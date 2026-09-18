@@ -231,7 +231,8 @@ function openShareDialog(track) {
 async function shareTrack(track) {
   if (!track) return;
   const data = {title:track.title, text:'СЕРИЯ АНДАТРЫ — ' + track.title, url:trackShareUrl(track)};
-  if (navigator.share) { try { await navigator.share(data); return; } catch (error) { if (error && error.name === 'AbortError') return; } }
+  const usePhoneShareMenu = window.matchMedia('(pointer: coarse)').matches && window.matchMedia('(max-width: 900px)').matches;
+  if (usePhoneShareMenu && navigator.share) { try { await navigator.share(data); return; } catch (error) { if (error && error.name === 'AbortError') return; } }
   openShareDialog(track);
 }
 
