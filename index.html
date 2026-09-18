@@ -277,6 +277,13 @@ let currentPage = Math.max(1, Number.parseInt(new URLSearchParams(location.searc
 let activeTrack = null;
 let isSeeking = false;
 let playCounts = {};
+const playCountApi = 'https://iqcfuwwjtfrmqnrlxhbb.supabase.co/functions/v1/track-plays';
+const playCountCooldown = 30 * 60 * 1000;
+let countedPlayTimes = {};
+try { countedPlayTimes = JSON.parse(localStorage.getItem('andatra-counted-plays') || '{}'); } catch { countedPlayTimes = {}; }
+const countingPlayIds = new Set();
+let listenedSeconds = 0;
+let lastAudioTime = 0;
 let advisoryTimer;
 let shareUrl = '';
 let shareData = null;
@@ -289,8 +296,23 @@ const formatPlays = value => {
   return count + ' ' + word;
 };
 const updateVisiblePlayCounts = () => document.querySelectorAll('[data-play-count]').forEach(element => { element.textContent = formatPlays(playCounts[element.dataset.playCount]); });
-async function loadPlayCounts() { try { const result = await fetch('/api/track-plays', {cache:'no-store'}); if (result.ok) { playCounts = (await result.json()).counts || {}; updateVisiblePlayCounts(); } } catch (error) { console.error(error); } }
-async function registerPlay(id) { try { const result = await fetch('/api/track-plays', {method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({id})}); if (result.ok) { const data = await result.json(); playCounts[id] = data.count; updateVisiblePlayCounts(); } } catch (error) { console.error(error); } }
+async function loadPlayCounts() { try { const result = await fetch(playCountApi, {cache:'no-store'}); if (result.ok) { playCounts = (await result.json()).counts || {}; updateVisiblePlayCounts(); } } catch (error) { console.error(error); } }
+async function registerPlay(id) {
+  const now = Date.now();
+  if (countingPlayIds.has(id) || now - (Number(countedPlayTimes[id]) || 0) < playCountCooldown) return;
+  countingPlayIds.add(id);
+  try {
+    const result = await fetch(playCountApi, {method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({id})});
+    if (result.ok) {
+      const data = await result.json();
+      playCounts[id] = data.count;
+      countedPlayTimes[id] = now;
+      localStorage.setItem('andatra-counted-plays', JSON.stringify(countedPlayTimes));
+      updateVisiblePlayCounts();
+    }
+  } catch (error) { console.error(error); }
+  finally { countingPlayIds.delete(id); }
+}
 const updateUrl = () => { const url = new URL(location.href); currentPage > 1 ? url.searchParams.set('page', currentPage) : url.searchParams.delete('page'); history.replaceState(null, '', url.pathname + url.search + '#music'); };
 const showAdvisory = () => { clearTimeout(advisoryTimer); advisoryToast.classList.remove('show'); void advisoryToast.offsetWidth; advisoryToast.classList.add('show'); advisoryToast.setAttribute('aria-hidden','false'); advisoryTimer=setTimeout(() => { advisoryToast.classList.remove('show'); advisoryToast.setAttribute('aria-hidden','true'); }, 2800); };
 const trackShareUrl = track => { const url = new URL('https://andatra-music.ru/'); url.searchParams.set('track', track.id); url.hash = 'music'; return url.toString(); };
@@ -343,8 +365,8 @@ function renderTracks() {
 }
 async function selectTrack(track, autoplay = true) {
   if (!track) return;
-  if (!activeTrack || activeTrack.id !== track.id) { activeTrack = track; audio.src = track.src; playerTitle.textContent = track.title; playerDownload.href = track.src; player.hidden = false; document.body.classList.add('player-open'); }
-  if (autoplay) { try { await audio.play(); registerPlay(track.id); } catch (error) { console.error(error); } }
+  if (!activeTrack || activeTrack.id !== track.id) { activeTrack = track; listenedSeconds = 0; lastAudioTime = 0; audio.src = track.src; playerTitle.textContent = track.title; playerDownload.href = track.src; player.hidden = false; document.body.classList.add('player-open'); }
+  if (autoplay) { try { await audio.play(); } catch (error) { console.error(error); } }
   updatePlayButtons();
 }
 function stepTrack(direction) { const index = activeTrack ? andatraTracks.findIndex(track => track.id === activeTrack.id) : -1; selectTrack(andatraTracks[(index + direction + andatraTracks.length) % andatraTracks.length]); }
@@ -357,7 +379,7 @@ tracklist.addEventListener('click', event => {
 });
 pagination.addEventListener('click', event => { const link = event.target.closest('[data-page]'); if (!link) return; event.preventDefault(); currentPage = Number(link.dataset.page); updateUrl(); renderTracks(); document.getElementById('music').scrollIntoView({behavior:'smooth'}); });
 trackSearch.addEventListener('input', () => { const query = trackSearch.value.trim().toLocaleLowerCase('ru'); filteredTracks = query ? andatraTracks.filter(track => (track.title + ' ' + track.artist).toLocaleLowerCase('ru').includes(query)) : andatraTracks; currentPage = 1; updateUrl(); renderTracks(); });
-playerToggle.addEventListener('click', async () => { if (!activeTrack) return selectTrack(andatraTracks[0]); if (audio.paused) { try { await audio.play(); registerPlay(activeTrack.id); } catch (error) { console.error(error); } } else audio.pause(); });
+playerToggle.addEventListener('click', async () => { if (!activeTrack) return selectTrack(andatraTracks[0]); if (audio.paused) { try { await audio.play(); } catch (error) { console.error(error); } } else audio.pause(); });
 playerShare.addEventListener('click', () => shareTrack(activeTrack));
 playerClose.addEventListener('click', () => { audio.pause(); audio.removeAttribute('src'); audio.load(); activeTrack=null; player.hidden=true; document.body.classList.remove('player-open'); currentTime.textContent='0:00'; totalTime.textContent='—:—'; seekRange.value=0; updatePlayButtons(); });
 shareClose.addEventListener('click', () => shareDialog.close());
@@ -429,8 +451,16 @@ document.getElementById('prevTrack').addEventListener('click', () => stepTrack(-
 document.getElementById('nextTrack').addEventListener('click', () => stepTrack(1));
 audio.addEventListener('play', () => { if (playingShort) stopShort(playingShort); playerToggle.textContent='❚❚'; updatePlayButtons(); showAdvisory(); });
 audio.addEventListener('pause', () => { playerToggle.textContent='▶'; updatePlayButtons(); });
-audio.addEventListener('loadedmetadata', () => { totalTime.textContent=formatTime(audio.duration); seekRange.max=audio.duration || 100; });
-audio.addEventListener('timeupdate', () => { currentTime.textContent=formatTime(audio.currentTime); if (!isSeeking) seekRange.value=audio.currentTime || 0; });
+audio.addEventListener('loadedmetadata', () => { totalTime.textContent=formatTime(audio.duration); seekRange.max=audio.duration || 100; lastAudioTime=audio.currentTime || 0; });
+audio.addEventListener('timeupdate', () => {
+  const position = audio.currentTime || 0;
+  currentTime.textContent=formatTime(position);
+  if (!isSeeking) seekRange.value=position;
+  const elapsed = position - lastAudioTime;
+  if (!audio.paused && elapsed > 0 && elapsed < 2) listenedSeconds += elapsed;
+  lastAudioTime = position;
+  if (activeTrack && listenedSeconds >= 10) registerPlay(activeTrack.id);
+});
 audio.addEventListener('ended', () => stepTrack(1));
 seekRange.addEventListener('pointerdown', () => { isSeeking=true; });
 seekRange.addEventListener('touchstart', () => { isSeeking=true; }, {passive:true});
