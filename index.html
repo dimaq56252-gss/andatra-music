@@ -53,8 +53,21 @@ body.player-open{padding-bottom:104px}
 @media(max-width:760px){.track{grid-template-columns:44px 1fr}.track-actions{grid-column:2;flex-wrap:wrap}.duration{display:none}.music-head .random-track{width:100%}.track-search{align-items:stretch;flex-direction:column}.global-player{left:8px;right:8px;bottom:8px;grid-template-columns:auto minmax(90px,1fr) auto;padding:12px 48px 12px 12px;gap:9px}.player-info{grid-column:1/3;grid-row:1}.player-controls{grid-column:3;grid-row:1}.global-player>#currentTime{display:block;grid-column:1;grid-row:2}.global-player>#seekRange{display:block;grid-column:2;grid-row:2;min-height:32px}.global-player>#totalTime{display:block;grid-column:3;grid-row:2}.volume{display:none}.player-actions{grid-column:1/4;grid-row:3;justify-self:start}.player-download,.player-share-link{font-size:15px;padding:11px 16px}.player-close{right:8px}.music-grid{gap:28px}.advisory-toast{right:10px;top:88px;width:210px}.advisory-top{font-size:25px}.advisory-bottom{font-size:14px}}
 .player-download,.player-share-link{background:var(--accent);border-color:var(--accent);color:#08090d}.player-download:hover,.player-share-link:hover{background:#e5ff82;border-color:#e5ff82;color:#08090d}.player-info small{font-size:13px;font-weight:800;line-height:1.25}.player-info strong{font-size:21px;line-height:1.2}.player-info{display:flex;flex-direction:column;gap:3px}@media(max-width:760px){.player-info small{font-size:12px}.player-info strong{font-size:18px}}
 </style>
+<!-- Yandex.Metrika counter -->
+<script type="text/javascript">
+    (function(m,e,t,r,i,k,a){
+        m[i]=m[i]||function(){(m[i].a=m[i].a||[]).push(arguments)};
+        m[i].l=1*new Date();
+        for (var j = 0; j < document.scripts.length; j++) {if (document.scripts[j].src === r) { return; }}
+        k=e.createElement(t),a=e.getElementsByTagName(t)[0],k.async=1,k.src=r,a.parentNode.insertBefore(k,a)
+    })(window, document,'script','https://mc.yandex.ru/metrika/tag.js?id=112789700', 'ym');
+
+    ym(112789700, 'init', {ssr:true, webvisor:true, clickmap:true, ecommerce:"dataLayer", referrer: document.referrer, url: location.href, accurateTrackBounce:true, trackLinks:true});
+</script>
+<!-- /Yandex.Metrika counter -->
 </head>
 <body>
+<noscript><div><img src="https://mc.yandex.ru/watch/112789700" style="position:absolute; left:-9999px" alt=""></div></noscript>
 <nav class="nav"><a class="logo" href="#">ANDATRA</a><div class="menu"><a href="#music">Музыка</a><a href="#shorts">Shorts</a><a href="#gallery">Галерея</a><a href="#about">Об артисте</a></div></nav>
 <header class="hero">
   <div>
@@ -272,6 +285,7 @@ const shareClose = document.getElementById('shareClose');
 const shareCopy = document.getElementById('shareCopy');
 const shareMore = document.getElementById('shareMore');
 const advisoryToast = document.getElementById('advisoryToast');
+const metrikaGoal = (goal, params = {}) => { if (typeof window.ym === 'function') window.ym(112789700, 'reachGoal', goal, params); };
 let filteredTracks = andatraTracks;
 let currentPage = Math.max(1, Number.parseInt(new URLSearchParams(location.search).get('page') || '1', 10) || 1);
 let activeTrack = null;
@@ -309,6 +323,8 @@ async function registerPlay(id) {
       countedPlayTimes[id] = now;
       localStorage.setItem('andatra-counted-plays', JSON.stringify(countedPlayTimes));
       updateVisiblePlayCounts();
+      const track = andatraTracks.find(item => item.id === Number(id));
+      metrikaGoal('track_play', {track_id:id, track_title:track?.title || ''});
     }
   } catch (error) { console.error(error); }
   finally { countingPlayIds.delete(id); }
@@ -338,6 +354,7 @@ function openShareDialog(track) {
 }
 async function shareTrack(track) {
   if (!track) return;
+  metrikaGoal('track_share', {track_id:track.id, track_title:track.title});
   openShareDialog(track);
 }
 
@@ -413,6 +430,7 @@ function playShort(card) {
   card.replaceChildren(iframe);
   card.classList.add('playing');
   playingShort = card;
+  metrikaGoal('video_play', {video_id:card.dataset.video, video_title:title});
 }
 shortsRail.addEventListener('pointerdown', () => { shortsActivated = true; }, {passive:true});
 shortsRail.addEventListener('click', event => {
@@ -446,7 +464,14 @@ function appendShortBatch(size = 24) {
   });
 }
 appendShortBatch();
-randomTrackButton.addEventListener('click', () => selectTrack(andatraTracks[Math.floor(Math.random() * andatraTracks.length)]));
+randomTrackButton.addEventListener('click', () => { metrikaGoal('random_track'); selectTrack(andatraTracks[Math.floor(Math.random() * andatraTracks.length)]); });
+document.addEventListener('click', event => {
+  const download = event.target.closest('a[download]');
+  if (!download) return;
+  const trackElement = download.closest('[data-track-id]');
+  const track = trackElement ? andatraTracks.find(item => item.id === Number(trackElement.dataset.trackId)) : activeTrack;
+  metrikaGoal('track_download', {track_id:track?.id || '', track_title:track?.title || ''});
+});
 document.getElementById('prevTrack').addEventListener('click', () => stepTrack(-1));
 document.getElementById('nextTrack').addEventListener('click', () => stepTrack(1));
 audio.addEventListener('play', () => { if (playingShort) stopShort(playingShort); playerToggle.textContent='❚❚'; updatePlayButtons(); showAdvisory(); });
