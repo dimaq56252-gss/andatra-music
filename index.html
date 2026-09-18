@@ -308,28 +308,57 @@ shareClose.addEventListener('click', () => shareDialog.close());
 shareMore.addEventListener('click', async () => { if (!shareData || !navigator.share) return; try { await navigator.share(shareData); shareDialog.close(); } catch (error) { if (!error || error.name !== 'AbortError') console.error(error); } });
 shareDialog.addEventListener('click', event => { if (event.target === shareDialog) shareDialog.close(); });
 shareCopy.addEventListener('click', async () => { try { await navigator.clipboard.writeText(shareUrl); shareCopy.textContent='Ссылка скопирована'; } catch (error) { console.error(error); } });
-document.querySelectorAll('.shorts-tab').forEach(tab => tab.addEventListener('click', () => {
-  const channel = tab.dataset.shortsChannel;
-  document.querySelectorAll('.shorts-tab').forEach(item => { const active = item === tab; item.classList.toggle('active', active); item.setAttribute('aria-selected', active); });
-  document.querySelectorAll('.short-card').forEach(card => { card.hidden = card.dataset.channel !== channel; });
-  document.getElementById('shortsRail').scrollTo({top:0,behavior:'smooth'});
-}));
-document.getElementById('shortsRail').addEventListener('click', event => {
-  const button = event.target.closest('.short-play');
-  if (!button) return;
+const shortsRail = document.getElementById('shortsRail');
+const shortCards = [...document.querySelectorAll('.short-card')];
+shortCards.forEach(card => { card.dataset.preview = card.innerHTML; });
+let playingShort = null;
+let shortsActivated = false;
+function stopShort(card) {
+  if (!card) return;
+  if (card.querySelector('iframe')) card.innerHTML = card.dataset.preview;
+  card.classList.remove('playing');
+  if (playingShort === card) playingShort = null;
+}
+function playShort(card) {
+  if (!card || card.hidden || playingShort === card) return;
+  if (playingShort) stopShort(playingShort);
   if (!audio.paused) { audio.pause(); updatePlayButtons(); }
-  const card = button.closest('.short-card');
+  const title = card.querySelector('.short-title')?.textContent || card.querySelector('img')?.alt || 'YouTube Short';
   const iframe = document.createElement('iframe');
   iframe.src = 'https://www.youtube-nocookie.com/embed/' + card.dataset.video + '?autoplay=1&playsinline=1&rel=0';
-  iframe.title = button.querySelector('.short-title')?.textContent || 'YouTube Short';
+  iframe.title = title;
   iframe.allow = 'accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share';
   iframe.allowFullscreen = true;
   card.replaceChildren(iframe);
+  card.classList.add('playing');
+  playingShort = card;
+}
+document.querySelectorAll('.shorts-tab').forEach(tab => tab.addEventListener('click', () => {
+  const channel = tab.dataset.shortsChannel;
+  shortsActivated = true;
+  shortCards.forEach(stopShort);
+  document.querySelectorAll('.shorts-tab').forEach(item => { const active = item === tab; item.classList.toggle('active', active); item.setAttribute('aria-selected', active); });
+  shortCards.forEach(card => { card.hidden = card.dataset.channel !== channel; });
+  shortsRail.scrollTo({top:0,behavior:'auto'});
+  playShort(shortCards.find(card => !card.hidden));
+}));
+shortsRail.addEventListener('pointerdown', () => { shortsActivated = true; }, {passive:true});
+shortsRail.addEventListener('click', event => {
+  const button = event.target.closest('.short-play');
+  if (!button) return;
+  shortsActivated = true;
+  playShort(button.closest('.short-card'));
 });
+const shortObserver = new IntersectionObserver(entries => {
+  if (!shortsActivated) return;
+  const visible = entries.filter(entry => entry.isIntersecting && entry.intersectionRatio >= .72).sort((a,b) => b.intersectionRatio - a.intersectionRatio)[0];
+  if (visible) playShort(visible.target);
+}, {root:shortsRail,threshold:[.72,.85]});
+shortCards.forEach(card => shortObserver.observe(card));
 randomTrackButton.addEventListener('click', () => selectTrack(andatraTracks[Math.floor(Math.random() * andatraTracks.length)]));
 document.getElementById('prevTrack').addEventListener('click', () => stepTrack(-1));
 document.getElementById('nextTrack').addEventListener('click', () => stepTrack(1));
-audio.addEventListener('play', () => { playerToggle.textContent='❚❚'; updatePlayButtons(); showAdvisory(); });
+audio.addEventListener('play', () => { if (playingShort) stopShort(playingShort); playerToggle.textContent='❚❚'; updatePlayButtons(); showAdvisory(); });
 audio.addEventListener('pause', () => { playerToggle.textContent='▶'; updatePlayButtons(); });
 audio.addEventListener('loadedmetadata', () => { totalTime.textContent=formatTime(audio.duration); seekRange.max=audio.duration || 100; });
 audio.addEventListener('timeupdate', () => { currentTime.textContent=formatTime(audio.currentTime); if (!isSeeking) seekRange.value=audio.currentTime || 0; });
