@@ -102,7 +102,7 @@ body.player-open{padding-bottom:104px}
   </div>
 </div></section>
 
-<section class="section" id="karaoke"><div class="wrap"><div class="section-head"><div><div class="eyebrow">Sing along</div><h2>Караоке</h2></div></div><div class="karaoke-grid"><div><div class="karaoke-screen" id="karaokeScreen"><h3 id="karaokeTitle">ANDATRA</h3><div class="line" id="karaokeLine">Выберите песню</div><div class="next" id="karaokeNext"></div><div class="bar" id="karaokeBar"></div></div><div class="karaoke-controls"><select id="karaokeSelect" aria-label="Выберите трек"></select><select id="karaokeVersion" aria-label="Версия трека" hidden><option value="instrumental">Минус без вокала</option><option value="original">Оригинал с вокалом</option></select><button id="karaokeToggle" type="button">▶ Слушать</button><button id="karaokeFull" type="button">⛶ Экран</button></div></div><div class="karaoke-side"><h3>Пой с ANDATRA</h3><p>Для «Классики» доступен минус без вокала и оригинал. Включите музыку; слова с отметками времени сменяются во время воспроизведения.</p><details><summary>Добавить слова и тайминг</summary><textarea id="karaokeText" placeholder="[00:12.00]Первая строка&#10;[00:18.50]Вторая строка"></textarea><p>Формат: [минуты:секунды] строка. Слова сохраняются только в вашем браузере.</p><button id="karaokeSave" type="button">Сохранить</button><p id="karaokeStatus" role="status"></p></details></div></div></div></section><section class="section" id="video"><div class="wrap">
+<section class="section" id="karaoke"><div class="wrap"><div class="section-head"><div><div class="eyebrow">Sing along</div><h2>Караоке</h2></div></div><div class="karaoke-grid"><div><div class="karaoke-screen" id="karaokeScreen"><h3 id="karaokeTitle">ANDATRA</h3><div class="line" id="karaokeLine">Выберите песню</div><div class="next" id="karaokeNext"></div><div class="bar" id="karaokeBar"></div></div><div class="karaoke-controls"><button id="karaokeToggle" type="button">▶ Слушать</button><button id="karaokeFull" type="button">⛶ Экран</button></div></div><div class="karaoke-side"><h3>Пой с ANDATRA</h3><p>«Классика» — минус без вокала. Включите музыку: слова появляются короткими фразами в такт.</p><details><summary>Добавить слова и тайминг</summary><textarea id="karaokeText" placeholder="[00:12.00]Первая строка&#10;[00:18.50]Вторая строка"></textarea><p>Формат: [минуты:секунды] строка. Слова сохраняются только в вашем браузере.</p><button id="karaokeSave" type="button">Сохранить</button><p id="karaokeStatus" role="status"></p></details></div></div></div></section><section class="section" id="video"><div class="wrap">
   <div class="section-head"><div><div class="eyebrow">Watch</div><h2>Видео</h2></div></div>
   <div class="video-wrap"><div class="video-frame">
     <video controls playsinline preload="none" poster="assets/video-posters/andre.webp">
@@ -506,12 +506,9 @@ seekRange.addEventListener('pointerup', () => { if (Number.isFinite(audio.durati
 volumeRange.addEventListener('input', () => { audio.volume=Number(volumeRange.value); });
 audio.volume=Number(volumeRange.value);
 
-const karaokeSelect=document.getElementById('karaokeSelect');
 const karaokeText=document.getElementById('karaokeText');
-const karaokeVersion=document.getElementById('karaokeVersion');
-const karaokePublishedText={79:"[00:13.40]Я самый пиздатый на свете\n[00:15.40]сука нет, на этой планете\n[00:17.20]ты не очень тупая поэтому можешь родить мне много детей\n[00:20.50]да, я все осилю это на изи тут бабок много мы накосили\n[00:24.60]Эта шалава кидает трусы на сцену - но мы не просили\n[00:28.00]нам не надо денег с репа как и волку поводок\n[00:31.70]в нас людского дохуя похуй с кем делать фиток\n[00:35.30]очень много в тексте мата маме не показывай, веть ей понравится...а ей понравится\n[00:41.60]потом смотришь  на обложке ее жопа...оуу вот это задница\n[00:48.90]потом смотришь  на обложке ее жопа...вауу вот это задница"};
+const karaokePublishedText={79:"[00:13.40]Я самый пиздатый\n[00:15.00]на свете\n[00:15.40]сука нет\n[00:16.20]на этой планете\n[00:17.20]ты не очень\n[00:18.00]тупая поэтому\n[00:18.90]можешь родить мне\n[00:19.90]много детей\n[00:20.50]да, я все осилю\n[00:22.00]это на изи\n[00:22.70]тут бабок много\n[00:23.60]мы накосили\n[00:24.60]Эта шалава\n[00:25.50]кидает трусы на сцену\n[00:26.80]но мы не просили\n[00:28.00]нам не надо\n[00:29.00]денег с репа\n[00:30.00]как и волку\n[00:30.80]поводок\n[00:31.70]в нас людского\n[00:32.70]дохуя\n[00:33.50]похуй с кем\n[00:34.10]делать фиток\n[00:35.30]очень много\n[00:35.90]в тексте мата\n[00:36.90]маме не показывай\n[00:38.50]веть ей понравится\n[00:40.30]а ей понравится\n[00:42.00]потом смотришь\n[00:43.00]на обложке\n[00:43.90]ее жопа\n[00:45.20]оуу вот это\n[00:47.70]задница\n[00:48.90]потом смотришь\n[00:50.00]на обложке\n[00:50.80]ее жопа\n[00:52.00]вауу вот это\n[00:54.60]задница\n[00:55.50]♪ Классика"};
 let karaokeTrack=andatraTracks[0],karaokeCues=[];
-andatraTracks.forEach(track=>{const option=document.createElement('option');option.value=track.id;option.textContent=track.title;karaokeSelect.append(option)});
 function karaokeParse(value){
  const rows=[];
  value.split('\n').forEach(line=>{
@@ -532,12 +529,11 @@ function karaokeRefresh(){
  document.getElementById('karaokeToggle').textContent=activeTrack?.id===karaokeTrack.id&&!audio.paused?'❚❚ Пауза':'▶ Слушать';
 }
 function karaokeChoose(track){
- karaokeTrack=track;karaokeSelect.value=track.id;karaokeVersion.hidden=track.id!==79;
- try{karaokeText.value=localStorage.getItem('andatra-karaoke-'+track.id)||karaokePublishedText[track.id]||''}catch{karaokeText.value=karaokePublishedText[track.id]||''}
+ karaokeTrack=track;
+ try{karaokeText.value=localStorage.getItem('andatra-karaoke-v2-'+track.id)||karaokePublishedText[track.id]||''}catch{karaokeText.value=karaokePublishedText[track.id]||''}
  karaokeCues=karaokeParse(karaokeText.value);document.getElementById('karaokeStatus').textContent='';karaokeRefresh();
 }
-karaokeSelect.addEventListener('change',()=>karaokeChoose(andatraTracks.find(track=>track.id===Number(karaokeSelect.value))||andatraTracks[0]));
-function karaokeSource(){return karaokeTrack.id===79&&karaokeVersion.value==='instrumental'?'/assets/audio/klassika-instrumental.mp3':karaokeTrack.src}
+function karaokeSource(){return '/assets/audio/klassika-instrumental.mp3'}
 async function karaokePlay(){
  const source=karaokeSource();
  if(activeTrack?.id===karaokeTrack.id&&audio.src.endsWith(source)&&!audio.paused){audio.pause();return}
@@ -547,10 +543,9 @@ async function karaokePlay(){
  try{await audio.play()}catch(error){console.error(error)}
  karaokeRefresh();
 }
-karaokeVersion.addEventListener('change',()=>{if(activeTrack?.id!==karaokeTrack.id)return;const position=audio.currentTime,playing=!audio.paused;audio.src=karaokeSource();audio.load();audio.addEventListener('loadedmetadata',()=>{audio.currentTime=Math.min(position,audio.duration||position);if(playing)audio.play().catch(console.error)},{once:true})});
 document.getElementById('karaokeToggle').addEventListener('click',karaokePlay);
 document.getElementById('karaokeFull').addEventListener('click',()=>{if(document.fullscreenElement)document.exitFullscreen();else document.getElementById('karaokeScreen').requestFullscreen?.()});
-document.getElementById('karaokeSave').addEventListener('click',()=>{karaokeCues=karaokeParse(karaokeText.value);try{localStorage.setItem('andatra-karaoke-'+karaokeTrack.id,karaokeText.value);document.getElementById('karaokeStatus').textContent=karaokeCues.length?'Сохранено строк: '+karaokeCues.length:'Добавьте строки с отметками времени'}catch{document.getElementById('karaokeStatus').textContent='Не удалось сохранить текст'}karaokeRefresh()});
+document.getElementById('karaokeSave').addEventListener('click',()=>{karaokeCues=karaokeParse(karaokeText.value);try{localStorage.setItem('andatra-karaoke-v2-'+karaokeTrack.id,karaokeText.value);document.getElementById('karaokeStatus').textContent=karaokeCues.length?'Сохранено строк: '+karaokeCues.length:'Добавьте строки с отметками времени'}catch{document.getElementById('karaokeStatus').textContent='Не удалось сохранить текст'}karaokeRefresh()});
 ['timeupdate','play','pause','loadedmetadata'].forEach(name=>audio.addEventListener(name,karaokeRefresh));
 karaokeChoose(karaokeTrack);
 const sharedTrackId = Number(new URLSearchParams(location.search).get('track'));
