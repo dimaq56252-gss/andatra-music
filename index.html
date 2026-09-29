@@ -103,7 +103,7 @@ body.player-open{padding-bottom:104px}
   </div>
 </div></section>
 
-<section class="section" id="karaoke"><div class="wrap"><div class="section-head"><div><div class="eyebrow">Sing along</div><h2>Караоке</h2></div></div><div class="karaoke-grid"><div><div class="karaoke-screen" id="karaokeScreen"><h3 id="karaokeTitle">ANDATRA</h3><div class="line" id="karaokeLine">Выберите песню</div><div class="next" id="karaokeNext"></div><div class="bar" id="karaokeBar"></div></div><div class="karaoke-controls"><button id="karaokeToggle" type="button">▶ Слушать</button><button id="karaokeFull" type="button">⛶ Экран</button></div></div><div class="karaoke-side"><h3>СЕРИЯ АНДАТРЫ — Классика</h3><details hidden><summary>Добавить слова и тайминг</summary><textarea id="karaokeText" placeholder="[00:12.00]Первая строка&#10;[00:18.50]Вторая строка"></textarea><p>Формат: [минуты:секунды] строка. Слова сохраняются только в вашем браузере.</p><button id="karaokeSave" type="button">Сохранить</button><p id="karaokeStatus" role="status"></p></details></div></div></div></section><section class="section" id="video"><div class="wrap">
+<section class="section" id="karaoke"><div class="wrap"><div class="section-head"><div><div class="eyebrow">Sing along</div><h2>Караоке</h2></div></div><div class="karaoke-grid"><div><div class="karaoke-screen" id="karaokeScreen"><h3 id="karaokeTitle">ANDATRA</h3><div class="line" id="karaokeLine">Выберите песню</div><div class="next" id="karaokeNext"></div><div class="bar" id="karaokeBar"></div></div><div class="karaoke-controls"><select id="karaokeSelect" aria-label="Песня караоке"><option value="79">Классика</option><option value="32">Мангуст</option></select><button id="karaokeToggle" type="button">▶ Слушать</button><button id="karaokeFull" type="button">⛶ Экран</button></div></div><div class="karaoke-side"><h3 id="karaokeSideTitle">СЕРИЯ АНДАТРЫ — Классика</h3><details hidden><summary>Добавить слова и тайминг</summary><textarea id="karaokeText" placeholder="[00:12.00]Первая строка&#10;[00:18.50]Вторая строка"></textarea><p>Формат: [минуты:секунды] строка. Слова сохраняются только в вашем браузере.</p><button id="karaokeSave" type="button">Сохранить</button><p id="karaokeStatus" role="status"></p></details></div></div></div></section><section class="section" id="video"><div class="wrap">
   <div class="section-head"><div><div class="eyebrow">Watch</div><h2>Видео</h2></div></div>
   <div class="video-wrap"><div class="video-frame">
     <video controls playsinline preload="none" poster="assets/video-posters/andre.webp">
@@ -508,7 +508,8 @@ volumeRange.addEventListener('input', () => { audio.volume=Number(volumeRange.va
 audio.volume=Number(volumeRange.value);
 
 const karaokeText=document.getElementById('karaokeText');
-const karaokePublishedText={79:"[00:13.40]Я самый пиздатый\n[00:15.00]на свете\n[00:15.40]сука нет\n[00:16.20]на этой планете\n[00:17.20]ты не очень\n[00:18.00]тупая поэтому\n[00:18.90]можешь родить мне\n[00:19.90]много детей\n[00:20.50]да, я все осилю\n[00:22.00]это на изи\n[00:22.70]тут бабок много\n[00:23.60]мы накосили\n[00:24.60]Эта шалава\n[00:25.50]кидает трусы на сцену\n[00:26.80]но мы не просили\n[00:28.00]нам не надо\n[00:29.00]денег с репа\n[00:30.00]как и волку\n[00:30.80]поводок\n[00:31.70]в нас людского\n[00:32.70]дохуя\n[00:33.50]похуй с кем\n[00:34.10]делать фиток\n[00:35.30]очень много\n[00:35.90]в тексте мата\n[00:36.90]маме не показывай\n[00:38.50]веть ей понравится\n[00:40.30]а ей понравится\n[00:42.00]потом смотришь\n[00:43.00]на обложке\n[00:43.90]ее жопа\n[00:45.20]оуу вот это\n[00:47.70]задница\n[00:48.90]потом смотришь\n[00:50.00]на обложке\n[00:50.80]ее жопа\n[00:52.00]вауу вот это\n[00:54.60]задница\n[00:55.50]♪ Классика"};
+const karaokeSelect=document.getElementById('karaokeSelect');
+const karaokePublishedText={79:"[00:13.40]Я самый пиздатый\n[00:15.00]на свете\n[00:15.40]сука нет\n[00:16.20]на этой планете\n[00:17.20]ты не очень\n[00:18.00]тупая поэтому\n[00:18.90]можешь родить мне\n[00:19.90]много детей\n[00:20.50]да, я все осилю\n[00:22.00]это на изи\n[00:22.70]тут бабок много\n[00:23.60]мы накосили\n[00:24.60]Эта шалава\n[00:25.50]кидает трусы на сцену\n[00:26.80]но мы не просили\n[00:28.00]нам не надо\n[00:29.00]денег с репа\n[00:30.00]как и волку\n[00:30.80]поводок\n[00:31.70]в нас людского\n[00:32.70]дохуя\n[00:33.50]похуй с кем\n[00:34.10]делать фиток\n[00:35.30]очень много\n[00:35.90]в тексте мата\n[00:36.90]маме не показывай\n[00:38.50]веть ей понравится\n[00:40.30]а ей понравится\n[00:42.00]потом смотришь\n[00:43.00]на обложке\n[00:43.90]ее жопа\n[00:45.20]оуу вот это\n[00:47.70]задница\n[00:48.90]потом смотришь\n[00:50.00]на обложке\n[00:50.80]ее жопа\n[00:52.00]вауу вот это\n[00:54.60]задница\n[00:55.50]♪ Классика",32:"[02:28.06]Я залетаю\n[02:29.42]в новый год\n[02:30.18]он обещает\n[02:31.24]дать бабло\n[02:31.98]щас пиздюки\n[02:32.82]лутают деньги\n[02:33.84]а кому то\n[02:34.90]не дано\n[02:35.40]у меня шапка\n[02:36.76]из фольги\n[02:37.54]а ты пиздуешь\n[02:38.54]на работу\n[02:39.26]ну и кто\n[02:40.08]теперь дурак\n[02:41.12]ты продал время\n[02:42.00]за банкноту\n[02:43.08]похуй кто ты\n[02:44.00]гоп фан или\n[02:44.86]ботан\n[02:45.38]но как и все\n[02:46.44]будешь закопан\n[02:47.64]ебалом давай\n[02:48.68]не хлопай\n[02:49.50]тут время\n[02:50.02]не так и много\n[02:51.12]мы люди\n[02:51.94]нас тянет\n[02:52.66]к земле\n[02:53.30]но точно\n[02:53.94]не в окопы\n[02:54.96]нахуй ты сюда\n[02:55.94]пришел\n[02:56.54]веть от тебя\n[02:57.34]воняет копом\n[02:58.58]делать деньги как\n[02:59.74]пассивка\n[03:00.40]у нас клан\n[03:01.56]будто мы ситхи\n[03:02.30]эти треки надо\n[03:03.40]выкупать\n[03:04.30]как золотые слитки\n[03:05.86]похуй на твой\n[03:06.78]камень\n[03:07.22]тут уважают\n[03:08.54]только плитки\n[03:09.50]я строитель\n[03:10.24]стиль улитки\n[03:11.22]взял гавна\n[03:11.94]себе по скидке\n[03:13.02]нету денег\n[03:13.94]на кредитке\n[03:14.90]так как нет\n[03:15.62]самой кредитки\n[03:16.74]я разъебал\n[03:17.52]этот бит\n[03:18.36]но не в\n[03:18.98]одну калитку\n[03:20.12]я не люблю\n[03:20.92]политику\n[03:21.60]андатра это\n[03:23.06]критика\n[03:23.70]сейчас медальки\n[03:24.86]забирают\n[03:25.82]отборные стукачи\n[03:28.00]♪ Мангуст"};
 let karaokeTrack=andatraTracks[0],karaokeCues=[];
 function karaokeParse(value){
  const rows=[];
@@ -518,7 +519,7 @@ function karaokeParse(value){
  });
  return rows.sort((a,b)=>a.time-b.time);
 }
-const karaokeGroups=[[0,1],[2,3],[4,5,6,7],[8,9,10,11],[12,13,14],[15,16,17,18],[19,20,21,22],[23,24,25,26,27],[28,29,30,31,32],[33,34,35,36,37]];
+const karaokeGroupsByTrack={79:[[0,1],[2,3],[4,5,6,7],[8,9,10,11],[12,13,14],[15,16,17,18],[19,20,21,22],[23,24,25,26,27],[28,29,30,31,32],[33,34,35,36,37]],32:[[0,1],[2,3],[4,5],[6,7],[8,9],[10,11],[12,13],[14,15],[16,17,18],[19,20],[21,22,23,24],[25,26,27,28,29],[30,31,32,33],[34,35,36,37],[38,39,40],[41,42],[43,44],[45,46],[47,48],[49,50],[51,52],[53,54],[55,56],[57,58],[59,60],[61,62,63]]};
 let karaokeRenderedIndex=null;
 function karaokeRefresh(){
  const position=activeTrack?.id===karaokeTrack.id ? audio.currentTime||0 : 0;
@@ -526,16 +527,17 @@ function karaokeRefresh(){
  document.getElementById('karaokeTitle').textContent=karaokeTrack.title;
  const lyricLine=document.getElementById('karaokeLine');
  const nextLine=document.getElementById('karaokeNext');
- const grouped=karaokeTrack.id===79&&karaokeText.value===karaokePublishedText[79]&&karaokeCues.length===39;
+ const groups=karaokeGroupsByTrack[karaokeTrack.id];
+ const grouped=Boolean(groups)&&karaokeText.value===karaokePublishedText[karaokeTrack.id]&&karaokeCues.length===groups.flat().length+1;
  if(grouped){
   lyricLine.classList.remove('karaoke-plain');lyricLine.classList.add('karaoke-lines');nextLine.textContent='';
-  if(index!==karaokeRenderedIndex){
-   karaokeRenderedIndex=index;lyricLine.replaceChildren();
-   if(index>=38){lyricLine.textContent='♪ Классика'}
+  if(karaokeTrack.id+':'+index!==karaokeRenderedIndex){
+   karaokeRenderedIndex=karaokeTrack.id+':'+index;lyricLine.replaceChildren();
+   if(index>=groups.flat().length || (index<0&&karaokeTrack.id===32)){lyricLine.textContent='♪ '+karaokeTrack.title}
    else{
-    const groupIndex=Math.max(0,karaokeGroups.findIndex(group=>group.includes(index)));
-    const start=Math.max(0,Math.min(groupIndex-1,karaokeGroups.length-4));
-    karaokeGroups.slice(start,start+4).forEach(group=>{
+    const groupIndex=Math.max(0,groups.findIndex(group=>group.includes(index)));
+    const start=Math.max(0,Math.min(groupIndex-1,groups.length-4));
+    groups.slice(start,start+4).forEach(group=>{
      const row=document.createElement('div');row.className='karaoke-row';
      group.forEach((cueIndex,part)=>{
       const span=document.createElement('span');
@@ -557,11 +559,12 @@ function karaokeRefresh(){
  document.getElementById('karaokeToggle').textContent=activeTrack?.id===karaokeTrack.id&&!audio.paused?'❚❚ Пауза':'▶ Слушать';
 }
 function karaokeChoose(track){
- karaokeTrack=track;
+ karaokeTrack=track;karaokeSelect.value=String(track.id);karaokeRenderedIndex=null;
+ document.getElementById('karaokeSideTitle').textContent='СЕРИЯ АНДАТРЫ — '+track.title;
  try{karaokeText.value=localStorage.getItem('andatra-karaoke-v2-'+track.id)||karaokePublishedText[track.id]||''}catch{karaokeText.value=karaokePublishedText[track.id]||''}
  karaokeCues=karaokeParse(karaokeText.value);document.getElementById('karaokeStatus').textContent='';karaokeRefresh();
 }
-function karaokeSource(){return '/assets/audio/klassika-instrumental.mp3'}
+function karaokeSource(){return karaokeTrack.id===32?'/assets/audio/mangust-instrumental.mp3':'/assets/audio/klassika-instrumental.mp3'}
 async function karaokePlay(){
  const source=karaokeSource();
  if(activeTrack?.id===karaokeTrack.id&&audio.src.endsWith(source)&&!audio.paused){audio.pause();return}
@@ -571,6 +574,7 @@ async function karaokePlay(){
  try{await audio.play()}catch(error){console.error(error)}
  karaokeRefresh();
 }
+karaokeSelect.addEventListener('change',()=>{audio.pause();karaokeChoose(andatraTracks.find(track=>track.id===Number(karaokeSelect.value))||andatraTracks[0])});
 document.getElementById('karaokeToggle').addEventListener('click',karaokePlay);
 document.getElementById('karaokeFull').addEventListener('click',()=>{if(document.fullscreenElement)document.exitFullscreen();else document.getElementById('karaokeScreen').requestFullscreen?.()});
 document.getElementById('karaokeSave').addEventListener('click',()=>{karaokeCues=karaokeParse(karaokeText.value);try{localStorage.setItem('andatra-karaoke-v2-'+karaokeTrack.id,karaokeText.value);document.getElementById('karaokeStatus').textContent=karaokeCues.length?'Сохранено строк: '+karaokeCues.length:'Добавьте строки с отметками времени'}catch{document.getElementById('karaokeStatus').textContent='Не удалось сохранить текст'}karaokeRefresh()});
