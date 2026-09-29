@@ -636,9 +636,11 @@ karaokeChoose(karaokeTrack);
   canvas.width=Math.round(width*ratio);canvas.height=Math.round(height*ratio);ctx.setTransform(ratio,0,0,ratio,0,0);
  }
  function spawn(){
-  const radius=9+Math.random()*12;
-  drops.push({x:20+Math.random()*Math.max(1,width-40),y:-radius*2,radius,
-   trail:65+Math.random()*110,speed:90+Math.random()*130,wave:Math.random()*6.28,
+  const radius=19+Math.random()*15;
+  const edge=Math.min(150,width*.2);
+  const x=Math.random()<.5?radius*.6+Math.random()*edge:width-radius*.6-Math.random()*edge;
+  drops.push({x,y:-radius*2,radius,
+   trail:125+Math.random()*125,speed:55+Math.random()*60,wave:Math.random()*6.28,
    color:Math.random()>.48?'#c9f738':'#87dc36'});
  }
  function draw(now){
@@ -663,7 +665,7 @@ karaokeChoose(karaokeTrack);
   const position=window.scrollY,delta=position-lastScroll;lastScroll=position;
   if(delta<=0)return;
   scrollAmount+=delta;
-  while(scrollAmount>=65&&drops.length<18){scrollAmount-=65;spawn()}
+  while(scrollAmount>=100&&drops.length<12){scrollAmount-=100;spawn()}
   if(!frame&&drops.length)frame=requestAnimationFrame(draw);
  }
  resize();window.addEventListener('resize',resize,{passive:true});window.addEventListener('scroll',onScroll,{passive:true});
