@@ -666,7 +666,7 @@ karaokeChoose(karaokeTrack);
   surface.setAttribute('cy',y.toFixed(1));surface.setAttribute('opacity',fillLevel>0?'.85':'0');
  }
  function draw(now){
-  const dt=Math.min((now-lastFrame)/1000||0,.05);lastFrame=now;ctx.clearRect(0,0,width,height);
+  const dt=Math.min((now-lastFrame)/1000||0,1);lastFrame=now;ctx.clearRect(0,0,width,height);
   for(let i=drops.length-1;i>=0;i--){
    const drop=drops[i];drop.y+=drop.speed*dt;
    if(basinVisible&&!drop.collected&&drop.y>=height-20){drop.collected=true;fillLevel=Math.min(1,fillLevel+.038);updateBowl()}
