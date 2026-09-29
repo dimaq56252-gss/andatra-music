@@ -63,6 +63,7 @@ body.player-open{padding-bottom:104px}
 @media(max-width:760px){.track{grid-template-columns:44px 1fr}.track-actions{grid-column:2;flex-wrap:wrap}.duration{display:none}.music-head .random-track{width:100%}.track-search{align-items:stretch;flex-direction:column}.global-player{left:8px;right:8px;bottom:8px;grid-template-columns:auto minmax(90px,1fr) auto;padding:12px 48px 12px 12px;gap:9px}.player-info{grid-column:1/3;grid-row:1}.player-controls{grid-column:3;grid-row:1}.global-player>#currentTime{display:block;grid-column:1;grid-row:2}.global-player>#seekRange{display:block;grid-column:2;grid-row:2;min-height:32px}.global-player>#totalTime{display:block;grid-column:3;grid-row:2}.volume{display:none}.player-actions{grid-column:1/4;grid-row:3;justify-self:start}.player-download,.player-share-link{font-size:15px;padding:11px 16px}.player-close{right:8px}.music-grid{gap:28px}.advisory-toast{right:10px;top:88px;width:210px}.advisory-top{font-size:25px}.advisory-bottom{font-size:14px}}
 .player-download,.player-share-link{background:var(--accent);border-color:var(--accent);color:#08090d}.player-download:hover,.player-share-link:hover{background:#e5ff82;border-color:#e5ff82;color:#08090d}.player-info small{font-size:13px;font-weight:800;line-height:1.25}.player-info strong{font-size:21px;line-height:1.2}.player-info{display:flex;flex-direction:column;gap:3px}@media(max-width:760px){.player-info small{font-size:12px}.player-info strong{font-size:18px}}
 .karaoke-grid{display:grid;grid-template-columns:2fr 1fr;gap:20px}.karaoke-screen{min-height:400px;aspect-ratio:16/9;border-radius:20px;background:radial-gradient(circle at 40% 30%,#365740,#0b1214 68%);color:#fff;display:flex;align-items:center;justify-content:center;flex-direction:column;text-align:center;padding:24px;box-sizing:border-box;position:relative;overflow:hidden}.karaoke-screen h3{font-size:clamp(24px,4vw,52px);margin:0 0 24px}.karaoke-screen .line{font-size:clamp(22px,3vw,40px);font-weight:800;line-height:1.2;color:#caff91}.karaoke-screen .next{font-size:22px;opacity:.65;margin-top:14px}.karaoke-screen .bar{height:5px;background:#caff91;position:absolute;bottom:0;left:0;width:0}.karaoke-controls{display:flex;gap:10px;margin-top:12px}.karaoke-controls select{flex:1;min-width:0}.karaoke-controls select,.karaoke-controls button,.karaoke-side button{padding:12px;border-radius:8px;background:#1b2420;color:white;border:1px solid #ffffff55;cursor:pointer}.karaoke-side{padding:20px;border:1px solid #ffffff33;border-radius:16px;display:flex;align-items:center;justify-content:center;text-align:center}.karaoke-side p{line-height:1.5}.karaoke-side summary{cursor:pointer}.karaoke-side textarea{width:100%;height:160px;box-sizing:border-box;background:#111;color:white;padding:10px;margin:12px 0}.karaoke-screen:fullscreen{aspect-ratio:auto;min-height:100vh}@media(max-width:850px){.karaoke-grid{grid-template-columns:1fr}.karaoke-screen{min-height:300px}}.karaoke-screen .karaoke-plain{white-space:pre-line;overflow:auto;max-height:310px;width:100%;font-size:clamp(14px,1.5vw,22px);line-height:1.35;text-align:center;padding:0 12px}.karaoke-screen:fullscreen .karaoke-plain{max-height:75vh;font-size:clamp(18px,2.3vw,34px)}
+.karaoke-screen .karaoke-lines{width:100%;max-width:760px;font-size:clamp(17px,2vw,25px);line-height:1.35}.karaoke-row{display:block;margin:8px 0;color:#f5f5f0}.karaoke-row span{transition:color .12s ease,opacity .12s ease}.karaoke-row .karaoke-done{opacity:.48}.karaoke-row .karaoke-current{color:#caff91;opacity:1;text-shadow:0 0 18px #caff9170}.karaoke-row .karaoke-upcoming{opacity:.78}.karaoke-screen:fullscreen .karaoke-lines{font-size:clamp(23px,3vw,42px)}
 </style>
 <!-- Yandex.Metrika counter -->
 <script type="text/javascript">
@@ -517,14 +518,41 @@ function karaokeParse(value){
  });
  return rows.sort((a,b)=>a.time-b.time);
 }
+const karaokeGroups=[[0,1],[2,3],[4,5,6,7],[8,9,10,11],[12,13,14],[15,16,17,18],[19,20,21,22],[23,24,25,26,27],[28,29,30,31,32],[33,34,35,36,37]];
+let karaokeRenderedIndex=null;
 function karaokeRefresh(){
  const position=activeTrack?.id===karaokeTrack.id ? audio.currentTime||0 : 0;
  let index=-1;karaokeCues.forEach((cue,i)=>{if(cue.time<=position)index=i});
  document.getElementById('karaokeTitle').textContent=karaokeTrack.title;
  const lyricLine=document.getElementById('karaokeLine');
- lyricLine.classList.toggle('karaoke-plain',!karaokeCues.length&&Boolean(karaokeText.value));
- lyricLine.textContent=!karaokeCues.length&&karaokeText.value?karaokeText.value:(index<0?'♪ '+karaokeTrack.title:karaokeCues[index].text);
- document.getElementById('karaokeNext').textContent=karaokeCues[index+1]?.text||(!karaokeCues.length&&karaokeText.value?'':'Добавьте слова песни с таймингом');
+ const nextLine=document.getElementById('karaokeNext');
+ const grouped=karaokeTrack.id===79&&karaokeText.value===karaokePublishedText[79]&&karaokeCues.length===39;
+ if(grouped){
+  lyricLine.classList.remove('karaoke-plain');lyricLine.classList.add('karaoke-lines');nextLine.textContent='';
+  if(index!==karaokeRenderedIndex){
+   karaokeRenderedIndex=index;lyricLine.replaceChildren();
+   if(index>=38){lyricLine.textContent='♪ Классика'}
+   else{
+    const groupIndex=Math.max(0,karaokeGroups.findIndex(group=>group.includes(index)));
+    const start=Math.max(0,Math.min(groupIndex-1,karaokeGroups.length-4));
+    karaokeGroups.slice(start,start+4).forEach(group=>{
+     const row=document.createElement('div');row.className='karaoke-row';
+     group.forEach((cueIndex,part)=>{
+      const span=document.createElement('span');
+      span.textContent=(part?' ':'')+karaokeCues[cueIndex].text;
+      span.className=cueIndex<index?'karaoke-done':cueIndex===index?'karaoke-current':'karaoke-upcoming';
+      row.append(span);
+     });
+     lyricLine.append(row);
+    });
+   }
+  }
+ }else{
+  karaokeRenderedIndex=null;lyricLine.classList.remove('karaoke-lines');
+  lyricLine.classList.toggle('karaoke-plain',!karaokeCues.length&&Boolean(karaokeText.value));
+  lyricLine.textContent=!karaokeCues.length&&karaokeText.value?karaokeText.value:(index<0?'♪ '+karaokeTrack.title:karaokeCues[index].text);
+  nextLine.textContent=karaokeCues[index+1]?.text||(!karaokeCues.length&&karaokeText.value?'':'Добавьте слова песни с таймингом');
+ }
  document.getElementById('karaokeBar').style.width=activeTrack?.id===karaokeTrack.id&&Number.isFinite(audio.duration)&&audio.duration>0?Math.min(100,position/audio.duration*100)+'%':'0%';
  document.getElementById('karaokeToggle').textContent=activeTrack?.id===karaokeTrack.id&&!audio.paused?'❚❚ Пауза':'▶ Слушать';
 }
