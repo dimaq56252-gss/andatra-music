@@ -64,8 +64,6 @@ body.player-open{padding-bottom:104px}
 .player-download,.player-share-link{background:var(--accent);border-color:var(--accent);color:#08090d}.player-download:hover,.player-share-link:hover{background:#e5ff82;border-color:#e5ff82;color:#08090d}.player-info small{font-size:13px;font-weight:800;line-height:1.25}.player-info strong{font-size:21px;line-height:1.2}.player-info{display:flex;flex-direction:column;gap:3px}@media(max-width:760px){.player-info small{font-size:12px}.player-info strong{font-size:18px}}
 .karaoke-grid{display:grid;grid-template-columns:2fr 1fr;gap:20px}.karaoke-screen{min-height:400px;aspect-ratio:16/9;border-radius:20px;background:radial-gradient(circle at 40% 30%,#365740,#0b1214 68%);color:#fff;display:flex;align-items:center;justify-content:center;flex-direction:column;text-align:center;padding:24px;box-sizing:border-box;position:relative;overflow:hidden}.karaoke-screen h3{font-size:clamp(24px,4vw,52px);margin:0 0 24px}.karaoke-screen .line{font-size:clamp(22px,3vw,40px);font-weight:800;line-height:1.2;color:#caff91}.karaoke-screen .next{font-size:22px;opacity:.65;margin-top:14px}.karaoke-screen .bar{height:5px;background:#caff91;position:absolute;bottom:0;left:0;width:0}.karaoke-controls{display:flex;gap:10px;margin-top:12px}.karaoke-controls select{flex:1;min-width:0}.karaoke-controls select,.karaoke-controls button,.karaoke-side button{padding:12px;border-radius:8px;background:#1b2420;color:white;border:1px solid #ffffff55;cursor:pointer}.karaoke-controls .karaoke-arrow{min-width:44px;font-size:20px;line-height:1}.karaoke-side{padding:20px;border:1px solid #ffffff33;border-radius:16px;display:flex;align-items:center;justify-content:center;text-align:center}.karaoke-side p{line-height:1.5}.karaoke-side summary{cursor:pointer}.karaoke-side textarea{width:100%;height:160px;box-sizing:border-box;background:#111;color:white;padding:10px;margin:12px 0}.karaoke-screen:fullscreen{aspect-ratio:auto;min-height:100vh}@media(max-width:850px){.karaoke-grid{grid-template-columns:1fr}.karaoke-screen{min-height:300px}}@media(max-width:520px){.karaoke-controls{flex-wrap:wrap}.karaoke-controls select{flex-basis:calc(100% - 112px)}.karaoke-controls #karaokeToggle,.karaoke-controls #karaokeFull{flex:1}}.karaoke-screen .karaoke-plain{white-space:pre-line;overflow:auto;max-height:310px;width:100%;font-size:clamp(14px,1.5vw,22px);line-height:1.35;text-align:center;padding:0 12px}.karaoke-screen:fullscreen .karaoke-plain{max-height:75vh;font-size:clamp(18px,2.3vw,34px)}
 .karaoke-track-list{margin-top:22px}.karaoke-track-list h3{margin:0 0 12px;font-size:18px}.karaoke-track-items{display:grid;gap:9px}.karaoke-track-item{width:100%;display:flex;align-items:center;gap:14px;padding:14px 16px;border:1px solid var(--line);border-radius:12px;background:#111218;color:#fff;font:inherit;text-align:left;cursor:pointer}.karaoke-track-item:hover{border-color:var(--accent)}.karaoke-track-item.is-active{border-color:var(--accent);background:rgba(213,255,62,.1)}.karaoke-track-number{color:var(--muted);font-size:13px;min-width:26px}.karaoke-track-name{flex:1;font-weight:800}.karaoke-track-state{color:var(--muted);font-size:13px}.karaoke-track-item.is-active .karaoke-track-state{color:var(--accent)}.karaoke-track-item.is-playing .karaoke-track-state::before{content:"● ";font-size:10px}
-.slime-canvas{position:fixed;inset:0;width:100vw;height:100vh;pointer-events:none;z-index:75}
-.slime-basin{position:relative;overflow:hidden;min-height:440px;padding:68px 20px 35px;text-align:center;background:radial-gradient(ellipse at 50% 78%,#243f19 0,#10190f 37%,#08090d 73%);border-top:1px solid #72972a55}.slime-basin h2{margin:0 0 12px;color:#d5ff50;font-size:clamp(23px,3vw,40px);letter-spacing:.04em}.slime-basin p{margin:0;color:#a8ba8d}.slime-bowl{display:block;width:min(760px,96vw);margin:12px auto 0;filter:drop-shadow(0 24px 26px #000a)}.slime-basin::before,.slime-basin::after{content:"";position:absolute;top:0;width:clamp(16px,3vw,38px);height:140px;border-radius:0 0 50% 50%;background:linear-gradient(90deg,#548e23,#c9f738 55%,#7bbe2a);box-shadow:0 0 25px #acfa3266;animation:slime-side-pulse 3s ease-in-out infinite alternate}.slime-basin::before{left:4%}.slime-basin::after{right:4%;height:210px;animation-delay:1s}@keyframes slime-side-pulse{to{transform:scaleY(1.16)}}@media(prefers-reduced-motion:reduce){.slime-basin::before,.slime-basin::after{animation:none}}
 .karaoke-screen .karaoke-lines{width:100%;max-width:760px;font-size:clamp(17px,2vw,25px);line-height:1.35}.karaoke-row{display:block;margin:8px 0;color:#f5f5f0}.karaoke-row span{transition:color .12s ease,opacity .12s ease}.karaoke-row .karaoke-done{opacity:.48}.karaoke-row .karaoke-current{color:#caff91;opacity:1;text-shadow:0 0 18px #caff9170}.karaoke-row .karaoke-upcoming{opacity:.78}.karaoke-screen:fullscreen .karaoke-lines{font-size:clamp(23px,3vw,42px)}
 </style>
 <!-- Yandex.Metrika counter -->
@@ -238,17 +236,6 @@ body.player-open{padding-bottom:104px}
   
 </div></section>
 
-<section class="slime-basin" id="slimeBasin" aria-label="Миска для слизи">
-<h2>МИСКА ДЛЯ СЛИЗИ</h2><p>Сюда стекают потоки с сайта</p>
-<svg class="slime-bowl" viewBox="0 0 600 350" role="img" aria-label="Большая миска постепенно наполняется зелёной слизью">
-<defs><linearGradient id="bowlShell" x2="0" y2="1"><stop stop-color="#72837d"/><stop offset=".35" stop-color="#2c3536"/><stop offset="1" stop-color="#121a1b"/></linearGradient><linearGradient id="bowlLiquid" x2="0" y2="1"><stop stop-color="#e0ff53"/><stop offset=".35" stop-color="#a9e62c"/><stop offset="1" stop-color="#4f9d23"/></linearGradient><clipPath id="bowlInside"><path d="M82 94 Q300 136 518 94 L472 274 Q450 320 300 321 Q150 320 128 274 Z"/></clipPath></defs>
-<ellipse cx="300" cy="315" rx="235" ry="19" fill="#000" opacity=".4"/>
-<path d="M58 83 Q300 135 542 83 L489 281 Q465 337 300 338 Q135 337 111 281 Z" fill="url(#bowlShell)" stroke="#a0b4a3" stroke-width="6"/>
-<ellipse cx="300" cy="92" rx="242" ry="48" fill="#101c14" stroke="#9cac93" stroke-width="12"/>
-<g clip-path="url(#bowlInside)"><rect id="slimeLiquid" x="78" y="322" width="444" height="0" fill="url(#bowlLiquid)"/><ellipse id="slimeSurface" cx="300" cy="322" rx="215" ry="17" fill="#dfff58" opacity="0"/></g>
-<path d="M59 86 Q300 141 541 86" fill="none" stroke="#d5e5c4" stroke-width="9" stroke-linecap="round" opacity=".8"/>
-<path d="M132 278 Q155 325 300 326 Q445 325 468 278" fill="none" stroke="#789069" stroke-width="5" opacity=".5"/>
-</svg></section>
 <footer class="footer"><span>© 2026 ANDATRA</span><span>Music · Visual · Artist</span></footer>
 <div class="lightbox" id="lightbox" onclick="if(event.target===this)closeLightbox()"><button class="close" onclick="closeLightbox()">×</button><img decoding="async" id="lightboxImg" alt=""></div>
 <div class="advisory-toast" id="advisoryToast" aria-hidden="true"><div class="advisory-inner"><span class="advisory-top">Parental Advisory</span><span class="advisory-bottom">Explicit Content</span></div></div>
@@ -635,58 +622,6 @@ document.getElementById('karaokeFull').addEventListener('click',()=>{if(document
 document.getElementById('karaokeSave').addEventListener('click',()=>{karaokeCues=karaokeParse(karaokeText.value);try{localStorage.setItem('andatra-karaoke-v2-'+karaokeTrack.id,karaokeText.value);document.getElementById('karaokeStatus').textContent=karaokeCues.length?'Сохранено строк: '+karaokeCues.length:'Добавьте строки с отметками времени'}catch{document.getElementById('karaokeStatus').textContent='Не удалось сохранить текст'}karaokeRefresh()});
 ['timeupdate','play','pause','loadedmetadata'].forEach(name=>audio.addEventListener(name,karaokeRefresh));
 karaokeChoose(karaokeTrack);
-// Continuous side streams collect in the bowl at the bottom of the site.
-(function initScrollSlime(){
- if(window.matchMedia('(prefers-reduced-motion: reduce)').matches)return;
- const basin=document.getElementById('slimeBasin');
- const liquid=document.getElementById('slimeLiquid');
- const surface=document.getElementById('slimeSurface');
- const canvas=document.createElement('canvas');canvas.className='slime-canvas';canvas.setAttribute('aria-hidden','true');
- document.body.append(canvas);
- const ctx=canvas.getContext('2d');if(!ctx){canvas.remove();return}
- let width=0,height=0,ratio=1,lastFrame=0,fillLevel=0,basinVisible=false;
- const drops=[];
- new IntersectionObserver(entries=>{basinVisible=entries[0].isIntersecting},{threshold:.15}).observe(basin);
- function resize(){
-  ratio=Math.min(window.devicePixelRatio||1,2);width=window.innerWidth;height=window.innerHeight;
-  canvas.width=Math.round(width*ratio);canvas.height=Math.round(height*ratio);ctx.setTransform(ratio,0,0,ratio,0,0);
- }
- function spawn(){
-  if(drops.length>=12)return;
-  const radius=19+Math.random()*15;
-  const edge=Math.min(150,width*.2);
-  const x=Math.random()<.5?radius*.6+Math.random()*edge:width-radius*.6-Math.random()*edge;
-  drops.push({x,y:-radius*2,radius,collected:false,
-   trail:125+Math.random()*125,speed:55+Math.random()*60,wave:Math.random()*6.28,
-   color:Math.random()>.48?'#c9f738':'#87dc36'});
- }
- function updateBowl(){
-  const y=322-fillLevel*222;
-  liquid.setAttribute('y',y.toFixed(1));liquid.setAttribute('height',(322-y).toFixed(1));
-  surface.setAttribute('cy',y.toFixed(1));surface.setAttribute('opacity',fillLevel>0?'.85':'0');
- }
- function draw(now){
-  const dt=Math.min((now-lastFrame)/1000||0,1);lastFrame=now;ctx.clearRect(0,0,width,height);
-  for(let i=drops.length-1;i>=0;i--){
-   const drop=drops[i];drop.y+=drop.speed*dt;
-   if(basinVisible&&!drop.collected&&drop.y>=height-20){drop.collected=true;fillLevel=Math.min(1,fillLevel+.038);updateBowl()}
-   if(drop.y-drop.trail>height+30){drops.splice(i,1);continue}
-   const x=drop.x+Math.sin(now*.0015+drop.wave)*3,r=drop.radius,top=drop.y-drop.trail;
-   const fill=ctx.createLinearGradient(x-r,0,x+r,0);
-   fill.addColorStop(0,'rgba(67,135,27,.55)');fill.addColorStop(.4,drop.color);fill.addColorStop(1,'rgba(220,255,73,.88)');
-   ctx.fillStyle=fill;ctx.shadowColor='#b9f92e';ctx.shadowBlur=12;
-   ctx.beginPath();ctx.moveTo(x-r*.27,top);ctx.bezierCurveTo(x-r*.7,top+drop.trail*.3,x-r*.4,drop.y-r*1.8,x-r,drop.y-r*.35);
-   ctx.bezierCurveTo(x-r*1.1,drop.y+r*.8,x-r*.45,drop.y+r*1.15,x,drop.y+r*1.2);
-   ctx.bezierCurveTo(x+r*.95,drop.y+r*1.1,x+r*1.1,drop.y+r*.2,x+r*.8,drop.y-r*.35);
-   ctx.bezierCurveTo(x+r*.3,drop.y-r*1.6,x+r*.35,top+drop.trail*.3,x+r*.27,top);
-   ctx.closePath();ctx.fill();ctx.shadowBlur=0;
-   ctx.fillStyle='rgba(245,255,170,.55)';ctx.beginPath();ctx.ellipse(x-r*.28,drop.y-r*.25,r*.19,r*.45,-.4,0,Math.PI*2);ctx.fill();
-  }
-  requestAnimationFrame(draw);
- }
- resize();spawn();spawn();window.addEventListener('resize',resize,{passive:true});
- setInterval(spawn,650);requestAnimationFrame(draw);
-})();
 const sharedTrackId = Number(new URLSearchParams(location.search).get('track'));
 const sharedTrack = andatraTracks.find(track => track.id === sharedTrackId);
 if (sharedTrack) currentPage = Math.floor(andatraTracks.indexOf(sharedTrack) / tracksPerPage) + 1;
