@@ -103,7 +103,7 @@ body.player-open{padding-bottom:104px}
   </div>
 </div></section>
 
-<section class="section" id="karaoke"><div class="wrap"><div class="section-head"><div><div class="eyebrow">Sing along</div><h2>Караоке</h2></div></div><div class="karaoke-grid"><div><div class="karaoke-screen" id="karaokeScreen"><h3 id="karaokeTitle">ANDATRA</h3><div class="line" id="karaokeLine">Выберите песню</div><div class="next" id="karaokeNext"></div><div class="bar" id="karaokeBar"></div></div><div class="karaoke-controls"><button id="karaokePrev" class="karaoke-arrow" type="button" aria-label="Предыдущий трек караоке">‹</button><select id="karaokeSelect" aria-label="Песня караоке"><option value="79">Классика</option><option value="32">Мангуст</option></select><button id="karaokeNextTrack" class="karaoke-arrow" type="button" aria-label="Следующий трек караоке">›</button><button id="karaokeToggle" type="button">▶ Слушать</button><button id="karaokeFull" type="button">⛶ Экран</button></div></div><div class="karaoke-side"><h3 id="karaokeSideTitle">СЕРИЯ АНДАТРЫ — Классика</h3><details hidden><summary>Добавить слова и тайминг</summary><textarea id="karaokeText" placeholder="[00:12.00]Первая строка&#10;[00:18.50]Вторая строка"></textarea><p>Формат: [минуты:секунды] строка. Слова сохраняются только в вашем браузере.</p><button id="karaokeSave" type="button">Сохранить</button><p id="karaokeStatus" role="status"></p></details></div><div class="karaoke-track-list"><h3>Треки караоке</h3><div id="karaokeTrackList" class="karaoke-track-items"></div></div></div></section>
+<section class="section" id="karaoke"><div class="wrap"><div class="section-head"><div><div class="eyebrow">Sing along</div><h2>Караоке</h2></div></div><div class="karaoke-grid"><div><div class="karaoke-screen" id="karaokeScreen"><h3 id="karaokeTitle">ANDATRA</h3><div class="line" id="karaokeLine">Выберите песню</div><div class="next" id="karaokeNext"></div><div class="bar" id="karaokeBar"></div></div><div class="karaoke-controls"><button id="karaokePrev" class="karaoke-arrow" type="button" aria-label="Предыдущий трек караоке">‹</button><select id="karaokeSelect" aria-label="Песня караоке"><option value="79">Классика</option><option value="32">Мангуст</option><option value="81">Ядерная Зима</option><option value="67">Ачивки</option><option value="112">Забито</option><option value="111">Оболонь</option><option value="72">Падшая Женщина</option><option value="128">feat ПАССИВНО АГРЕССИВНЫЙ Летопись</option><option value="63">Заебался</option><option value="68">Осуждаю</option></select><button id="karaokeNextTrack" class="karaoke-arrow" type="button" aria-label="Следующий трек караоке">›</button><button id="karaokeToggle" type="button">▶ Слушать</button><button id="karaokeFull" type="button">⛶ Экран</button></div></div><div class="karaoke-side"><h3 id="karaokeSideTitle">СЕРИЯ АНДАТРЫ — Классика</h3><details hidden><summary>Добавить слова и тайминг</summary><textarea id="karaokeText" placeholder="[00:12.00]Первая строка&#10;[00:18.50]Вторая строка"></textarea><p>Формат: [минуты:секунды] строка. Слова сохраняются только в вашем браузере.</p><button id="karaokeSave" type="button">Сохранить</button><p id="karaokeStatus" role="status"></p></details></div><div class="karaoke-track-list"><h3>Треки караоке</h3><div id="karaokeTrackList" class="karaoke-track-items"></div></div></div></section>
 
 
 
@@ -356,7 +356,7 @@ audio.addEventListener('timeupdate', () => {
   lastAudioTime = position;
   if (activeTrack && listenedSeconds >= 10) registerPlay(activeTrack.id);
 });
-audio.addEventListener('ended', () => stepTrack(1));
+audio.addEventListener('ended', () => { if(activeTrack?.id===karaokeTrack.id&&audio.src.endsWith(karaokeSource())){const next=karaokeTrackIds[(karaokeTrackIds.indexOf(karaokeTrack.id)+1)%karaokeTrackIds.length];karaokeChoose(andatraTracks.find(track=>track.id===next));karaokePlay();}else stepTrack(1); });
 seekRange.addEventListener('pointerdown', () => { isSeeking=true; });
 seekRange.addEventListener('touchstart', () => { isSeeking=true; }, {passive:true});
 seekRange.addEventListener('input', () => { currentTime.textContent=formatTime(Number(seekRange.value)); });
@@ -412,7 +412,7 @@ function karaokeRefresh(){
   karaokeRenderedIndex=null;lyricLine.classList.remove('karaoke-lines');
   lyricLine.classList.toggle('karaoke-plain',!karaokeCues.length&&Boolean(karaokeText.value));
   lyricLine.textContent=!karaokeCues.length&&karaokeText.value?karaokeText.value:(index<0?'♪ '+karaokeTrack.title:karaokeCues[index].text);
-  nextLine.textContent=karaokeCues[index+1]?.text||(!karaokeCues.length&&karaokeText.value?'':'Добавьте слова песни с таймингом');
+  nextLine.textContent=karaokeCues[index+1]?.text||(!karaokeCues.length&&karaokeText.value?'':'Текст скоро появится');
  }
  document.getElementById('karaokeBar').style.width=activeTrack?.id===karaokeTrack.id&&Number.isFinite(audio.duration)&&audio.duration>0?Math.min(100,position/audio.duration*100)+'%':'0%';
  document.getElementById('karaokeToggle').textContent=activeTrack?.id===karaokeTrack.id&&!audio.paused?'❚❚ Пауза':'▶ Слушать';
@@ -424,7 +424,8 @@ function karaokeChoose(track){
  try{karaokeText.value=localStorage.getItem('andatra-karaoke-v2-'+track.id)||karaokePublishedText[track.id]||''}catch{karaokeText.value=karaokePublishedText[track.id]||''}
  karaokeCues=karaokeParse(karaokeText.value);document.getElementById('karaokeStatus').textContent='';karaokeRefresh();
 }
-function karaokeSource(){return karaokeTrack.id===32?'/assets/audio/mangust-instrumental.mp3':'/assets/audio/klassika-instrumental.mp3'}
+const karaokeInstrumentals={"79":"/assets/audio/klassika-instrumental.mp3","32":"/assets/audio/mangust-instrumental.mp3","81":"/assets/audio/yadernaya-zima-instrumental.mp3","67":"/assets/audio/achivki-instrumental.mp3","112":"/assets/audio/zabito-instrumental.mp3","111":"/assets/audio/obolon-instrumental.mp3","72":"/assets/audio/padshaya-zhenschina-instrumental.mp3","128":"/assets/audio/letopis-instrumental.mp3","63":"/assets/audio/zaebalsya-instrumental.mp3","68":"/assets/audio/osuzhdayu-instrumental.mp3"};
+function karaokeSource(){return karaokeInstrumentals[karaokeTrack.id]}
 async function karaokePlay(){
  const source=karaokeSource();
  if(activeTrack?.id===karaokeTrack.id&&audio.src.endsWith(source)&&!audio.paused){audio.pause();return}
