@@ -1,0 +1,30 @@
+name: Import channel videos
+on:
+  push:
+    paths: ['.github/workflows/import-channel.yml']
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  download:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install video tools
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y ffmpeg
+          pip install -U 'yt-dlp[default]'
+      - name: Download and verify sample
+        run: |
+          mkdir -p channel
+          yt-dlp --js-runtimes node --remote-components ejs:github --no-playlist -f 'bv*[height<=720]+ba/b[height<=720]/b' --merge-output-format mp4 -o 'channel/%(id)s.%(ext)s' 'https://www.youtube.com/watch?v=aksQdRFAyLo'
+          ffprobe -v error -show_entries format=duration,size -of json channel/aksQdRFAyLo.mp4
+      - uses: actions/upload-artifact@v4
+        with:
+          name: channel-import-sample
+          path: channel/
+          retention-days: 3
