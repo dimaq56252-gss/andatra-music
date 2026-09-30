@@ -22,6 +22,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+      - name: Assemble video assets
+        run: python3 scripts/assemble-media.py
       - uses: actions/configure-pages@v5
         with:
           enablement: true
@@ -31,3 +33,4 @@ jobs:
       - name: Deploy
         id: deployment
         uses: actions/deploy-pages@v4
+
