@@ -394,7 +394,7 @@ function karaokeRefresh(){
   lyricLine.classList.remove('karaoke-plain');lyricLine.classList.add('karaoke-lines');nextLine.textContent='';
   if(karaokeTrack.id+':'+index!==karaokeRenderedIndex){
    karaokeRenderedIndex=karaokeTrack.id+':'+index;lyricLine.replaceChildren();
-   if(index>=groups.flat().length || (index<0&&karaokeTrack.id===32)){lyricLine.textContent='♪ '+karaokeTrack.title}
+   if(index>=groups.flat().length){lyricLine.textContent='♪ '+karaokeTrack.title}
    else{
     const groupIndex=Math.max(0,groups.findIndex(group=>group.includes(index)));
     const start=Math.max(0,Math.min(groupIndex-1,groups.length-4));
