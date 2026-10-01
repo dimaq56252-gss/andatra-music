@@ -4,7 +4,16 @@
   const START = 'andatra-preview-start-v1';
   const read = key => { try { return sessionStorage.getItem(key); } catch { return null; } };
   const write = (key, value) => { try { sessionStorage.setItem(key, value); } catch {} };
-  if (read(KEY) === 'unlocked') return;
+  const remembered = () => {
+    try { if (localStorage.getItem(KEY) === 'unlocked') return true; } catch {}
+    return read(KEY) === 'unlocked';
+  };
+  const remember = () => {
+    try { localStorage.setItem(KEY, 'unlocked'); } catch {}
+    write(KEY, 'unlocked');
+  };
+  // Preserve access for visitors who already unlocked this tab.
+  if (remembered()) { remember(); return; }
   const saved = Number(read(START));
   const started = saved > 0 && saved <= Date.now() ? saved : Date.now();
   write(START, String(started));
@@ -60,7 +69,7 @@
         input.focus();
         return;
       }
-      write(KEY, 'unlocked');
+      remember();
       locked = false;
       clearInterval(timer);
       inertStates.forEach((value, element) => { element.inert = value; });
