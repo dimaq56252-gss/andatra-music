@@ -10,7 +10,7 @@
 <script defer src="/access-gate.js"></script>
 </head>
 <body>
-<header><a class="logo" href="/">ANDATRA</a><nav aria-label="Разделы сайта"><a href="/#music">Музыка</a><a href="/#karaoke">Караоке</a><a href="/video/">Видео</a><a href="/studio.html" aria-current="page">Студия</a><a href="/separate/">Отделить вокал</a></nav></header>
+<header><a class="logo" href="/">ANDATRA</a><nav aria-label="Разделы сайта"><a href="/#music">Музыка</a><a href="/#karaoke">Караоке</a><a href="/video/">Видео</a><a href="/studio.html" aria-current="page">Студия</a><a href="/separate/">Отделить вокал</a><a href="/bpm/">BPM</a><a href="/drumpad/">Drum Pad</a><a href="/convert/">Конвертер</a></nav></header>
 <main>
 <div class="top"><div><p class="eyebrow">СЕРИЯ АНДАТРЫ</p><h1>Студия</h1></div><span class="badge">МИНУС · ГОЛОС · БЭКИ</span></div>
 <div class="layout">
@@ -29,7 +29,7 @@
 <section class="panel"><h2>Звук и экспорт</h2><label class="setting">Общая громкость <output id="masterValue">80%</output><input id="master" type="range" min="0" max="1" step="0.01" value="0.8"></label><label class="setting">Эхо на голосе <output id="echoValue">0%</output><input id="echo" type="range" min="0" max="0.5" step="0.01" value="0"></label><button id="exportMix" class="primary" disabled>Скачать трек · WAV</button><p>На каждой голосовой дорожке можно скачать отдельный дубль. Задержка новых дублей компенсируется автоматически. Для точной подстройки используй поправку в блоке микрофона.</p><p>До 10 минут в одном миксе. Файлы остаются на твоём устройстве. Перед закрытием скачай записи.</p></section>
 </aside>
 </div>
-<p class="footer">Работает в браузере. При отказе в доступе к микрофону разреши его в настройках сайта. <span class="mobile-note">На телефоне держи эту вкладку открытой во время записи.</span></p>
+<section class="panel" style="margin-top:18px"><h2>Инструменты студии</h2><div class="actions"><a class="file" href="/bpm/">BPM Detector</a><a class="file" href="/drumpad/">Drum Pad / Beat Maker</a><a class="file" href="/convert/">Конвертер аудио</a><a class="file" href="/separate/">Отделить вокал</a></div></section><p class="footer">Работает в браузере. При отказе в доступе к микрофону разреши его в настройках сайта. <span class="mobile-note">На телефоне держи эту вкладку открытой во время записи.</span></p>
 </main>
 <script type="module" src="/studio.js?v=separate-1"></script>
 </body></html>
