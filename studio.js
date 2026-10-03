@@ -260,4 +260,20 @@ function initStudio() {
     else $('meter').style.width='0%'; requestAnimationFrame(tick);
   }
   render(); tick();
+  if (new URLSearchParams(location.search).get('import') === 'separated') {
+    busy=true; controls(); status('Открываю отделённый минус…');
+    (async()=>{
+      try {
+        const item=await new Promise((resolve,reject)=>{
+          const request=indexedDB.open('andatra-audio-transfer',1);
+          request.onupgradeneeded=()=>request.result.createObjectStore('files');
+          request.onerror=()=>reject(request.error);
+          request.onsuccess=()=>{const db=request.result,tx=db.transaction('files','readonly'),get=tx.objectStore('files').get('beat');get.onsuccess=()=>resolve(get.result);get.onerror=()=>reject(get.error);tx.oncomplete=()=>db.close();};
+        });
+        if(!item) throw new Error('Минус не найден. Скачай его и загрузи файл вручную.');
+        await loadFile(new File([item.blob],item.name,{type:'audio/wav'}),'beat');
+        history.replaceState(null,'',location.pathname);status('Минус готов. Можно записывать голос.');
+      } catch(error){status(error.message,true);} finally{busy=false;controls();}
+    })();
+  }
 }
