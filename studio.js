@@ -1,4 +1,8 @@
 const MAX_SECONDS = 600;
+export function recordingLatency(context, settings = {}) {
+  const seconds = value => Number.isFinite(value) && value >= 0 ? value : 0;
+  return Math.min(1, seconds(context.baseLatency) + seconds(context.outputLatency) + seconds(settings.latency));
+}
 export function clipSchedule(duration, start, position) {
   const offset = Math.max(0, position - start);
   return offset >= duration ? null : { delay: Math.max(0, start - position), offset, length: duration - offset };
@@ -25,7 +29,20 @@ function initStudio() {
   const $ = id => document.getElementById(id);
   const tracks = []; let nextId = 1, ctx, mic, analyser, nodes = [], playing = false, recording = false;
   let busy = false, exporting = false, recorder, chunks = [], position = 0, origin = 0, startPosition = 0;
-  let recordPosition = 0, recordLead = 0, recordingStarted = false, unsaved = false, masterNode;
+  let recordPosition = 0, recordLead = 0, recordCorrection = 0, recordingStarted = false, unsaved = false, masterNode;
+  const latencyPanel = document.createElement('label');
+  latencyPanel.className = 'setting';
+  latencyPanel.innerHTML = 'Поправка задержки, мс <input id="latencyAdjust" type="number" min="-1000" max="1000" step="10" value="0"><span id="latencyInfo"></span>';
+  $('mic-label').after(latencyPanel);
+  const correctionKey = () => 'andatra-studio-latency:' + (mic?.getAudioTracks()[0]?.getSettings().deviceId || 'default');
+  function latencyInfo() {
+    const estimate = ctx ? Math.round(recordingLatency(ctx, mic?.getAudioTracks()[0]?.getSettings()) * 1000) : 0;
+    $('latencyInfo').textContent = `Автокомпенсация: ${estimate} мс. Если голос опаздывает, добавь положительную поправку; она сохранится для микрофона.`;
+  }
+  $('latencyAdjust').onchange = () => {
+    $('latencyAdjust').value = Math.max(-1000, Math.min(1000, Number($('latencyAdjust').value) || 0));
+    try { localStorage.setItem(correctionKey(), $('latencyAdjust').value); } catch {}
+  };
   const time = value => { const n = Math.max(0, value); return `${String(Math.floor(n / 60)).padStart(2,'0')}:${String(Math.floor(n % 60)).padStart(2,'0')}`; };
   const status = (text, error = false) => { $('status').textContent = text; $('status').classList.toggle('error', error); };
   const endTime = () => Math.min(MAX_SECONDS, Math.max(0, ...tracks.map(t => t.start + t.offset / 1000 + t.buffer.duration)));
@@ -44,7 +61,7 @@ function initStudio() {
     $('record').classList.toggle('is-recording', recording);
     $('play').textContent = playing && !recording ? '❚❚ Пауза' : '▶ Слушать';
     $('seek').disabled = locked;
-    for (const id of ['beatFile','beatSelect','voiceFile','micSelect','micConnect']) $(id).disabled = locked || playing;
+    for (const id of ['beatFile','beatSelect','voiceFile','micSelect','micConnect','latencyAdjust']) $(id).disabled = locked || playing;
     $('exportMix').disabled = !tracks.some(t => !t.muted) || locked || playing;
     document.querySelectorAll('[data-track-control]').forEach(el => { el.disabled = locked || playing; });
     $('seek').max = Math.max(1, endTime(), position);
@@ -135,9 +152,9 @@ function initStudio() {
     if(result.duration>MAX_SECONDS) throw new Error('Файл длиннее 10 минут. Обрежь его и загрузи снова.');
     return result;
   }
-  function add(buffer,name,kind,start=0) {
+  function add(buffer,name,kind,start=0,offset=0) {
     if(kind==='beat') { const old=tracks.findIndex(t=>t.kind==='beat'); if(old>=0) tracks.splice(old,1); }
-    tracks.push({id:nextId++,buffer,name,kind,start,gain:kind==='beat'?0.65:1,offset:0,muted:false}); unsaved=true; render();
+    tracks.push({id:nextId++,buffer,name,kind,start,gain:kind==='beat'?0.65:1,offset,muted:false}); unsaved=true; render();
   }
   async function loadFile(file,kind) {
     if(file.size>100*1024*1024) throw new Error('Максимальный размер файла — 100 МБ.');
@@ -154,12 +171,14 @@ function initStudio() {
     await audio();
     if(mic) { for(const track of mic.getTracks()) track.stop(); mic=undefined; }
     const deviceId=$('micSelect').value;
-    mic=await navigator.mediaDevices.getUserMedia({audio:{...(deviceId?{deviceId:{exact:deviceId}}:{}),echoCancellation:false,noiseSuppression:false,autoGainControl:false},video:false});
+    mic=await navigator.mediaDevices.getUserMedia({audio:{...(deviceId?{deviceId:{exact:deviceId}}:{}),echoCancellation:false,noiseSuppression:false,autoGainControl:false,latency:{ideal:0.01}},video:false});
     const source=ctx.createMediaStreamSource(mic); analyser=ctx.createAnalyser(); analyser.fftSize=512; source.connect(analyser);
     const devices=await navigator.mediaDevices.enumerateDevices(), chosen=mic.getAudioTracks()[0].getSettings().deviceId;
     $('micSelect').replaceChildren(new Option('По умолчанию',''));
     devices.filter(d=>d.kind==='audioinput').forEach((d,i)=>$('micSelect').add(new Option(d.label||`Микрофон ${i+1}`,d.deviceId)));
     if(chosen) $('micSelect').value=chosen;
+    try { $('latencyAdjust').value = localStorage.getItem(correctionKey()) || '0'; } catch {}
+    latencyInfo();
     $('mic-label').textContent='Подключён · '+(mic.getAudioTracks()[0].label||'Микрофон'); $('micConnect').textContent='Переподключить микрофон';
     mic.getAudioTracks()[0].onended=()=>{ $('mic-label').textContent='Микрофон отключился'; if(recording) finishRecording(); mic=undefined; };
   }
@@ -177,6 +196,8 @@ function initStudio() {
       const mime=['audio/webm;codecs=opus','audio/mp4','audio/ogg;codecs=opus'].find(type=>MediaRecorder.isTypeSupported(type));
       recorder=new MediaRecorder(mic,mime?{mimeType:mime}:undefined); chunks=[]; recordingStarted=false;
       recordPosition=position; recordLead=0.1;
+      recordCorrection = Math.round(recordingLatency(ctx,mic.getAudioTracks()[0].getSettings())*1000) + (Number($('latencyAdjust').value)||0);
+      latencyInfo();
       recorder.ondataavailable=e=>{ if(e.data.size) chunks.push(e.data); };
       recorder.onstart=()=>{ recordingStarted=true; startAt(recordPosition,ctx.currentTime+recordLead); status('Идёт запись. Нажми «Закончить запись», когда закончишь дубль.'); };
       recorder.onerror=e=>{ status('Ошибка записи: '+(e.error?.message||'микрофон недоступен'),true); finishRecording(); };
@@ -190,8 +211,8 @@ function initStudio() {
           if(length<buffer.sampleRate*0.15) throw new Error('Дубль слишком короткий. Запиши хотя бы секунду.');
           const trimmed=ctx.createBuffer(buffer.numberOfChannels,length,buffer.sampleRate);
           for(let c=0;c<buffer.numberOfChannels;c++) trimmed.copyToChannel(buffer.getChannelData(c).subarray(trim,trim+length),c);
-          add(trimmed,`Дубль ${tracks.filter(t=>t.kind==='voice').length+1}`,'voice',recordPosition); position=recordPosition;
-          status('Дубль готов. Прослушай его или запиши следующий. При необходимости поправь сдвиг.');
+          add(trimmed,`Дубль ${tracks.filter(t=>t.kind==='voice').length+1}`,'voice',recordPosition,-recordCorrection); position=recordPosition;
+          status(`Дубль готов. Компенсация задержки: ${recordCorrection} мс. Прослушай его или запиши следующий.`);
         } catch(error) { status(error.message,true); }
         finally { busy=false; controls(); }
       };

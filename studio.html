@@ -26,10 +26,10 @@
 </section>
 <aside class="side">
 <section class="panel"><h2>Микрофон</h2><select id="micSelect" aria-label="Выбор микрофона"><option value="">По умолчанию</option></select><button id="micConnect">Подключить микрофон</button><div class="meter" aria-hidden="true"><span id="meter"></span></div><div id="mic-label">Микрофон не подключён</div><p>Голос не выводится в наушники во время записи, чтобы не мешала задержка.</p></section>
-<section class="panel"><h2>Звук и экспорт</h2><label class="setting">Общая громкость <output id="masterValue">80%</output><input id="master" type="range" min="0" max="1" step="0.01" value="0.8"></label><label class="setting">Эхо на голосе <output id="echoValue">0%</output><input id="echo" type="range" min="0" max="0.5" step="0.01" value="0"></label><button id="exportMix" class="primary" disabled>Скачать трек · WAV</button><p>На каждой голосовой дорожке можно скачать отдельный дубль. Если голос запаздывает — уменьши «Сдвиг, мс».</p><p>До 10 минут в одном миксе. Файлы остаются на твоём устройстве. Перед закрытием скачай записи.</p></section>
+<section class="panel"><h2>Звук и экспорт</h2><label class="setting">Общая громкость <output id="masterValue">80%</output><input id="master" type="range" min="0" max="1" step="0.01" value="0.8"></label><label class="setting">Эхо на голосе <output id="echoValue">0%</output><input id="echo" type="range" min="0" max="0.5" step="0.01" value="0"></label><button id="exportMix" class="primary" disabled>Скачать трек · WAV</button><p>На каждой голосовой дорожке можно скачать отдельный дубль. Задержка новых дублей компенсируется автоматически. Для точной подстройки используй поправку в блоке микрофона.</p><p>До 10 минут в одном миксе. Файлы остаются на твоём устройстве. Перед закрытием скачай записи.</p></section>
 </aside>
 </div>
 <p class="footer">Работает в браузере. При отказе в доступе к микрофону разреши его в настройках сайта. <span class="mobile-note">На телефоне держи эту вкладку открытой во время записи.</span></p>
 </main>
-<script type="module" src="/studio.js"></script>
+<script type="module" src="/studio.js?v=latency-2"></script>
 </body></html>
