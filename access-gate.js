@@ -107,13 +107,3 @@
   script.src = '/site-navigation.js?v=20261004';
   document.head.append(script);
 })();
-
-// Timed face hologram, shared by every section.
-(() => {
-  if (document.getElementById('andatra-cameo-script')) return;
-  const script = document.createElement('script');
-  script.id = 'andatra-cameo-script';
-  script.src = '/hologram-cameo.js?v=20261005';
-  document.head.append(script);
-})();
-
