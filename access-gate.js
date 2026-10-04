@@ -98,3 +98,12 @@
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init, {once:true});
   else init();
 })();
+
+// Shared navigation for the site's sections and tools.
+(() => {
+  if (document.getElementById('andatra-navigation-script')) return;
+  const script = document.createElement('script');
+  script.id = 'andatra-navigation-script';
+  script.src = '/site-navigation.js?v=20261004';
+  document.head.append(script);
+})();
