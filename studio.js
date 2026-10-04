@@ -1,3 +1,5 @@
+import {initMastering} from './mastering.js';
+import {saveProject,loadProject,downloadBlob} from './studio-project.js';
 const MAX_SECONDS = 600;
 export function recordingLatency(context, settings = {}) {
   const seconds = value => Number.isFinite(value) && value >= 0 ? value : 0;
@@ -61,7 +63,7 @@ function initStudio() {
     $('record').classList.toggle('is-recording', recording);
     $('play').textContent = playing && !recording ? '❚❚ Пауза' : '▶ Слушать';
     $('seek').disabled = locked;
-    for (const id of ['beatFile','beatSelect','voiceFile','micSelect','micConnect','latencyAdjust']) $(id).disabled = locked || playing;
+    for (const id of ['beatFile','beatSelect','voiceFile','micSelect','micConnect','latencyAdjust','saveProject','loadProject']) $(id).disabled = locked || playing;
     $('exportMix').disabled = !tracks.some(t => !t.muted) || locked || playing;
     document.querySelectorAll('[data-track-control]').forEach(el => { el.disabled = locked || playing; });
     $('seek').max = Math.max(1, endTime(), position);
@@ -103,6 +105,7 @@ function initStudio() {
   async function listen() {
     try {
       if (playing) { pause(); return; }
+      $('masteringPlayer')?.pause();
       await audio(); if (position >= endTime()) position = 0;
       startAt(position,ctx.currentTime + 0.05);
     } catch (error) { status('Не удалось воспроизвести: ' + error.message,true); }
@@ -133,15 +136,15 @@ function initStudio() {
     for (const track of tracks) {
       const row = document.createElement('article'); row.className='track';
       row.innerHTML = `<div class="track-head"><span class="track-name"></span><button data-track-control class="mute"></button>${track.kind==='voice'?'<button data-track-control class="save">Скачать дубль</button>':''}<button data-track-control class="remove danger" aria-label="Удалить дорожку">Удалить</button></div><canvas aria-label="Звуковая волна"></canvas><div class="track-controls"><label>Громкость <input data-track-control class="gain" type="range" min="0" max="1.5" step="0.01"><output></output></label><label>Сдвиг, мс <input data-track-control class="offset" type="number" min="-10000" max="10000" step="10"></label><span class="hint"></span></div>`;
-      row.querySelector('.track-name').textContent = (track.kind==='beat'?'МИНУС · ':'ГОЛОС · ') + track.name;
+      row.querySelector('.track-name').textContent = (track.kind==='beat'?'МИНУС · ':track.kind==='voice'?'ГОЛОС · ':'ДОРОЖКА · ') + track.name;
       const mute = row.querySelector('.mute'); mute.textContent = track.muted ? 'Включить' : 'Выключить'; mute.setAttribute('aria-pressed',String(track.muted));
-      mute.onclick = () => { track.muted=!track.muted; render(); };
+      mute.onclick = () => { track.muted=!track.muted; unsaved=true; render(); };
       const slider = row.querySelector('.gain'), out = row.querySelector('output'); slider.value=track.gain; out.textContent=Math.round(track.gain*100)+'%';
-      slider.oninput = () => { track.gain=Number(slider.value); out.textContent=Math.round(track.gain*100)+'%'; };
+      slider.oninput = () => { track.gain=Number(slider.value); unsaved=true; out.textContent=Math.round(track.gain*100)+'%'; };
       const offset = row.querySelector('.offset'); offset.value=track.offset;
-      offset.onchange=()=>{ track.offset=Math.max(-10000,Math.min(10000,Number(offset.value)||0)); offset.value=track.offset; controls(); };
+      offset.onchange=()=>{ track.offset=Math.max(-10000,Math.min(10000,Number(offset.value)||0)); offset.value=track.offset; unsaved=true; controls(); };
       row.querySelector('.hint').textContent = `${time(track.buffer.duration)} · начало ${time(track.start)}`;
-      row.querySelector('.remove').onclick=()=>{ if(confirm('Удалить эту дорожку? Сначала скачай дубль, если он нужен.')) { tracks.splice(tracks.indexOf(track),1); render(); } };
+      row.querySelector('.remove').onclick=()=>{ if(confirm('Удалить эту дорожку? Сначала скачай дубль, если он нужен.')) { tracks.splice(tracks.indexOf(track),1); unsaved=true; render(); } };
       const save=row.querySelector('.save'); if(save) save.onclick=()=>download(track.buffer,track.name);
       $('tracks').append(row); waveform(row.querySelector('canvas'),track);
     }
@@ -190,6 +193,7 @@ function initStudio() {
     if(recording) { finishRecording(); return; }
     busy=true; controls();
     try {
+      $('masteringPlayer')?.pause();
       await audio(); if(playing) pause();
       if(position>=MAX_SECONDS) position=0;
       if(!mic || !mic.active) await connectMic();
@@ -248,8 +252,8 @@ function initStudio() {
   $('micConnect').onclick=async()=>{ busy=true; controls(); try { await connectMic(); status('Микрофон готов к записи.'); } catch(error) { status(micError(error),true); } finally { busy=false; controls(); } };
   $('micSelect').onchange=()=>{ if(mic) $('micConnect').click(); };
   $('seek').oninput=()=>{ const wasPlaying=playing; if(wasPlaying)pause(); position=Number($('seek').value); if(wasPlaying)startAt(position,ctx.currentTime+0.03); };
-  $('master').oninput=()=>{ $('masterValue').textContent=Math.round(Number($('master').value)*100)+'%'; if(masterNode)masterNode.gain.value=Number($('master').value); };
-  $('echo').oninput=()=>{ $('echoValue').textContent=Math.round(Number($('echo').value)*100)+'%'; if(playing&&!recording){const pos=cursor(); startAt(pos,ctx.currentTime+0.03);} };
+  $('master').oninput=()=>{ if(tracks.length)unsaved=true; $('masterValue').textContent=Math.round(Number($('master').value)*100)+'%'; if(masterNode)masterNode.gain.value=Number($('master').value); };
+  $('echo').oninput=()=>{ if(tracks.length)unsaved=true; $('echoValue').textContent=Math.round(Number($('echo').value)*100)+'%'; if(playing&&!recording){const pos=cursor(); startAt(pos,ctx.currentTime+0.03);} };
   window.addEventListener('beforeunload',e=>{ if(unsaved||recording){ e.preventDefault(); e.returnValue=''; } });
   document.addEventListener('visibilitychange',()=>{ if(document.hidden&&recording){ finishRecording(); status('Запись остановлена: вкладка была скрыта.'); } });
   window.addEventListener('resize',()=>document.querySelectorAll('.track canvas').forEach((canvas,i)=>waveform(canvas,tracks[i])));
@@ -259,6 +263,21 @@ function initStudio() {
     if(analyser&&mic?.active){ const values=new Float32Array(analyser.fftSize); analyser.getFloatTimeDomainData(values); const peak=Math.max(...values.map(Math.abs)); $('meter').style.width=Math.min(100,peak*180)+'%'; $('meter').style.background=peak>0.95?'#ff636f':'#d7ff47'; }
     else $('meter').style.width='0%'; requestAnimationFrame(tick);
   }
+  const snapshot = () => ({tracks:tracks.map(t=>({...t})),master:Number($('master').value),echo:Number($('echo').value)});
+  initMastering({audio,snapshot,isLocked:()=>busy||exporting||recording||playing,lock:value=>{exporting=value;controls();}});
+  $('saveProject').onclick=async()=>{
+    if(busy||exporting||recording||playing)return;
+    exporting=true;controls();status('Сохраняю проект…');
+    try{downloadBlob(await saveProject(snapshot()),'ANDATRA-studio-project.zip');unsaved=false;status('Проект сохранён: дорожки, громкость, сдвиги и эхо.');}
+    catch(e){status(e.message,true);}finally{exporting=false;controls();}
+  };
+  $('loadProject').onchange=async()=>{
+    const file=$('loadProject').files[0];if(!file||busy||exporting||recording||playing)return;
+    if(tracks.length&&!confirm('Заменить дорожки студии проектом из файла? Сначала сохрани текущий проект.')){$('loadProject').value='';return;}
+    busy=true;controls();
+    try{const p=await loadProject(file,await audio(),status);tracks.splice(0,tracks.length,...p.tracks.map(t=>({...t,id:nextId++})));$('master').value=p.master;$('masterValue').textContent=Math.round(p.master*100)+'%';$('echo').value=p.echo;$('echoValue').textContent=Math.round(p.echo*100)+'%';position=0;unsaved=true;render();status('Проект загружен. Настрой дорожки или отправь его на обработку ниже.');}
+    catch(e){status(e.message,true);}finally{busy=false;$('loadProject').value='';controls();}
+  };
   render(); tick();
   if (new URLSearchParams(location.search).get('import') === 'separated') {
     busy=true; controls(); status('Открываю отделённый минус…');
