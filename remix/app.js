@@ -1,5 +1,5 @@
-import {estimateTempo,estimateKey,NOTE_NAMES,generateInstrumental,mixRemix,validateSettings} from './music.js';
-import {separateChannels} from './separation.js';
+import {estimateTempo,estimateKey,NOTE_NAMES,generateInstrumental,mixRemix,validateSettings} from './music.js?v=finite-2';
+import {separateChannels} from './separation.js?v=finite-2';
 import {wavBytes,measure} from '../audio-processing.js';
 import {downloadBlob} from '../studio-project.js';
 export function initRemixer(){
@@ -8,10 +8,10 @@ export function initRemixer(){
   for(let root=0;root<12;root++)for(const mode of ['minor','major']){const option=document.createElement('option');option.value=root+':'+mode;option.textContent=NOTE_NAMES[root]+(mode==='minor'?' minor':' major');$('key').append(option);}
   const players=['original','remix','vocals','instrumental'];
   function clearResults(){for(const id of players.slice(1)){$(id).pause();$(id).removeAttribute('src');$(id).load();}urls.forEach(u=>URL.revokeObjectURL(u));urls=[];result=null;$('results').hidden=true;}
-  function lock(value){busy=value;for(const id of ['file','inputMode','scope','style','bpm','offset','key','harmony','autoTempo','voiceGain','beatGain'])$(id).disabled=value;$('run').disabled=value||!file;$('variant').disabled=value||!cache;$('cancel').hidden=!value;}
+  function lock(value){busy=value;for(const id of ['file','inputMode','scope','backend','style','bpm','offset','key','harmony','autoTempo','voiceGain','beatGain'])$(id).disabled=value;$('run').disabled=value||!file;$('variant').disabled=value||!cache;$('cancel').hidden=!value;}
   function resetCache(){generation++;abort?.abort();cache=undefined;variation=0;clearResults();$('analysis').textContent='Темп и тональность появятся после анализа. Вокал сохраняет исходную скорость.';$('run').textContent='Создать ремикс';lock(false);status(file?'Нажми «Создать ремикс».':'Выбери песню, чтобы начать.');}
   $('file').onchange=()=>{resetCache();file=$('file').files[0];if(originalURL)URL.revokeObjectURL(originalURL);$('original').pause();$('original').removeAttribute('src');$('original').load();originalURL=file?URL.createObjectURL(file):'';if(originalURL)$('original').src=originalURL;$('original').hidden=!file;$('filename').textContent=file?file.name:'Песня не выбрана';transferred=false;lock(false);status(file?'Готово. Выбери стиль и создай ремикс.':'Выбери песню, чтобы начать.');};
-  for(const id of ['scope','inputMode'])$(id).onchange=resetCache;
+  for(const id of ['scope','inputMode','backend'])$(id).onchange=resetCache;
   function changed(){clearResults();$('run').textContent=cache?'Пересобрать ремикс':'Создать ремикс';status(cache?'Настройки изменились. Пересобери ремикс — голос уже готов.':'Настройки выбраны. Загрузи песню и создай ремикс.');}
   for(const id of ['style','offset','key','harmony'])$(id).onchange=changed;
   $('autoTempo').onchange=()=>{if(cache&&$('autoTempo').checked){$('bpm').value=cache.tempo.bpm;$('offset').value=Math.round(cache.tempo.offset*1000);}changed();};
@@ -25,7 +25,7 @@ export function initRemixer(){
   }
   async function run(newVariant=false){
     if(!file||busy)return;if(newVariant&&!cache)return;if(newVariant)variation++;
-    const token=++generation;abort=new AbortController();transferred=false;lock(true);clearResults();$('original').pause();$('progress').hidden=false;$('progress').removeAttribute('value');let context;
+    const token=++generation;abort=new AbortController();transferred=false;lock(true);clearResults();$('original').pause();$('progress').hidden=false;$('progress').removeAttribute('value');let context,stage='загрузка песни';
     try{
       if(!cache){
         if(file.size>100*1024*1024)throw Error('Файл больше 100 МБ.');
@@ -36,8 +36,8 @@ export function initRemixer(){
         if(measure(input).peak<1e-6)throw Error('В файле только тишина.');
         status('Подбираю темп…');const tempo=estimateTempo(input);let vocals,key;
         if($('inputMode').value==='vocals'){vocals=input;key=estimateKey(input);}else{
-          status('Отделяю твой голос от старого минуса…');
-          const data=await separateChannels([new Float32Array(input.getChannelData(0)),new Float32Array(input.getChannelData(1))],{signal:abort.signal,onProgress:progress});if(token!==generation)return;
+          stage='отделение голоса';status('Отделяю твой голос от старого минуса…');
+          const data=await separateChannels([new Float32Array(input.getChannelData(0)),new Float32Array(input.getChannelData(1))],{signal:abort.signal,onProgress:progress,backend:$('backend').value});if(token!==generation)return;
           vocals=context.createBuffer(2,data.vocals[0].length,44100);for(let c=0;c<2;c++)vocals.copyToChannel(data.vocals[c],c);
           const accompaniment=context.createBuffer(2,data.instrumental[0].length,44100);for(let c=0;c<2;c++)accompaniment.copyToChannel(data.instrumental[c],c);key=estimateKey(accompaniment);
         }
@@ -46,13 +46,13 @@ export function initRemixer(){
         $('analysis').textContent=`Автотемп: ${tempo.bpm} BPM${tempo.confidence<.25?' — проверь вручную':''}. Тональность: ${key.label}${key.score<.4?' — приблизительно':''}. Фрагмент: ${Math.round(vocals.duration)} с. ${$('inputMode').value==='vocals'?'Для речевого вокала тональность лучше выбрать вручную.':''}`;
       }
       if(token!==generation)return;
-      const s=settings();$('bpm').value=s.bpm;$('offset').value=Math.round(s.offset*1000);$('progress').value=.8;status('Создаю новый минус: ударные, бас и аккорды…');
+      stage='генерация нового минуса';const s=settings();$('bpm').value=s.bpm;$('offset').value=Math.round(s.offset*1000);$('progress').value=.8;status('Создаю новый минус: ударные, бас и аккорды…');
       const instrumental=await generateInstrumental(cache.vocals.duration,s);if(token!==generation)return;
-      $('progress').value=.92;status('Собираю ремикс с твоим голосом…');const mix=await mixRemix(cache.vocals,instrumental,s);if(token!==generation)return;
+      $('progress').value=.92;stage='сборка ремикса';status('Собираю ремикс с твоим голосом…');const mix=await mixRemix(cache.vocals,instrumental,s);if(token!==generation)return;
       result={mix:new Blob([wavBytes(mix)],{type:'audio/wav'}),beat:new Blob([wavBytes(instrumental)],{type:'audio/wav'}),voice:new Blob([wavBytes(cache.vocals)],{type:'audio/wav'}),settings:s};
       for(const [id,blob]of [['remix',result.mix],['instrumental',result.beat],['vocals',result.voice]]){const url=URL.createObjectURL(blob);urls.push(url);$(id).src=url;}
       $('results').hidden=false;$('progress').value=1;$('run').textContent='Пересобрать ремикс';status('Готово. Прослушай ремикс. Для другого рисунка нажми «Другой вариант минуса».');
-    }catch(e){if(token===generation)status(e.name==='AbortError'?'Обработка остановлена.':e.message,true);}
+    }catch(e){if(token===generation)status(e.name==='AbortError'?'Обработка остановлена.':('Ошибка: '+stage+'. '+e.message),true);}
     finally{await context?.close();if(token===generation){lock(false);$('progress').hidden=true;}}
   }
   $('run').onclick=()=>run();$('variant').onclick=()=>run(true);

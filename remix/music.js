@@ -48,7 +48,7 @@ export function validateSettings(s){
 const frequency=note=>440*2**((note-69)/12);
 function tone(context,out,note,when,duration,level,type='sine'){
   if(when<0||duration<.01)return;
-  const o=context.createOscillator(),g=context.createGain();o.type=type;o.frequency.value=frequency(note);g.gain.setValueAtTime(.0001,when);g.gain.exponentialRampToValueAtTime(Math.max(.0001,level),when+.018);g.gain.setValueAtTime(Math.max(.0001,level*.6),when+Math.max(.02,duration*.65));g.gain.exponentialRampToValueAtTime(.0001,when+duration);o.connect(g).connect(out);o.start(when);o.stop(when+duration+.01);
+  const o=context.createOscillator(),g=context.createGain();o.type=type;o.frequency.value=frequency(note);g.gain.setValueAtTime(.0001,when);g.gain.exponentialRampToValueAtTime(Math.max(.0001,level),when+Math.min(.018,duration*.25));g.gain.exponentialRampToValueAtTime(Math.max(.0001,level*.6),when+duration*.65);g.gain.exponentialRampToValueAtTime(.0001,when+duration);o.connect(g).connect(out);o.start(when);o.stop(when+duration+.01);
 }
 export async function generateInstrumental(duration,settings){
   if(!Number.isFinite(duration)||duration<=0||duration>300.01)throw Error('Поддерживаются песни до 5 минут.');
