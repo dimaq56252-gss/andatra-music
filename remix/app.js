@@ -1,5 +1,5 @@
-import {estimateTempo,estimateKey,NOTE_NAMES,generateInstrumental,mixRemix,validateSettings} from './music.js?v=finite-2';
-import {separateChannels} from './separation.js?v=finite-2';
+import {estimateTempo,estimateKey,NOTE_NAMES,generateInstrumental,mixRemix,validateSettings} from './music.js?v=istft-3';
+import {separateChannels} from './separation.js?v=istft-3';
 import {wavBytes,measure} from '../audio-processing.js';
 import {downloadBlob} from '../studio-project.js';
 export function initRemixer(){

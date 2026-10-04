@@ -2,7 +2,7 @@ export function separateChannels(channels,{signal,onProgress=()=>{},backend='was
   return new Promise((resolve,reject)=>{
     if(signal?.aborted){reject(new DOMException('Остановлено','AbortError'));return;}
     const expected=channels[0].length;
-    const worker=new WorkerClass('/separate/engine.js?v=finite-2',{type:'module'});
+    const worker=new WorkerClass('/separate/engine.js?v=istft-3',{type:'module'});
     let done=false;
     function finish(error,result){if(done)return;done=true;signal?.removeEventListener('abort',abort);worker.terminate();error?reject(error):resolve(result);}
     function abort(){finish(new DOMException('Остановлено','AbortError'));}
