@@ -1,6 +1,7 @@
-import {attachSampleCredits} from './sample-engine.js?v=remix-6';
+import {STYLE_SOUNDS} from './styles.js?v=groove-17';
+import {attachSampleCredits} from './sample-engine.js?v=groove-17';
 import {analyzeVocal,alignVocalBeat,estimateVocalTempo,chooseRemixTempo} from './adaptation.js?v=timing-16';
-import {estimateTempo,estimateKey,NOTE_NAMES,generateInstrumental,mixRemix,validateSettings,melodySelection,cropAudio,remixChoices} from './music.js?v=audible-15';
+import {estimateTempo,estimateKey,NOTE_NAMES,generateInstrumental,mixRemix,validateSettings,melodySelection,cropAudio,remixChoices} from './music.js?v=groove-17';
 import {separateChannels} from './separation.js?v=remix-6';
 import {wavBytes,measure} from '../audio-processing.js';
 import {downloadBlob} from '../studio-project.js';
@@ -11,7 +12,7 @@ export function initRemixer(){
   const audioBlob=(buffer,sampled=false)=>new Blob([sampled?attachSampleCredits(wavBytes(buffer)):wavBytes(buffer)],{type:'audio/wav'});
   const players=['original','remix','vocals','instrumental','preview0'];
   function clearResults(){for(const id of players.slice(1)){$(id).pause();$(id).removeAttribute('src');$(id).load();}urls.forEach(u=>URL.revokeObjectURL(u));urls=[];result=null;variants=[];$('results').hidden=true;$('audition').hidden=true;$('build').disabled=true;}
-  function lock(value){busy=value;for(const id of ['file','scope','style','bpm','offset','key','harmony','autoTempo','adaptive','fit','voiceGain','beatGain','melody','instrument','polish','samples','structure','tapTempo','offsetEarlier','offsetLater','offsetEarlierBig','offsetLaterBig'])$(id).disabled=value;$('run').disabled=value||!file;$('variant').disabled=value||!cache;$('cancel').hidden=!value;$('build').disabled=value||!variants.length;document.querySelectorAll('[name=choice]').forEach(el=>el.disabled=value);}
+  function lock(value){busy=value;for(const id of ['file','scope','style','bpm','offset','key','harmony','autoTempo','adaptive','fit','voiceGain','beatGain','drumGain','bassGain','melody','instrument','polish','samples','structure','tapTempo','offsetEarlier','offsetLater','offsetEarlierBig','offsetLaterBig'])$(id).disabled=value;$('run').disabled=value||!file;$('variant').disabled=value||!cache;$('cancel').hidden=!value;$('build').disabled=value||!variants.length;document.querySelectorAll('[name=choice]').forEach(el=>el.disabled=value);}
   function resetCache(){generation++;abort?.abort();cache=undefined;edits=[];variation=0;settingsDirty=false;manualOffset=false;clearResults();$('analysis').textContent='Темп и тональность появятся после анализа. Вокал сохраняет исходную скорость.';$('run').textContent='Подготовить пробу';lock(false);status(file?'Нажми «Подготовить пробу».':'Загрузи отдельный вокал, чтобы начать.');}
   $('file').onchange=()=>{resetCache();file=$('file').files[0];if(originalURL)URL.revokeObjectURL(originalURL);$('original').pause();$('original').removeAttribute('src');$('original').load();originalURL=file?URL.createObjectURL(file):'';if(originalURL)$('original').src=originalURL;$('original').hidden=!file;$('filename').textContent=file?file.name:'Вокал не выбран';transferred=false;lock(false);status(file?'Вокал загружен. Выбери стиль и создай ремикс.':'Загрузи отдельный вокал, чтобы начать.');};
   $('scope').onchange=resetCache;
@@ -28,12 +29,12 @@ export function initRemixer(){
   $('adaptive').onchange=()=>{automaticTempo();changed();analysis();};
   $('fit').oninput=()=>{$('fitOut').textContent=$('fit').value+'%';automaticTempo();changed();analysis();};
   $('bpm').onchange=()=>{$('autoTempo').checked=false;const s=validateSettings({bpm:$('bpm').value});$('bpm').value=s.bpm;edits=[];changed();};
-  for(const [id,out]of [['voiceGain','voiceOut'],['beatGain','beatOut'],['melody','melodyOut']])$(id).oninput=()=>{$(out).textContent=$(id).value+'%';changed();};
-  function settings(){const key=$('key').value==='auto'?($('adaptive').checked&&Number($('fit').value)>0&&cache.profile.key?cache.profile.key:cache.key):{root:Number($('key').value.split(':')[0]),mode:$('key').value.split(':')[1]};return validateSettings({style:$('style').value,bpm:$('bpm').value,offset:Number($('offset').value)/1000,root:key.root,mode:key.mode,harmony:$('harmony').checked,adaptive:$('adaptive').checked,fit:Number($('fit').value)/100,voice:Number($('voiceGain').value)/100,beat:Number($('beatGain').value)/100,melody:Number($('melody').value)/100,instrument:$('instrument').value,polish:$('polish').checked,samples:$('samples').value==='sample',structure:$('structure').checked,variation,edits});}
+  for(const [id,out]of [['voiceGain','voiceOut'],['beatGain','beatOut'],['melody','melodyOut'],['drumGain','drumOut'],['bassGain','bassOut']])$(id).oninput=()=>{$(out).textContent=$(id).value+'%';changed();};
+  function settings(){const key=$('key').value==='auto'?($('adaptive').checked&&Number($('fit').value)>0&&cache.profile.key?cache.profile.key:cache.key):{root:Number($('key').value.split(':')[0]),mode:$('key').value.split(':')[1]};return validateSettings({partGains:{drum:Number($('drumGain').value)/100,bass:Number($('bassGain').value)/100},style:$('style').value,bpm:$('bpm').value,offset:Number($('offset').value)/1000,root:key.root,mode:key.mode,harmony:$('harmony').checked,adaptive:$('adaptive').checked,fit:Number($('fit').value)/100,voice:Number($('voiceGain').value)/100,beat:Number($('beatGain').value)/100,melody:Number($('melody').value)/100,instrument:$('instrument').value,polish:$('polish').checked,samples:$('samples').value==='sample',structure:$('structure').checked,variation,edits});}
   function singleChoice(s){
     const choices=remixChoices(s),choice=choices[[1,2,0][s.variation%3]];
-    const instruments=['piano','guitar','epiano','strings','organ','pad'];
-    return {...choice,name:'Вариант '+(s.variation+1),settings:{...choice.settings,variation:s.variation,instrument:s.instrument==='auto'?instruments[s.variation%instruments.length]:s.instrument}};
+    const instruments=STYLE_SOUNDS[s.style]||STYLE_SOUNDS.rap;
+    return {...choice,name:'Вариант '+(s.variation+1),settings:{...choice.settings,variation:s.variation,instrument:s.instrument==='auto'?instruments[s.variation%instruments.length]:s.instrument,swing:s.swing}};
   }
   function progress(data){
     if(data.type==='status'){status(data.text);$('progress').removeAttribute('value');}
@@ -94,4 +95,3 @@ export function initRemixer(){
   lock(false);
 }
 if(typeof document!=='undefined')initRemixer();
-
