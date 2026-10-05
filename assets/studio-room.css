@@ -1,0 +1,8 @@
+/* Shared recording room for ANDATRA studio tools. */
+body{isolation:isolate;background:#08090d}
+.studio-room-backdrop{position:fixed;inset:0;z-index:-1;pointer-events:none;background:linear-gradient(180deg,rgba(5,7,14,.24),rgba(5,7,14,.48)),url('/assets/studio-room-v1.webp') center top/cover no-repeat}
+header{background:rgba(8,9,16,.82);backdrop-filter:blur(8px);border-bottom-color:#61517b66}
+.panel{background:rgba(13,15,24,.89);border-color:#64567d70;box-shadow:0 12px 36px #0005}
+main>h1,main>.eyebrow,main>.lead,main>.muted,.top,footer{text-shadow:0 2px 18px #000}
+.card{background:rgba(13,15,24,.65)}
+@media(max-width:600px){.studio-room-backdrop{background-position:42% top}.panel{background:rgba(13,15,24,.94)}header{backdrop-filter:none}}
