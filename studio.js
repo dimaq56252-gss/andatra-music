@@ -32,6 +32,7 @@ function initStudio() {
   const tracks = []; let nextId = 1, ctx, mic, analyser, nodes = [], playing = false, recording = false;
   let busy = false, exporting = false, recorder, chunks = [], position = 0, origin = 0, startPosition = 0;
   let recordPosition = 0, recordLead = 0, recordCorrection = 0, recordingStarted = false, unsaved = false, masterNode;
+  const liveGains = new Map();
   const latencyPanel = document.createElement('label');
   latencyPanel.className = 'setting';
   latencyPanel.innerHTML = 'Поправка задержки, мс <input id="latencyAdjust" type="number" min="-1000" max="1000" step="10" value="0"><span id="latencyInfo"></span>';
@@ -65,13 +66,13 @@ function initStudio() {
     $('seek').disabled = locked;
     for (const id of ['beatFile','beatSelect','voiceFile','micSelect','micConnect','latencyAdjust','saveProject','loadProject']) $(id).disabled = locked || playing;
     $('exportMix').disabled = !tracks.some(t => !t.muted) || locked || playing;
-    document.querySelectorAll('[data-track-control]').forEach(el => { el.disabled = locked || playing; });
+    document.querySelectorAll('[data-track-control]').forEach(el => { el.disabled = locked || (playing && !el.matches('.offset,.gain')); });
     $('seek').max = Math.max(1, endTime(), position);
     $('duration').textContent = time(endTime());
   }
   function cleanNodes() {
     for (const node of nodes) { try { node.stop?.(); } catch {} try { node.disconnect(); } catch {} }
-    nodes = []; masterNode = undefined;
+    nodes = []; masterNode = undefined; liveGains.clear();
   }
   function bus(context, destination) {
     const master = context.createGain(); master.gain.value = Number($('master').value);
@@ -83,7 +84,7 @@ function initStudio() {
     const schedule = clipSchedule(track.buffer.duration, track.start + track.offset / 1000, pos);
     if (!schedule || track.muted || schedule.delay >= MAX_SECONDS - pos) return [];
     const source = context.createBufferSource(), gain = context.createGain();
-    source.buffer = track.buffer; gain.gain.value = track.gain; source.connect(gain); gain.connect(master);
+    source.buffer = track.buffer; gain.gain.value = track.gain; if(context===ctx)liveGains.set(track.id,gain); source.connect(gain); gain.connect(master);
     const parts = [source,gain];
     const wet = Number($('echo').value);
     if (track.kind === 'voice' && wet > 0) {
@@ -123,13 +124,16 @@ function initStudio() {
     const context = canvas.getContext('2d'), width = canvas.width = Math.max(300,Math.round(canvas.clientWidth * devicePixelRatio));
     const height = canvas.height = Math.round(84 * devicePixelRatio), samples = track.buffer.getChannelData(0);
     context.fillStyle = '#0c0e13'; context.fillRect(0,0,width,height); context.strokeStyle = track.kind === 'beat' ? '#d7ff47' : '#73c8ff';
-    context.beginPath(); const hop = Math.max(1,Math.floor(samples.length / width));
+    context.beginPath(); const duration=Math.max(1,endTime()),start=track.start+track.offset/1000;
     for (let x = 0; x < width; x += 2) {
-      let peak = 0; for (let i = x * hop; i < Math.min((x+2)*hop,samples.length); i+=Math.max(1,Math.floor(hop/32))) peak = Math.max(peak,Math.abs(samples[i]));
-      const size = Math.max(1,peak * height * 0.44); context.moveTo(x,height/2-size); context.lineTo(x,height/2+size);
+      const from=Math.floor((x/width*duration-start)*track.buffer.sampleRate),to=Math.ceil(((x+2)/width*duration-start)*track.buffer.sampleRate);
+      if(to<=0||from>=samples.length)continue;
+      let peak=0;for(let i=Math.max(0,from);i<Math.min(to,samples.length);i+=Math.max(1,Math.floor((to-from)/32)))peak=Math.max(peak,Math.abs(samples[i]));
+      const size=Math.max(1,peak*height*.44);context.moveTo(x,height/2-size);context.lineTo(x,height/2+size);
     }
     context.stroke();
   }
+  function trackHint(track){const start=track.start+track.offset/1000;return `${time(track.buffer.duration)} · начало ${start<0?'-':''}${time(Math.abs(start))}.${String(Math.round(Math.abs(start)*1000)%1000).padStart(3,'0')}`;}
   function render() {
     $('tracks').replaceChildren();
     if (!tracks.length) { const empty = document.createElement('div'); empty.className='empty'; empty.innerHTML='<strong>Здесь будут твои дорожки</strong>Минус, основной голос и сколько угодно бэков.'; $('tracks').append(empty); }
@@ -140,10 +144,20 @@ function initStudio() {
       const mute = row.querySelector('.mute'); mute.textContent = track.muted ? 'Включить' : 'Выключить'; mute.setAttribute('aria-pressed',String(track.muted));
       mute.onclick = () => { track.muted=!track.muted; unsaved=true; render(); };
       const slider = row.querySelector('.gain'), out = row.querySelector('output'); slider.value=track.gain; out.textContent=Math.round(track.gain*100)+'%';
-      slider.oninput = () => { track.gain=Number(slider.value); unsaved=true; out.textContent=Math.round(track.gain*100)+'%'; };
+      slider.oninput = () => { track.gain=Number(slider.value); unsaved=true; out.textContent=Math.round(track.gain*100)+'%'; const gain=liveGains.get(track.id);if(gain)gain.gain.setTargetAtTime(track.gain,ctx.currentTime,.01); };
       const offset = row.querySelector('.offset'); offset.value=track.offset;
-      offset.onchange=()=>{ track.offset=Math.max(-10000,Math.min(10000,Number(offset.value)||0)); offset.value=track.offset; unsaved=true; controls(); };
-      row.querySelector('.hint').textContent = `${time(track.buffer.duration)} · начало ${time(track.start)}`;
+      const applyOffset=commit=>{
+        if(!commit&&(offset.value===''||offset.validity.badInput))return;
+        const value=Math.max(-10000,Math.min(10000,Number(offset.value)||0));
+        if(commit)offset.value=value;if(value===track.offset)return;
+        const pos=cursor();track.offset=value;unsaved=true;
+        if(playing&&!recording)startAt(pos,ctx.currentTime+.005);else controls();
+        document.querySelectorAll('.track canvas').forEach((canvas,i)=>waveform(canvas,tracks[i]));
+        row.querySelector('.hint').textContent=trackHint(track);
+        status(`Сдвиг применён: ${value>0?'+':''}${value} мс. ${value>0?'Дорожка звучит позже.':value<0?'Дорожка звучит раньше.':'Исходное положение.'}`);
+      };
+      offset.oninput=()=>applyOffset(false);offset.onchange=()=>applyOffset(true);
+      row.querySelector('.hint').textContent = trackHint(track);
       row.querySelector('.remove').onclick=()=>{ if(confirm('Удалить эту дорожку? Сначала скачай дубль, если он нужен.')) { tracks.splice(tracks.indexOf(track),1); unsaved=true; render(); } };
       const save=row.querySelector('.save'); if(save) save.onclick=()=>download(track.buffer,track.name);
       $('tracks').append(row); waveform(row.querySelector('canvas'),track);
@@ -305,3 +319,4 @@ function initStudio() {
     })();
   }
 }
+

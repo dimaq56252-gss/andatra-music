@@ -19,7 +19,7 @@
 <div class="transport">
 <div class="toolbar"><output class="clock" id="clock">00:00.0</output><button id="play" class="primary">▶ Слушать</button><button id="stop" disabled>■ Стоп</button><button id="record" class="record">● Записать голос</button></div>
 <div class="loaders"><label class="file">Загрузить минус<input id="beatFile" type="file" accept="audio/*"></label><select id="beatSelect" aria-label="Минус СЕРИИ АНДАТРЫ"><option value="">Или выбрать наш минус</option></select><label class="file">Добавить голос / бэк<input id="voiceFile" type="file" accept="audio/*" multiple></label></div>
-<div class="loaders"><button id="saveProject">Сохранить проект · ZIP</button><label class="file">Загрузить проект<input id="loadProject" type="file" accept=".zip,application/zip"></label></div><p class="hint">Надень наушники. Запись начнётся с выбранного времени, каждый дубль появится отдельной дорожкой.</p>
+<div class="loaders"><button id="saveProject">Сохранить проект · ZIP</button><label class="file">Загрузить проект<input id="loadProject" type="file" accept=".zip,application/zip"></label></div><p class="hint">Сдвиг применяется сразу: плюс — позже, минус — раньше. Волны показаны на общей шкале времени. Надень наушники. Запись начнётся с выбранного времени, каждый дубль появится отдельной дорожкой.</p>
 <div id="status" role="status" aria-live="polite">Выбери минус или сразу запиши голос.</div>
 <input id="seek" type="range" min="0" max="1" step="0.01" value="0" aria-label="Позиция воспроизведения"><div class="time-labels"><span>Начало</span><span id="duration">00:00</span></div>
 </div>
@@ -42,5 +42,6 @@
 </section>
 <section class="panel" style="margin-top:18px"><h2>Инструменты студии</h2><div class="actions"><a class="file" href="/bpm/">BPM Detector</a><a class="file" href="/drumpad/">Drum Pad / Beat Maker</a><a class="file" href="/convert/">Конвертер аудио</a><a class="file" href="/separate/">Отделить вокал</a><a class="file" href="/remix/">Создать ремикс</a></div></section><p class="footer">Работает в браузере. При отказе в доступе к микрофону разреши его в настройках сайта. <span class="mobile-note">На телефоне держи эту вкладку открытой во время записи.</span></p>
 </main>
-<script type="module" src="/studio.js?v=remix-1"></script>
+<script type="module" src="/studio.js?v=live-shift-2"></script>
 </body></html>
+
