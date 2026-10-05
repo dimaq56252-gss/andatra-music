@@ -1,0 +1,9 @@
+ANDATRA remix samples
+FluidR3_GM SoundFont recordings, subset and MP3 conversion from MIDI.js Soundfonts.
+Fluid SoundFont creators: Frank Wen, Josh Green, S. Christian Collins and contributors.
+Source melodic samples: https://github.com/gleitz/midi-js-soundfonts/tree/gh-pages/FluidR3_GM
+Source drum samples: https://github.com/dave4mpls/midi-js-soundfonts-with-drums/tree/gh-pages/FluidR3_GM/drums-mp3
+License for FluidR3_GM sample recordings: Creative Commons Attribution 3.0 US
+https://creativecommons.org/licenses/by/3.0/us/
+Changes: selected notes, bundled in JSON and pitch-shifted/enveloped during playback.
+These credits must accompany redistributions of the sample recordings.

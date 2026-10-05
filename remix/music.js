@@ -1,5 +1,7 @@
-import {composeMelody,renderLead} from './composer.js?v=remix-5';
-import {activityAt,barActivity,vocalAccentSteps,phraseEndsHere,duckInstrumental} from './adaptation.js?v=remix-5';
+import {loadSamples,sampleNote,sampleDrum} from './sample-engine.js?v=remix-6';
+import {structurePlan,arrangeDynamics} from './structure.js?v=remix-6';
+import {composeMelody,renderLead} from './composer.js?v=remix-6';
+import {activityAt,barActivity,vocalAccentSteps,phraseEndsHere,duckInstrumental} from './adaptation.js?v=remix-6';
 import {trigger} from '../drumpad/audio.js?v=3';
 import {limitPeaks,measure} from '../audio-processing.js';
 export const STYLES={rap:{name:'Рэп',kit:'classic',kick:[0,6,8,14],snare:[4,12],clap:[],hat:[0,2,4,6,8,10,12,14],open:[15]},trap:{name:'Трэп',kit:'trap',kick:[0,7,10],snare:[8],clap:[8],hat:[0,2,4,6,7,8,10,12,14,15],open:[11]},drill:{name:'Дрилл',kit:'trap',kick:[0,5,10,14],snare:[8],clap:[8],hat:[0,2,4,6,7,10,12,14],open:[11]},lofi:{name:'Lo-fi',kit:'classic',kick:[0,6,9],snare:[4,12],clap:[],hat:[0,3,4,7,8,11,12,15],open:[]},synth:{name:'Synthwave',kit:'electro',kick:[0,4,8,12],snare:[4,12],clap:[],hat:[0,2,4,6,8,10,12,14],open:[10]},house:{name:'Хаус',kit:'electro',kick:[0,4,8,12],snare:[],clap:[4,12],hat:[2,6,10,14],open:[2,10]}};
@@ -45,7 +47,7 @@ export function estimateKey(buffer){
 }
 export function validateSettings(s){
   const num=(value,min,max,fallback)=>Number.isFinite(Number(value))?Math.max(min,Math.min(max,Number(value))):fallback;
-  return {style:STYLES[s.style]?s.style:'rap',bpm:num(s.bpm,40,240,100),offset:num(s.offset,-2,4,0),root:Math.round(num(s.root,0,11,9)),mode:s.mode==='major'?'major':'minor',variation:Math.round(num(s.variation,0,9999,0)),harmony:s.harmony!==false,adaptive:s.adaptive!==false,fit:num(s.fit,0,1,.85),melody:num(s.melody,0,1,.55),instrument:['auto','piano','epiano','bell','pluck','strings','pad','lead','guitar','organ','chip'].includes(s.instrument)?s.instrument:'auto',polish:s.polish!==false,voice:num(s.voice,0,1.5,1),beat:num(s.beat,0,1.5,.7)};
+  return {samples:s.samples!==false,structure:s.structure!==false,character:['calm','dense','experimental'].includes(s.character)?s.character:'dense',style:STYLES[s.style]?s.style:'rap',bpm:num(s.bpm,40,240,100),offset:num(s.offset,-2,4,0),root:Math.round(num(s.root,0,11,9)),mode:s.mode==='major'?'major':'minor',variation:Math.round(num(s.variation,0,9999,0)),harmony:s.harmony!==false,adaptive:s.adaptive!==false,fit:num(s.fit,0,1,.85),melody:num(s.melody,0,1,.55),instrument:['auto','piano','epiano','bell','pluck','strings','pad','lead','guitar','organ','chip'].includes(s.instrument)?s.instrument:'auto',polish:s.polish!==false,voice:num(s.voice,0,1.5,1),beat:num(s.beat,0,1.5,.7)};
 }
 const frequency=note=>440*2**((note-69)/12);
 function tone(context,out,note,when,duration,level,type='sine'){
@@ -79,19 +81,30 @@ export function createArrangement(duration,settings,profile=null){
       }
     }
   }
-  return events;
+  return arrangeDynamics(events,structurePlan(duration,s,v),s);
 }
-export async function generateInstrumental(duration,settings,profile=null){
+export async function generateInstrumental(duration,settings,profile=null,segment=null){
   if(!Number.isFinite(duration)||duration<=0||duration>300.01)throw Error('Поддерживаются песни до 5 минут.');
-  const s=validateSettings(settings),c=new OfflineAudioContext(2,Math.ceil(duration*44100),44100),out=c.createGain();out.gain.value=.65;out.connect(c.destination);
-  for(const event of createArrangement(duration,s,profile)){
-    if(event.kind==='drum')trigger(c,out,event.index,event.when,event.level,event.kit);
-    else if(event.kind==='lead')renderLead(c,out,event);
-    else tone(c,out,event.note,event.when,event.duration,event.level,event.type);
+  const s=validateSettings(settings),start=Math.max(0,segment?.start||0),length=Math.min(duration-start,segment?.length||duration);if(length<=0)throw Error('Пустой фрагмент.');
+  const c=new OfflineAudioContext(2,Math.ceil(length*44100),44100),out=c.createGain();out.gain.value=.65;out.connect(c.destination);if(s.samples)await loadSamples(c);
+  for(const original of createArrangement(duration,s,profile)){
+    if(original.when>=start+length||original.when+(original.duration||.4)<=start)continue;
+    const event={...original,when:Math.max(0,original.when-start),duration:original.duration?Math.min(original.duration-Math.max(0,start-original.when),start+length-Math.max(start,original.when)):undefined};
+    if(event.kind==='drum'){if(!(s.samples&&sampleDrum(c,out,event.index,event.when,event.level)))trigger(c,out,event.index,event.when,event.level,event.kit);}
+    else if(event.kind==='lead'){if(!(s.samples&&sampleNote(c,out,event.instrument,event.note,event.when,event.duration,event.level*.8)))renderLead(c,out,event);}
+    else if(!(s.samples&&sampleNote(c,out,event.role==='bass'?'bass':s.style==='lofi'?'epiano':'piano',event.note,event.when,event.duration,event.level*1.8)))tone(c,out,event.note,event.when,event.duration,event.level,event.type);
   }
   const buffer=await c.startRendering(),stats=measure(buffer);if(stats.peak>0)limitPeaks(buffer,Math.min(2,.18/Math.max(.001,stats.rms)),.75);
-  if(s.adaptive)duckInstrumental(buffer,profile,s.fit);return buffer;
+  if(s.adaptive){let duckProfile=profile;if(start&&profile){const shift=Math.floor(start*profile.rate);duckProfile={...profile,active:profile.active.subarray(shift),duration:length};}duckInstrumental(buffer,duckProfile,s.fit);}return buffer;
 }
+export function cropAudio(context,buffer,start,length){const first=Math.max(0,Math.round(start*buffer.sampleRate)),n=Math.min(buffer.length-first,Math.round(length*buffer.sampleRate)),out=context.createBuffer(buffer.numberOfChannels,n,buffer.sampleRate);for(let i=0;i<out.numberOfChannels;i++)out.copyToChannel(buffer.getChannelData(i).subarray(first,first+n),i);return out;}
+export function remixChoices(settings){const s=validateSettings(settings);return [
+ {id:'calm',name:'Спокойный',settings:{...s,character:'calm',melody:s.melody*.75,beat:s.beat*.85}},
+ {id:'dense',name:'Плотный',settings:{...s,character:'dense',variation:s.variation+1}},
+ {id:'experimental',name:'Экспериментальный',settings:{...s,character:'experimental',variation:s.variation+5,instrument:s.instrument==='auto'?'guitar':s.instrument}}
+];}
+export function describeStructure(duration,settings,profile){const plan=structurePlan(duration,validateSettings(settings),profile),labels={intro:'Вступление',verse:'Куплет',chorus:'Припев / усиление',break:'Пауза / переход',outro:'Концовка'},segments=[];for(const part of plan){const last=segments.at(-1);if(last?.type===part.type)last.end=part.end;else segments.push({...part,label:labels[part.type]});}return segments;}
+
 export async function mixRemix(vocals,instrumental,settings){
   if(Math.abs(vocals.duration-instrumental.duration)>.02)throw Error('Длины голоса и минуса не совпадают.');
   const s=validateSettings(settings),c=new OfflineAudioContext(2,Math.ceil(vocals.duration*44100),44100),voiceStats=measure(vocals),beatStats=measure(instrumental);

@@ -1,5 +1,5 @@
 import {catalog,note} from '../drumpad/melodies.js?v=3';
-import {activityAt,barActivity,phraseEndsHere} from './adaptation.js?v=remix-5';
+import {activityAt,barActivity,phraseEndsHere} from './adaptation.js?v=remix-6';
 const styleMap={rap:['boom','funk'],trap:['trap'],house:['house'],drill:['drill'],lofi:['lofi','ambient'],synth:['synth']};
 const clamp=(v,a,b)=>Math.max(a,Math.min(b,v));
 const pc=(n)=>((n%12)+12)%12;
@@ -20,10 +20,10 @@ export function rankMelodies(profile,s,duration){const group=styleMap[s.style]||
 }
 export function composeMelody(profile,s,duration){const ranked=rankMelodies(profile,s,duration),choice=ranked[s.variation%ranked.length],p=choice.preset,{plan,scale,bar}=harmonicPlan(profile,s,duration,p.progression),step=bar/16,events=[];
  const mids=profile?.pitches.map(p=>p.midi).filter(Number.isFinite).sort((a,b)=>a-b)||[],voiceMedian=mids[Math.floor(mids.length/2)]||60,octave=voiceMedian>66?4:5;
- for(const [b,degree]of [...plan].sort((a,b)=>a[0]-b[0])){const start=s.offset+b*bar,density=barActivity(profile,start,bar);for(let i=0;i<8;i++){const when=start+p.rhythm[i]*step;if(when<0||when>=duration)continue;const activity=activityAt(profile,when),active=s.adaptive?s.fit*activity:0,singing=profile?.key&&vocalNoteAt(profile,when);if(singing&&active>.45&&i%4!==0)continue;if(active>.6&&i%2!==0)continue;let d=p.motif[(i+b*(p.variant%3)+80)%8]+degree;
+ for(const [b,degree]of [...plan].sort((a,b)=>a[0]-b[0])){const start=s.offset+b*bar,density=barActivity(profile,start,bar);for(let i=0;i<8;i++){const rhythm=s.character==='experimental'?(p.rhythm[i]+(i%2?1:0))%16:p.rhythm[i],when=start+rhythm*step;if(when<0||when>=duration)continue;const activity=activityAt(profile,when),active=s.adaptive?s.fit*activity:0,singing=profile?.key&&vocalNoteAt(profile,when);if(singing&&active>.45&&i%4!==0)continue;if(active>.6&&i%2!==0)continue;const phase=((b%4)+4)%4;let d=p.motif[(i+(phase===2?2:0))%8]+degree;if(phase===3&&i>=6)d=degree+(i===6?2:0);
  // At simultaneous sung notes, prefer a nearby consonant note within the chosen scale.
  if(singing&&active>.3){const candidates=[d-1,d,d+1].map(x=>({degree:x,distance:pc(midi(x,s.root,scale,octave)-singing.note)}));const consonant=candidates.find(x=>[0,3,4,7,8,9].includes(x.distance));if(consonant)d=consonant.degree;}
  const phraseFill=s.adaptive&&phraseEndsHere(profile,when-step*2,when)&&activity<.3;const next=p.rhythm[i+1]??16,length=Math.min((next-p.rhythm[i])*.7*step,duration-when);if(length<.03)continue;
- events.push({kind:'lead',note:midi(d,s.root,scale,octave),when,duration:length,level:s.melody*.38*(1-.8*active)*(phraseFill?1.12:1)*(density>.8?.8:1),instrument:s.instrument==='auto'?p.instrument:s.instrument});
+ events.push({kind:'lead',note:midi(d,s.root,scale,octave),when,duration:length,level:s.melody*.38*(1-.8*active)*(phraseFill?1.12:1)*(density>.8?.8:1),instrument:s.instrument==='auto'?(s.character==='calm'?'epiano':p.instrument):s.instrument});
  }}return {events,plan,preset:p,score:choice.score,ranked:ranked.slice(0,8).map(x=>({name:x.preset.genre+' · '+x.preset.name,score:x.score})),scale};}
 export function renderLead(c,out,event){const pan=c.createStereoPanner();pan.pan.value=Math.sin(event.when*.3)*.22;pan.connect(out);const item=note(c,pan,event.note,event.when,event.duration,.8,event.instrument,event.level),last=item.nodes.filter(n=>typeof n.start==='function').at(-1),cleanup=last.onended;last.onended=()=>{cleanup();pan.disconnect();};return item;}
