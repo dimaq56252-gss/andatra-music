@@ -1,7 +1,8 @@
-import {activityAt,barActivity,vocalAccentSteps,phraseEndsHere,fitChordDegree,duckInstrumental} from './adaptation.js?v=voice-fit-4';
-import {trigger} from '../drumpad/audio.js';
+import {composeMelody,renderLead} from './composer.js?v=remix-5';
+import {activityAt,barActivity,vocalAccentSteps,phraseEndsHere,duckInstrumental} from './adaptation.js?v=remix-5';
+import {trigger} from '../drumpad/audio.js?v=3';
 import {limitPeaks,measure} from '../audio-processing.js';
-export const STYLES={rap:{name:'Рэп',kit:'classic',kick:[0,6,8,14],snare:[4,12],clap:[],hat:[0,2,4,6,8,10,12,14],open:[15]},trap:{name:'Трэп',kit:'trap',kick:[0,7,10],snare:[8],clap:[8],hat:[0,2,4,6,7,8,10,12,14,15],open:[11]},house:{name:'Хаус',kit:'electro',kick:[0,4,8,12],snare:[],clap:[4,12],hat:[2,6,10,14],open:[2,10]}};
+export const STYLES={rap:{name:'Рэп',kit:'classic',kick:[0,6,8,14],snare:[4,12],clap:[],hat:[0,2,4,6,8,10,12,14],open:[15]},trap:{name:'Трэп',kit:'trap',kick:[0,7,10],snare:[8],clap:[8],hat:[0,2,4,6,7,8,10,12,14,15],open:[11]},drill:{name:'Дрилл',kit:'trap',kick:[0,5,10,14],snare:[8],clap:[8],hat:[0,2,4,6,7,10,12,14],open:[11]},lofi:{name:'Lo-fi',kit:'classic',kick:[0,6,9],snare:[4,12],clap:[],hat:[0,3,4,7,8,11,12,15],open:[]},synth:{name:'Synthwave',kit:'electro',kick:[0,4,8,12],snare:[4,12],clap:[],hat:[0,2,4,6,8,10,12,14],open:[10]},house:{name:'Хаус',kit:'electro',kick:[0,4,8,12],snare:[],clap:[4,12],hat:[2,6,10,14],open:[2,10]}};
 export const NOTE_NAMES=['C','C♯','D','D♯','E','F','F♯','G','G♯','A','A♯','B'];
 export function estimateTempo(buffer){
   const hop=Math.max(1,Math.floor(buffer.sampleRate/200)),rate=buffer.sampleRate/hop,n=Math.min(buffer.length,buffer.sampleRate*180),arrays=Array.from({length:Math.min(2,buffer.numberOfChannels)},(_,c)=>buffer.getChannelData(c));
@@ -44,7 +45,7 @@ export function estimateKey(buffer){
 }
 export function validateSettings(s){
   const num=(value,min,max,fallback)=>Number.isFinite(Number(value))?Math.max(min,Math.min(max,Number(value))):fallback;
-  return {style:STYLES[s.style]?s.style:'rap',bpm:num(s.bpm,40,240,100),offset:num(s.offset,-2,4,0),root:Math.round(num(s.root,0,11,9)),mode:s.mode==='major'?'major':'minor',variation:Math.round(num(s.variation,0,9999,0)),harmony:s.harmony!==false,adaptive:s.adaptive!==false,fit:num(s.fit,0,1,.7),voice:num(s.voice,0,1.5,1),beat:num(s.beat,0,1.5,.7)};
+  return {style:STYLES[s.style]?s.style:'rap',bpm:num(s.bpm,40,240,100),offset:num(s.offset,-2,4,0),root:Math.round(num(s.root,0,11,9)),mode:s.mode==='major'?'major':'minor',variation:Math.round(num(s.variation,0,9999,0)),harmony:s.harmony!==false,adaptive:s.adaptive!==false,fit:num(s.fit,0,1,.85),melody:num(s.melody,0,1,.55),instrument:['auto','piano','epiano','bell','pluck','strings','pad','lead','guitar','organ','chip'].includes(s.instrument)?s.instrument:'auto',polish:s.polish!==false,voice:num(s.voice,0,1.5,1),beat:num(s.beat,0,1.5,.7)};
 }
 const frequency=note=>440*2**((note-69)/12);
 function tone(context,out,note,when,duration,level,type='sine'){
@@ -53,9 +54,10 @@ function tone(context,out,note,when,duration,level,type='sine'){
 }
 export function createArrangement(duration,settings,profile=null){
   const s=validateSettings(settings),fit=s.adaptive?s.fit:0,v=fit?profile:null,events=[];
+  const composition=composeMelody(v,s,duration);if(s.melody>0)events.push(...composition.events);
   const p=STYLES[s.style],step=60/s.bpm/4,bar=step*16,scale=s.mode==='minor'?[0,2,3,5,7,8,10]:[0,2,4,5,7,9,11],progression=s.variation%2?[0,3,5,4]:[0,5,3,6];
   for(let b=Math.floor(-s.offset/bar)-1;b*bar+s.offset<duration;b++){
-    const start=s.offset+b*bar,base=progression[((b%4)+4)%4],degree=fitChordDegree(v,start,bar,s.root,scale,base),root=36+s.root+scale[degree];
+    const start=s.offset+b*bar,base=progression[((b%4)+4)%4],degree=composition.plan.get(b)??base,root=36+s.root+scale[degree];
     const density=barActivity(v,start,bar),accents=vocalAccentSteps(v,start,step);
     for(let i=0;i<16;i++){
       const when=start+i*step;if(when<0||when>=duration)continue;
@@ -73,7 +75,7 @@ export function createArrangement(duration,settings,profile=null){
       if(s.harmony&&(s.style==='house'?[2,6,10,14]:[0,8]).includes(i)){
         if(v&&density>.6&&(s.style==='house'?i===6||i===14:i===8))continue;
         const length=Math.min(step*(s.style==='house'?1.5:6),duration-when);
-        for(let note=0;note<3;note++){const d=degree+note*2,midi=60+s.root+scale[d%7]+Math.floor(d/7)*12;events.push({kind:'note',note:midi,when,duration:length,level:.045*(1-.5*activity*fit),type:s.style==='house'?'triangle':'sine',role:'chord'});}
+        for(let note=0;note<3;note++){const d=degree+note*2,midi=60+s.root+scale[d%7]+Math.floor(d/7)*12;events.push({kind:'note',note:midi,when,duration:length,level:.045*(1-.5*activity*fit),type:s.style==='house'||s.style==='synth'?'triangle':'sine',role:'chord'});}
       }
     }
   }
@@ -84,6 +86,7 @@ export async function generateInstrumental(duration,settings,profile=null){
   const s=validateSettings(settings),c=new OfflineAudioContext(2,Math.ceil(duration*44100),44100),out=c.createGain();out.gain.value=.65;out.connect(c.destination);
   for(const event of createArrangement(duration,s,profile)){
     if(event.kind==='drum')trigger(c,out,event.index,event.when,event.level,event.kit);
+    else if(event.kind==='lead')renderLead(c,out,event);
     else tone(c,out,event.note,event.when,event.duration,event.level,event.type);
   }
   const buffer=await c.startRendering(),stats=measure(buffer);if(stats.peak>0)limitPeaks(buffer,Math.min(2,.18/Math.max(.001,stats.rms)),.75);
@@ -91,8 +94,11 @@ export async function generateInstrumental(duration,settings,profile=null){
 }
 export async function mixRemix(vocals,instrumental,settings){
   if(Math.abs(vocals.duration-instrumental.duration)>.02)throw Error('Длины голоса и минуса не совпадают.');
-  const s=validateSettings(settings),c=new OfflineAudioContext(2,Math.ceil(vocals.duration*44100),44100);
-  for(const [buffer,volume]of [[vocals,s.voice],[instrumental,s.beat]]){const source=c.createBufferSource(),gain=c.createGain();source.buffer=buffer;gain.gain.value=volume;source.connect(gain).connect(c.destination);source.start();}
-  const buffer=await c.startRendering();limitPeaks(buffer,1,.89125094);return buffer;
+  const s=validateSettings(settings),c=new OfflineAudioContext(2,Math.ceil(vocals.duration*44100),44100),voiceStats=measure(vocals),beatStats=measure(instrumental);
+  // Active-window loudness avoids boosting a voice because of long phrase pauses.
+  let sum=0,count=0;const a=vocals.getChannelData(0),hop=Math.round(vocals.sampleRate*.05);for(let start=0;start<a.length;start+=hop){let energy=0;const end=Math.min(a.length,start+hop);for(let i=start;i<end;i++)energy+=a[i]*a[i];if(energy/(end-start)>Math.max(1e-7,voiceStats.rms**2*.15)){sum+=energy;count+=end-start;}}
+  const activeRMS=Math.sqrt(sum/Math.max(1,count)),voiceLevel=s.polish?Math.max(.35,Math.min(3,.14/Math.max(.001,activeRMS))):1,beatLevel=s.polish?Math.max(.4,Math.min(2,.10/Math.max(.001,beatStats.rms))):1;
+  for(const [buffer,volume,kind]of [[vocals,s.voice*voiceLevel,'voice'],[instrumental,s.beat*beatLevel,'beat']]){const source=c.createBufferSource(),gain=c.createGain();source.buffer=buffer;gain.gain.value=volume;source.connect(gain);if(s.polish){const hp=c.createBiquadFilter(),mud=c.createBiquadFilter(),presence=c.createBiquadFilter();hp.type='highpass';hp.frequency.value=kind==='voice'?65:28;mud.type='peaking';mud.frequency.value=kind==='voice'?300:2600;mud.Q.value=kind==='voice'?.8:.7;mud.gain.value=kind==='voice'?-1.8:-2.5;presence.type='highshelf';presence.frequency.value=5500;presence.gain.value=kind==='voice'?1.2:-.7;gain.connect(hp).connect(mud).connect(presence);if(kind==='voice'){const comp=c.createDynamicsCompressor();comp.threshold.value=-22;comp.knee.value=12;comp.ratio.value=2.5;comp.attack.value=.012;comp.release.value=.13;presence.connect(comp).connect(c.destination);}else presence.connect(c.destination);}else gain.connect(c.destination);source.start();}
+  const buffer=await c.startRendering(),stats=measure(buffer);limitPeaks(buffer,s.polish&&stats.rms>0?Math.max(.7,Math.min(1.8,.14/stats.rms)):1,.89125094);return buffer;
 }
-
+export function melodySelection(duration,settings,profile=null){const s=validateSettings(settings);return composeMelody(s.adaptive&&s.fit>0?profile:null,s,duration);}

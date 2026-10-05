@@ -22,20 +22,18 @@ export function analyzeVocal(buffer){
 }
 
 function findPitches(buffer,rms,threshold,hop){
-  const down=Math.max(1,Math.round(buffer.sampleRate/8000)),sr=buffer.sampleRate/down,size=512;
+  const down=Math.max(1,Math.round(buffer.sampleRate/8000)),sr=buffer.sampleRate/down,size=768;
   const arrays=Array.from({length:Math.min(2,buffer.numberOfChannels)},(_,c)=>buffer.getChannelData(c)),pitches=[];
-  const count=Math.min(240,Math.max(1,Math.floor(buffer.duration/.2))),window=new Float64Array(size);
+  const count=Math.min(1500,Math.max(1,Math.floor(buffer.duration/.12))),window=new Float64Array(size),lo=Math.ceil(sr/850),hi=Math.floor(sr/65),difference=new Float64Array(hi+1),normalized=new Float64Array(hi+1);
   for(let part=0;part<count;part++){
     const time=(part+.5)*buffer.duration/count,start=Math.round(time*buffer.sampleRate)-Math.floor(size*down/2);
-    if(start<0||start+(size-1)*down>=buffer.length||rms[Math.floor(time*buffer.sampleRate/hop)]<threshold*1.5)continue;
+    if(start<0||start+(size-1)*down>=buffer.length||rms[Math.floor(time*buffer.sampleRate/hop)]<threshold*1.4)continue;
     let mean=0;for(let i=0;i<size;i++){let v=0;for(const a of arrays)v+=a[start+i*down]/arrays.length;window[i]=v;mean+=v;}mean/=size;for(let i=0;i<size;i++)window[i]-=mean;
-    const lo=Math.ceil(sr/750),hi=Math.floor(sr/80),scores=new Float64Array(hi+1);let best=0,bestLag=0;
-    for(let lag=lo;lag<=hi;lag++){let sum=0,a=0,b=0;for(let i=0;i<size-lag;i++){sum+=window[i]*window[i+lag];a+=window[i]*window[i];b+=window[i+lag]*window[i+lag];}scores[lag]=sum/Math.sqrt(a*b+1e-15);if(scores[lag]>best){best=scores[lag];bestLag=lag;}}
-    if(best<.78)continue;
-    for(let lag=lo+1;lag<hi;lag++)if(scores[lag]>=best*.94&&scores[lag]>scores[lag-1]&&scores[lag]>=scores[lag+1]){bestLag=lag;break;}
-    const left=scores[bestLag-1]||best,right=scores[bestLag+1]||best,denom=left-2*scores[bestLag]+right;
-    const precise=bestLag+(Math.abs(denom)>1e-6?Math.max(-.5,Math.min(.5,.5*(left-right)/denom)):0);
-    const midi=69+12*Math.log2((sr/precise)/440);pitches.push({time,note:((Math.round(midi)%12)+12)%12,weight:best});
+    let cumulative=0;normalized[0]=1;for(let lag=1;lag<=hi;lag++){let sum=0;for(let i=0;i<size-hi;i++){const delta=window[i]-window[i+lag];sum+=delta*delta;}difference[lag]=sum;cumulative+=sum;normalized[lag]=cumulative>1e-15?sum*lag/cumulative:1;}
+    let bestLag=0;for(let lag=lo;lag<hi-1;lag++)if(normalized[lag]<.16&&normalized[lag]<=normalized[lag-1]&&normalized[lag]<normalized[lag+1]){bestLag=lag;break;}
+    if(!bestLag)continue;const best=1-normalized[bestLag],left=normalized[bestLag-1],right=normalized[bestLag+1],denom=left-2*normalized[bestLag]+right;
+    const precise=bestLag+(Math.abs(denom)>1e-9?Math.max(-.5,Math.min(.5,.5*(left-right)/denom)):0),midi=69+12*Math.log2((sr/precise)/440),tuning=Math.abs(midi-Math.round(midi));
+    pitches.push({time,midi,note:((Math.round(midi)%12)+12)%12,weight:best*(1-tuning*.6),confidence:best});
   }
   return pitches;
 }
@@ -51,7 +49,7 @@ function pitchKey(pitches){
     for(let i=0;i<12;i++){const x=chroma[(root+i)%12]-mean,y=p[i]-pm;sum+=x*y;a+=x*x;b+=y*y;}
     const score=sum/Math.sqrt(a*b+1e-9);candidates.push({root,mode,score,label:NOTE_NAMES[root]+(mode==='minor'?' minor':' major')});
   }
-  candidates.sort((a,b)=>b.score-a.score);const key=candidates[0];return key.score>.5&&key.score-candidates[1].score>.035?key:null;
+  candidates.sort((a,b)=>b.score-a.score);const key=candidates[0];return key.score>.5&&key.score-candidates[1].score>.025?{...key,confidence:Math.min(1,Math.max(0,(key.score-.4)*1.5+(key.score-candidates[1].score))),alternatives:candidates.slice(1,3)}:null;
 }
 
 export function activityAt(profile,time){if(!profile||time<0||time>=profile.duration)return 0;const i=Math.floor(time*profile.rate);return profile.active[Math.min(i,profile.active.length-1)]||0;}
@@ -88,4 +86,9 @@ export function duckInstrumental(buffer,profile,strength){
     const gain=10**(-6*amount*activity/20);for(const a of arrays)a[i]*=gain;
   }
   return buffer;
+}
+
+export function estimateVocalTempo(profile,fallback={bpm:100,confidence:0,offset:0}){
+ const accents=profile.accents.filter(a=>a.weight>.12);if(accents.length<12||profile.duration<6)return {...fallback,source:'uncertain'};
+ const scores=[];for(let bpm=65;bpm<=175;bpm++){const beat=60/bpm,sub=beat/2;let score=0,weight=0;for(let i=0;i<accents.length;i++)for(let j=i+1;j<Math.min(accents.length,i+9);j++){const distance=accents[j].time-accents[i].time;if(distance<.16||distance>4)continue;const ticks=distance/sub,error=Math.abs(ticks-Math.round(ticks)),w=accents[i].weight*accents[j].weight/(1+distance);score+=w*Math.exp(-error*error/.012);weight+=w;}scores.push({bpm,score:score/Math.max(.0001,weight)});}scores.sort((a,b)=>b.score-a.score);const best=scores[0],confidence=Math.max(0,Math.min(.85,(best.score-.3)*1.8));if(confidence<.25)return {...fallback,source:'uncertain'};return {bpm:best.bpm,confidence,offset:alignVocalBeat(profile,best.bpm,0,true),source:'vocal'};
 }
