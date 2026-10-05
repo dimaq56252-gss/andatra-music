@@ -1,6 +1,6 @@
 import {loadSamples,sampleNote,sampleDrum} from './sample-engine.js?v=remix-6';
-import {structurePlan,arrangeDynamics} from './structure.js?v=remix-6';
-import {composeMelody,renderLead} from './composer.js?v=remix-6';
+import {structurePlan,arrangeDynamics,editAt,applyPartEdits} from './structure.js?v=arranger-7';
+import {composeMelody,renderLead} from './composer.js?v=arranger-7';
 import {activityAt,barActivity,vocalAccentSteps,phraseEndsHere,duckInstrumental} from './adaptation.js?v=remix-6';
 import {trigger} from '../drumpad/audio.js?v=3';
 import {limitPeaks,measure} from '../audio-processing.js';
@@ -47,7 +47,9 @@ export function estimateKey(buffer){
 }
 export function validateSettings(s){
   const num=(value,min,max,fallback)=>Number.isFinite(Number(value))?Math.max(min,Math.min(max,Number(value))):fallback;
-  return {samples:s.samples!==false,structure:s.structure!==false,character:['calm','dense','experimental'].includes(s.character)?s.character:'dense',style:STYLES[s.style]?s.style:'rap',bpm:num(s.bpm,40,240,100),offset:num(s.offset,-2,4,0),root:Math.round(num(s.root,0,11,9)),mode:s.mode==='major'?'major':'minor',variation:Math.round(num(s.variation,0,9999,0)),harmony:s.harmony!==false,adaptive:s.adaptive!==false,fit:num(s.fit,0,1,.85),melody:num(s.melody,0,1,.55),instrument:['auto','piano','epiano','bell','pluck','strings','pad','lead','guitar','organ','chip'].includes(s.instrument)?s.instrument:'auto',polish:s.polish!==false,voice:num(s.voice,0,1.5,1),beat:num(s.beat,0,1.5,.7)};
+  const roles=['drum','bass','chord','lead'],partGains=Object.fromEntries(roles.map(role=>[role,num(s.partGains?.[role],0,1.5,1)]));
+  const edits=(Array.isArray(s.edits)?s.edits:[]).slice(0,100).filter(e=>Number.isFinite(e.start)&&Number.isFinite(e.end)&&e.end>e.start).map(e=>({start:Math.max(0,e.start),end:Math.min(300,e.end),type:['intro','verse','chorus','break','outro'].includes(e.type)?e.type:'auto',gains:Object.fromEntries(roles.map(role=>[role,num(e.gains?.[role],0,1.5,1)])),versions:Object.fromEntries(roles.map(role=>[role,Math.round(num(e.versions?.[role],0,9999,0))]))}));
+  return {partGains,edits,swing:num(s.swing,0,.35,.12),samples:s.samples!==false,structure:s.structure!==false,character:['calm','dense','experimental'].includes(s.character)?s.character:'dense',style:STYLES[s.style]?s.style:'rap',bpm:num(s.bpm,40,240,100),offset:num(s.offset,-2,4,0),root:Math.round(num(s.root,0,11,9)),mode:s.mode==='major'?'major':'minor',variation:Math.round(num(s.variation,0,9999,0)),harmony:s.harmony!==false,adaptive:s.adaptive!==false,fit:num(s.fit,0,1,.85),melody:num(s.melody,0,1,.55),instrument:['auto','piano','epiano','bell','pluck','strings','pad','lead','guitar','organ','chip'].includes(s.instrument)?s.instrument:'auto',polish:s.polish!==false,voice:num(s.voice,0,1.5,1),beat:num(s.beat,0,1.5,.7)};
 }
 const frequency=note=>440*2**((note-69)/12);
 function tone(context,out,note,when,duration,level,type='sine'){
@@ -60,28 +62,31 @@ export function createArrangement(duration,settings,profile=null){
   const p=STYLES[s.style],step=60/s.bpm/4,bar=step*16,scale=s.mode==='minor'?[0,2,3,5,7,8,10]:[0,2,4,5,7,9,11],progression=s.variation%2?[0,3,5,4]:[0,5,3,6];
   for(let b=Math.floor(-s.offset/bar)-1;b*bar+s.offset<duration;b++){
     const start=s.offset+b*bar,base=progression[((b%4)+4)%4],degree=composition.plan.get(b)??base,root=36+s.root+scale[degree];
+    
     const density=barActivity(v,start,bar),accents=vocalAccentSteps(v,start,step);
     for(let i=0;i<16;i++){
-      const when=start+i*step;if(when<0||when>=duration)continue;
+      const when=start+i*step+(i%2?s.swing*step:0);if(when<0||when>=duration)continue;
+      const edit=editAt(s,when),drumVersion=(s.variation+(edit?.versions.drum||0))%4,bassVersion=(s.variation+(edit?.versions.bass||0))%3,chordVersion=edit?.versions.chord||0;
       const activity=activityAt(v,when),velocity=(i%4===0?1:.72)*.65;
       for(const [name,index]of [['kick',0],['snare',1],['clap',2],['hat',3],['open',4]]){
         const fill=name==='kick'&&i===15&&(v?phraseEndsHere(v,start+8*step,start+bar):(b+s.variation)%4===3);
         const accent=name==='kick'&&accents.includes(i)&&!p.snare.includes(i)&&!p.clap.includes(i);
-        if(!(p[name].includes(i)||fill||accent))continue;
+        const rhythm=name==='kick'&&s.style!=='house'&&s.style!=='synth'?[[0,6,8,14],[0,3,8,11],[0,7,10,14],[0,5,8,13]][drumVersion]:name==='hat'&&drumVersion===2?[0,2,3,4,6,8,10,11,12,14]:p[name];
+        if(!(rhythm.includes(i)||fill||accent))continue;
         if(v&&name==='hat'&&density>.65&&i%4===2&&(b+s.variation)%2!==0)continue;
         const space=name==='hat'||name==='open'?1-.35*activity*fit:1-.12*activity*fit;
         events.push({kind:'drum',index,when,level:velocity*space,kit:p.kit});
       }
       if(s.style==='trap'&&[3,11].includes(i)&&(v?phraseEndsHere(v,when-step,when+step):(b+s.variation)%4===3)&&when+step/2<duration)events.push({kind:'drum',index:3,when:when+step/2,level:.28,kit:p.kit});
-      if((s.style==='house'?[0,4,8,12]:[...new Set([...p.kick,...accents])]).includes(i))events.push({kind:'note',note:root,when:when+.012,duration:Math.min(step*(s.style==='trap'?3:1.7),duration-when-.012),level:.2*(1-.25*activity*fit),type:s.style==='house'?'triangle':'sine',role:'bass'});
+      if((s.style==='house'?[0,4,8,12]:[...new Set([...[[0,6,8,14],[0,3,8,11],[0,7,10,14]][bassVersion],...accents])]).includes(i))events.push({kind:'note',note:root+(bassVersion===1&&i>=8?7:bassVersion===2&&i>=12?12:0),when:when+.012,duration:Math.min(step*(s.style==='trap'?3:1.7),duration-when-.012),level:.2*(1-.25*activity*fit),type:s.style==='house'?'triangle':'sine',role:'bass'});
       if(s.harmony&&(s.style==='house'?[2,6,10,14]:[0,8]).includes(i)){
         if(v&&density>.6&&(s.style==='house'?i===6||i===14:i===8))continue;
         const length=Math.min(step*(s.style==='house'?1.5:6),duration-when);
-        for(let note=0;note<3;note++){const d=degree+note*2,midi=60+s.root+scale[d%7]+Math.floor(d/7)*12;events.push({kind:'note',note:midi,when,duration:length,level:.045*(1-.5*activity*fit),type:s.style==='house'||s.style==='synth'?'triangle':'sine',role:'chord'});}
+        for(let note=0;note<3;note++){const d=degree+note*2;let midi=48+s.root+scale[d%7]+Math.floor(d/7)*12;const inversion=(Math.floor(b/4)+s.variation+chordVersion)%3;if(note<inversion)midi+=12;events.push({kind:'note',note:midi,when,duration:length,level:.045*(1-.5*activity*fit),type:s.style==='house'||s.style==='synth'?'triangle':'sine',role:'chord'});}
       }
     }
   }
-  return arrangeDynamics(events,structurePlan(duration,s,v),s);
+  return applyPartEdits(arrangeDynamics(events,structurePlan(duration,s,v),s),s);
 }
 export async function generateInstrumental(duration,settings,profile=null,segment=null){
   if(!Number.isFinite(duration)||duration<=0||duration>300.01)throw Error('Поддерживаются песни до 5 минут.');
@@ -99,9 +104,9 @@ export async function generateInstrumental(duration,settings,profile=null,segmen
 }
 export function cropAudio(context,buffer,start,length){const first=Math.max(0,Math.round(start*buffer.sampleRate)),n=Math.min(buffer.length-first,Math.round(length*buffer.sampleRate)),out=context.createBuffer(buffer.numberOfChannels,n,buffer.sampleRate);for(let i=0;i<out.numberOfChannels;i++)out.copyToChannel(buffer.getChannelData(i).subarray(first,first+n),i);return out;}
 export function remixChoices(settings){const s=validateSettings(settings);return [
- {id:'calm',name:'Спокойный',settings:{...s,character:'calm',melody:s.melody*.75,beat:s.beat*.85}},
- {id:'dense',name:'Плотный',settings:{...s,character:'dense',variation:s.variation+1}},
- {id:'experimental',name:'Экспериментальный',settings:{...s,character:'experimental',variation:s.variation+5,instrument:s.instrument==='auto'?'guitar':s.instrument}}
+ {id:'calm',name:'Спокойный',settings:{...s,character:'calm',swing:.2,melody:s.melody*.75,beat:s.beat*.85}},
+ {id:'dense',name:'Плотный',settings:{...s,character:'dense',swing:.06,variation:s.variation+1}},
+ {id:'experimental',name:'Экспериментальный',settings:{...s,character:'experimental',swing:.3,variation:s.variation+5,instrument:s.instrument==='auto'?'guitar':s.instrument}}
 ];}
 export function describeStructure(duration,settings,profile){const plan=structurePlan(duration,validateSettings(settings),profile),labels={intro:'Вступление',verse:'Куплет',chorus:'Припев / усиление',break:'Пауза / переход',outro:'Концовка'},segments=[];for(const part of plan){const last=segments.at(-1);if(last?.type===part.type)last.end=part.end;else segments.push({...part,label:labels[part.type]});}return segments;}
 
