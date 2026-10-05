@@ -1,5 +1,5 @@
 import {attachSampleCredits} from './sample-engine.js?v=remix-6';
-import {analyzeVocal,alignVocalBeat,estimateVocalTempo} from './adaptation.js?v=remix-6';
+import {analyzeVocal,alignVocalBeat,estimateVocalTempo,chooseRemixTempo} from './adaptation.js?v=timing-16';
 import {estimateTempo,estimateKey,NOTE_NAMES,generateInstrumental,mixRemix,validateSettings,melodySelection,cropAudio,remixChoices} from './music.js?v=audible-15';
 import {separateChannels} from './separation.js?v=remix-6';
 import {wavBytes,measure} from '../audio-processing.js';
@@ -18,7 +18,8 @@ export function initRemixer(){
   function changed(){settingsDirty=true;clearResults();$('run').textContent=cache?'Обновить пробу':'Подготовить пробу';status(cache?'Настройки изменились. Пересобери ремикс — голос уже готов.':'Настройки выбраны. Загрузи песню и создай ремикс.');}
   for(const id of ['style','key','harmony','instrument','polish','samples','structure'])$(id).onchange=()=>{changed();analysis();};
   $('offset').onchange=()=>{manualOffset=true;changed();analysis();};
-  function automaticTempo(){if(!cache||!$('autoTempo').checked)return;$('bpm').value=cache.tempo.bpm;const fit=$('adaptive').checked?Number($('fit').value)/100:0;const aligned=alignVocalBeat(cache.profile,cache.tempo.bpm,cache.tempo.offset,true);const offset=cache.tempo.offset+(aligned-cache.tempo.offset)*fit;if(!manualOffset)$('offset').value=Math.round(offset*1000);}
+  function automaticTempo(){if(!cache||!$('autoTempo').checked)return;$('bpm').value=cache.tempo.bpm;if(!manualOffset)$('offset').value=Math.round(cache.tempo.offset*1000);}
+
   function analysis(){if(!cache)return;const s=settings(),key=$('key').value==='auto'?($('adaptive').checked&&s.fit>0&&cache.profile.key?cache.profile.key:cache.key):{label:NOTE_NAMES[s.root]+(s.mode==='minor'?' minor':' major')};
     const selection=melodySelection(cache.vocals.duration,s,cache.profile),source=cache.profile.key&&$('key').value==='auto'&&s.adaptive&&s.fit>0?'по нотам голоса':'по песне / выбранной настройке';
     $('analysis').textContent=`Темп: ${cache.tempo.bpm} BPM${cache.tempo.confidence<.35?' — уверенность низкая, проверь вручную':''}. ${key?`Тональность: ${key.label} (${source}). `:''}Найдено фраз: ${cache.profile.phrases.length}, нот: ${cache.profile.pitches.length}. Мелодия: ${s.melody>0?selection.preset.genre+' · '+selection.preset.name:'выключена'}. ${s.adaptive&&s.fit>0?`Аккорды учитывают вокал, мелодия оставляет место в фразах и отвечает в паузах. Подстройка: ${Math.round(s.fit*100)}%. `:''}${s.polish?'Автобаланс и обработка вокала включены. ':''}${!cache.profile.key?'Надёжная тональность голоса не найдена — аккорды стоит проверить на слух. ':''}Голос сохраняет исходную скорость.`;
@@ -54,10 +55,10 @@ export function initRemixer(){
         stage='отделение голоса';status('Отделяю голос от старого минуса…');
         const data=await separateChannels([new Float32Array(input.getChannelData(0)),new Float32Array(input.getChannelData(1))],{signal:abort.signal,onProgress:progress,backend:'wasm'});if(token!==generation)return;
         vocals=context.createBuffer(2,data.vocals[0].length,44100);for(let c=0;c<2;c++)vocals.copyToChannel(data.vocals[c],c);
-        const accompaniment=context.createBuffer(2,data.instrumental[0].length,44100);for(let c=0;c<2;c++)accompaniment.copyToChannel(data.instrumental[c],c);key=estimateKey(accompaniment);
+        const accompaniment=context.createBuffer(2,data.instrumental[0].length,44100);for(let c=0;c<2;c++)accompaniment.copyToChannel(data.instrumental[c],c);key=estimateKey(accompaniment);const beatTempo=estimateTempo(accompaniment);if(beatTempo.confidence>tempo.confidence+.05)tempo=beatTempo;
         if(measure(vocals).peak<1e-6)throw Error('Не найден слышимый вокал. Попробуй другой фрагмент или загрузи отдельный голос.');
-        stage='анализ вокала';status('Анализирую акценты, паузы и ноты голоса…');const profile=analyzeVocal(vocals);tempo=estimateVocalTempo(profile,tempo);
-        cache={vocals,tempo,key,profile,alignedOffset:alignVocalBeat(profile,tempo.bpm,tempo.offset,true)};automaticTempo();analysis();
+        stage='анализ вокала';status('Анализирую акценты, паузы и ноты голоса…');const profile=analyzeVocal(vocals);tempo=chooseRemixTempo(profile,tempo);
+        cache={vocals,tempo,key,profile,alignedOffset:tempo.offset};automaticTempo();analysis();
 
       }
       if(token!==generation)return;

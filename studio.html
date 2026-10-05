@@ -37,7 +37,7 @@ header nav a{color:var(--yellow);font-weight:700}
 <div class="layout">
 <section class="panel timeline-panel" aria-label="Запись и дорожки">
 <div class="transport">
-<div class="toolbar"><output class="clock" id="clock">00:00.0</output><button id="play" class="primary">▶ Слушать</button><button id="stop" disabled>■ Стоп</button><button id="record" class="record">● Записать голос</button></div>
+<div class="toolbar"><output class="clock" id="clock">00:00.0</output><button id="record" class="record">● Записать голос</button><button id="stop" disabled>■ Стоп</button><button id="play" class="primary">▶ Слушать</button></div>
 <div class="loaders"><label class="file">Загрузить минус<input id="beatFile" type="file" accept="audio/*"></label><select id="beatSelect" aria-label="Минус СЕРИИ АНДАТРЫ"><option value="">Или выбрать наш минус</option></select><label class="file">Добавить голос / бэк<input id="voiceFile" type="file" accept="audio/*" multiple></label></div>
 <div class="loaders"><button id="saveProject">Сохранить проект · ZIP</button><label class="file">Загрузить проект<input id="loadProject" type="file" accept=".zip,application/zip"></label></div><p class="hint">Сдвиг применяется сразу: плюс — позже, минус — раньше. Волны показаны на общей шкале времени. Надень наушники. Запись начнётся с выбранного времени, каждый дубль появится отдельной дорожкой.</p>
 <div id="status" role="status" aria-live="polite">Выбери минус или сразу запиши голос.</div>

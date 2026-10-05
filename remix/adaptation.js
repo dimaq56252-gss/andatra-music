@@ -92,3 +92,9 @@ export function estimateVocalTempo(profile,fallback={bpm:100,confidence:0,offset
  const accents=profile.accents.filter(a=>a.weight>.12);if(accents.length<12||profile.duration<6)return {...fallback,source:'uncertain'};
  const scores=[];for(let bpm=65;bpm<=175;bpm++){const beat=60/bpm,sub=beat/2;let score=0,weight=0;for(let i=0;i<accents.length;i++)for(let j=i+1;j<Math.min(accents.length,i+9);j++){const distance=accents[j].time-accents[i].time;if(distance<.16||distance>4)continue;const ticks=distance/sub,error=Math.abs(ticks-Math.round(ticks)),w=accents[i].weight*accents[j].weight/(1+distance);score+=w*Math.exp(-error*error/.012);weight+=w;}scores.push({bpm,score:score/Math.max(.0001,weight)});}scores.sort((a,b)=>b.score-a.score);const best=scores[0],confidence=Math.max(0,Math.min(.85,(best.score-.3)*1.8));if(confidence<.25)return {...fallback,source:'uncertain'};return {bpm:best.bpm,confidence,offset:alignVocalBeat(profile,best.bpm,0,true),source:'vocal'};
 }
+
+// A song's instrumental pulse anchors the remix; syllables only supply a fallback.
+export function chooseRemixTempo(profile,songTempo){
+ if(songTempo.confidence>=.2)return {...songTempo,source:'song'};
+ return estimateVocalTempo(profile,songTempo);
+}
