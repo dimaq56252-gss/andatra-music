@@ -1,6 +1,6 @@
 import {attachSampleCredits} from './sample-engine.js?v=remix-6';
 import {analyzeVocal,alignVocalBeat,estimateVocalTempo} from './adaptation.js?v=remix-6';
-import {estimateTempo,estimateKey,NOTE_NAMES,generateInstrumental,mixRemix,validateSettings,melodySelection,cropAudio,remixChoices,describeStructure} from './music.js?v=balance-8';
+import {estimateTempo,estimateKey,NOTE_NAMES,generateInstrumental,mixRemix,validateSettings,melodySelection,cropAudio,remixChoices,describeStructure} from './music.js?v=variation-9';
 import {separateChannels} from './separation.js?v=remix-6';
 import {wavBytes,measure} from '../audio-processing.js';
 import {downloadBlob} from '../studio-project.js';
@@ -35,7 +35,7 @@ export function initRemixer(){
     if(data.type==='progress'){$('progress').value=.3+.45*data.step/data.total;status(`Отделяю твой голос: ${data.step} из ${data.total} фрагментов. Оставь вкладку открытой.`);}
   }
   async function run(newVariant=false){
-    if(!file||busy)return;if(newVariant&&!cache)return;if(newVariant)variation+=6;
+    if(!file||busy)return;if(newVariant&&!cache)return;if(newVariant)variation+=1;
     const token=++generation;abort=new AbortController();transferred=false;lock(true);clearResults();$('original').pause();$('progress').hidden=false;$('progress').removeAttribute('value');let context,stage='загрузка песни';
     try{
       if(!cache){

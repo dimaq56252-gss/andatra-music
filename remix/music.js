@@ -78,7 +78,7 @@ export function createArrangement(duration,settings,profile=null){
         events.push({kind:'drum',index,when,level:velocity*space,kit:p.kit});
       }
       if(s.style==='trap'&&[3,11].includes(i)&&(v?phraseEndsHere(v,when-step,when+step):(b+s.variation)%4===3)&&when+step/2<duration)events.push({kind:'drum',index:3,when:when+step/2,level:.28,kit:p.kit});
-      if((s.style==='house'?[0,4,8,12]:[...new Set([...[[0,6,8,14],[0,3,8,11],[0,7,10,14]][bassVersion],...accents])]).includes(i))events.push({kind:'note',note:root+(bassVersion===1&&i>=8?7:bassVersion===2&&i>=12?12:0),when:when+.012,duration:Math.min(step*(s.style==='trap'?3:1.7),duration-when-.012),level:.2*(1-.25*activity*fit),type:s.style==='house'?'triangle':'sine',role:'bass'});
+      if((s.style==='house'?[[0,4,8,12],[2,6,10,14],[0,3,8,11]][bassVersion]:[...new Set([...[[0,6,8,14],[0,3,8,11],[0,7,10,14]][bassVersion],...accents])]).includes(i))events.push({kind:'note',note:root+(bassVersion===1&&i>=8?7:bassVersion===2&&i>=12?12:0),when:when+.012,duration:Math.min(step*(s.style==='trap'?3:1.7),duration-when-.012),level:.2*(1-.25*activity*fit),type:s.style==='house'?'triangle':'sine',role:'bass'});
       if(s.harmony&&(s.style==='house'?[2,6,10,14]:[0,8]).includes(i)){
         if(v&&density>.6&&(s.style==='house'?i===6||i===14:i===8))continue;
         const length=Math.min(step*(s.style==='house'?1.5:6),duration-when);
