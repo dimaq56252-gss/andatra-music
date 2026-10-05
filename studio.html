@@ -18,6 +18,10 @@ header{background:rgba(8,9,16,.82);backdrop-filter:blur(8px);border-bottom-color
 .badge{background:rgba(13,15,24,.85)}
 @media(max-width:600px){.studio-room-backdrop{background-position:42% top}.panel{background:rgba(13,15,24,.94)}header{backdrop-filter:none}}
 
+/* Visible section links on the recording room background. */
+header nav a{color:var(--yellow);font-weight:700}
+#studioTools .actions a{background:var(--yellow);color:#08090d;border-color:var(--yellow);font-weight:800}
+#studioTools .actions a:hover{background:#e5ff87;border-color:#e5ff87}
 </style>
 <script defer src="/access-gate.js"></script>
 </head>
@@ -52,7 +56,7 @@ header{background:rgba(8,9,16,.82);backdrop-filter:blur(8px);border-bottom-color
 <button id="masteringDownload" class="primary" disabled style="margin-top:16px">Скачать обработанный трек · WAV</button>
 <p class="hint">Готовый трек: до 100 МБ и 10 минут. ZIP: до 200 МБ, до 32 дорожек. Проект ANDATRA сохраняет громкость, сдвиги и эхо. Для FL Studio и других DAW экспортируй дорожки WAV с общего начала и собери ZIP — файлы FLP напрямую не открываются.</p><p class="hint">Это автоматическая обработка: она не восстановит уже перегруженную запись. Файлы обрабатываются на устройстве. Для точного баланса проекта настрой дорожки в студии и затем нажми «Взять проект из студии».</p>
 </section>
-<section class="panel" style="margin-top:18px"><h2>Инструменты студии</h2><div class="actions"><a class="file" href="/bpm/">BPM Detector</a><a class="file" href="/drumpad/">Drum Pad / Beat Maker</a><a class="file" href="/convert/">Конвертер аудио</a><a class="file" href="/separate/">Отделить вокал</a><a class="file" href="/remix/">Создать ремикс</a></div></section><p class="footer">Работает в браузере. При отказе в доступе к микрофону разреши его в настройках сайта. <span class="mobile-note">На телефоне держи эту вкладку открытой во время записи.</span></p>
+<section class="panel" id="studioTools" style="margin-top:18px"><h2>Инструменты студии</h2><div class="actions"><a class="file" href="/bpm/">BPM Detector</a><a class="file" href="/drumpad/">Drum Pad / Beat Maker</a><a class="file" href="/convert/">Конвертер аудио</a><a class="file" href="/separate/">Отделить вокал</a><a class="file" href="/remix/">Создать ремикс</a></div></section><p class="footer">Работает в браузере. При отказе в доступе к микрофону разреши его в настройках сайта. <span class="mobile-note">На телефоне держи эту вкладку открытой во время записи.</span></p>
 </main>
 <script type="module" src="/studio.js?v=live-shift-2"></script>
 </body></html>
