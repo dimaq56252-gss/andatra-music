@@ -1,0 +1,32 @@
+{
+  "parts": [
+    "000.bin",
+    "001.bin",
+    "002.bin",
+    "003.bin",
+    "004.bin",
+    "005.bin",
+    "006.bin",
+    "007.bin",
+    "008.bin",
+    "009.bin",
+    "010.bin",
+    "011.bin",
+    "012.bin",
+    "013.bin",
+    "014.bin",
+    "015.bin",
+    "016.bin",
+    "017.bin",
+    "018.bin",
+    "019.bin",
+    "020.bin",
+    "021.bin",
+    "022.bin",
+    "023.bin",
+    "024.bin"
+  ],
+  "size": 5958238,
+  "sha256": "50a77fcd073de758b0f7c83557e89848721b0f16d99541e12c60f2d11bded141",
+  "output": "assets/remixes/kartrait-remix.mp3"
+}

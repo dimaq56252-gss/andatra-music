@@ -18,3 +18,24 @@ tmp.replace(out)
 shutil.rmtree(root/'assets/video-source-parts')
 print('Concert assembled and verified:',out.stat().st_size)
 
+
+# Assemble uploaded remix audio and verify the exact encoded file before publication.
+remix_root=root/'assets/remix-source-parts'
+if remix_root.exists():
+ for manifest_path in sorted(remix_root.glob('*/manifest.json')):
+  info=json.loads(manifest_path.read_text())
+  target=root/info['output']
+  assert target.resolve().is_relative_to((root/'assets/remixes').resolve()), 'Invalid remix output'
+  target.parent.mkdir(parents=True,exist_ok=True)
+  temporary=target.with_suffix('.tmp')
+  checksum=hashlib.sha256()
+  with temporary.open('wb') as dest:
+   for name in info['parts']:
+    data=(manifest_path.parent/name).read_bytes()
+    checksum.update(data)
+    dest.write(data)
+  assert temporary.stat().st_size==info['size'], 'Remix size mismatch'
+  assert checksum.hexdigest()==info['sha256'], 'Remix checksum mismatch'
+  temporary.replace(target)
+  print('Remix assembled and verified:',target.name,target.stat().st_size)
+ shutil.rmtree(remix_root)
