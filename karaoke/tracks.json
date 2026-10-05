@@ -1,0 +1,1090 @@
+[
+  {
+    "id": 79,
+    "title": "Классика",
+    "artist": "Серия Андатры",
+    "src": "/assets/audio/klassika.mp3",
+    "slug": "079-klassika",
+    "duration": 104.385
+  },
+  {
+    "id": 32,
+    "title": "Мангуст",
+    "artist": "Серия Андатры",
+    "src": "https://pub-c07c59e5e88244a6b502d21bf053245d.r2.dev/assets/track-032.mp3",
+    "slug": "032-mangust",
+    "duration": 221.858
+  },
+  {
+    "id": 81,
+    "title": "Ядерная Зима",
+    "artist": "Серия Андатры",
+    "src": "https://pub-c07c59e5e88244a6b502d21bf053245d.r2.dev/assets/track-081.mp3",
+    "slug": "081-yadernaya-zima",
+    "duration": 121.496
+  },
+  {
+    "id": 67,
+    "title": "Ачивки",
+    "artist": "Серия Андатры",
+    "src": "https://pub-c07c59e5e88244a6b502d21bf053245d.r2.dev/assets/track-067.mp3",
+    "slug": "067-achivki",
+    "duration": 144.196
+  },
+  {
+    "id": 112,
+    "title": "Забито",
+    "artist": "Серия Андатры",
+    "src": "https://pub-c07c59e5e88244a6b502d21bf053245d.r2.dev/assets/track-112.mp3",
+    "slug": "112-zabito",
+    "duration": 127.295
+  },
+  {
+    "id": 111,
+    "title": "Оболонь",
+    "artist": "Серия Андатры",
+    "src": "https://pub-c07c59e5e88244a6b502d21bf053245d.r2.dev/assets/track-111.mp3",
+    "slug": "111-obolon",
+    "duration": 144.144
+  },
+  {
+    "id": 72,
+    "title": "Падшая Женщина",
+    "artist": "Серия Андатры",
+    "src": "https://pub-c07c59e5e88244a6b502d21bf053245d.r2.dev/assets/track-072.mp3",
+    "slug": "072-padshaya-zhenschina",
+    "duration": 146.39
+  },
+  {
+    "id": 128,
+    "title": "feat ПАССИВНО АГРЕССИВНЫЙ Летопись",
+    "artist": "Серия Андатры",
+    "src": "https://pub-c07c59e5e88244a6b502d21bf053245d.r2.dev/assets/track-128.mp3",
+    "slug": "128-feat-passivno-agressivnyy-letopis",
+    "duration": 139.363
+  },
+  {
+    "id": 63,
+    "title": "Заебался",
+    "artist": "Серия Андатры",
+    "src": "https://pub-c07c59e5e88244a6b502d21bf053245d.r2.dev/assets/track-063.mp3",
+    "slug": "063-zaebalsya",
+    "duration": 244.167
+  },
+  {
+    "id": 68,
+    "title": "Осуждаю",
+    "artist": "Серия Андатры",
+    "src": "https://pub-c07c59e5e88244a6b502d21bf053245d.r2.dev/assets/track-068.mp3",
+    "slug": "068-osuzhdayu",
+    "duration": 164.049
+  },
+  {
+    "id": 1,
+    "title": "24 Декабря",
+    "artist": "Серия Андатры",
+    "src": "https://pub-c07c59e5e88244a6b502d21bf053245d.r2.dev/assets/track-001.mp3",
+    "slug": "001-24-dekabrya",
+    "duration": 149.185
+  },
+  {
+    "id": 2,
+    "title": "Долой Уныние",
+    "artist": "Серия Андатры",
+    "src": "https://pub-c07c59e5e88244a6b502d21bf053245d.r2.dev/assets/track-002.mp3",
+    "slug": "002-doloy-unynie",
+    "duration": 133.721
+  },
+  {
+    "id": 3,
+    "title": "Холла - Холла",
+    "artist": "Серия Андатры",
+    "src": "https://pub-c07c59e5e88244a6b502d21bf053245d.r2.dev/assets/track-003.mp3",
+    "slug": "003-holla-holla",
+    "duration": 119.249
+  },
+  {
+    "id": 4,
+    "title": "Лирическое Дерьмо ч2",
+    "artist": "Серия Андатры",
+    "src": "https://pub-c07c59e5e88244a6b502d21bf053245d.r2.dev/assets/track-004.mp3",
+    "slug": "004-liricheskoe-dermo-ch2",
+    "duration": 258.9
+  },
+  {
+    "id": 5,
+    "title": "Постовая Хуйня",
+    "artist": "Серия Андатры",
+    "src": "https://pub-c07c59e5e88244a6b502d21bf053245d.r2.dev/assets/track-005.mp3",
+    "slug": "005-postovaya-huynya",
+    "duration": 365.192
+  },
+  {
+    "id": 6,
+    "title": "17 Марта",
+    "artist": "Серия Андатры",
+    "src": "https://pub-c07c59e5e88244a6b502d21bf053245d.r2.dev/assets/track-006.mp3",
+    "slug": "006-17-marta",
+    "duration": 243.461
+  },
+  {
+    "id": 7,
+    "title": "Палёный Кроссовок",
+    "artist": "Серия Андатры",
+    "src": "https://pub-c07c59e5e88244a6b502d21bf053245d.r2.dev/assets/track-007.mp3",
+    "slug": "007-palenyy-krossovok",
+    "duration": 160.366
+  },
+  {
+    "id": 8,
+    "title": "feat Bori$ Касание при жёсткой поддержке ПАССИВНО",
+    "artist": "Серия Андатры",
+    "src": "https://pub-c07c59e5e88244a6b502d21bf053245d.r2.dev/assets/track-008.mp3",
+    "slug": "008-feat-bori-kasanie-pri-zhestkoy-podderzhke-passivno",
+    "duration": 571.22
+  },
+  {
+    "id": 9,
+    "title": "feat 7Kinik - Мацони",
+    "artist": "Серия Андатры",
+    "src": "https://pub-c07c59e5e88244a6b502d21bf053245d.r2.dev/assets/track-009.mp3",
+    "slug": "009-feat-7kinik-maconi",
+    "duration": 286.145
+  },
+  {
+    "id": 10,
+    "title": "Фиаско",
+    "artist": "Серия Андатры",
+    "src": "https://pub-c07c59e5e88244a6b502d21bf053245d.r2.dev/assets/track-010.mp3",
+    "slug": "010-fiasko",
+    "duration": 177.058
+  },
+  {
+    "id": 11,
+    "title": "H3AV3 F1ST!NG",
+    "artist": "Серия Андатры",
+    "src": "https://pub-c07c59e5e88244a6b502d21bf053245d.r2.dev/assets/track-011.mp3",
+    "slug": "011-h3av3-f1st-ng",
+    "duration": 168.046
+  },
+  {
+    "id": 12,
+    "title": "Порядочность",
+    "artist": "Серия Андатры",
+    "src": "https://pub-c07c59e5e88244a6b502d21bf053245d.r2.dev/assets/track-012.mp3",
+    "slug": "012-poryadochnost",
+    "duration": 94.067
+  },
+  {
+    "id": 13,
+    "title": "27 августа.",
+    "artist": "Серия Андатры",
+    "src": "https://pub-c07c59e5e88244a6b502d21bf053245d.r2.dev/assets/track-013.mp3",
+    "slug": "013-27-avgusta",
+    "duration": 200.882
+  },
+  {
+    "id": 14,
+    "title": "На Широком",
+    "artist": "Серия Андатры",
+    "src": "https://pub-c07c59e5e88244a6b502d21bf053245d.r2.dev/assets/track-014.mp3",
+    "slug": "014-na-shirokom",
+    "duration": 186.044
+  },
+  {
+    "id": 15,
+    "title": "Егор Крид",
+    "artist": "Серия Андатры",
+    "src": "https://pub-c07c59e5e88244a6b502d21bf053245d.r2.dev/assets/track-015.mp3",
+    "slug": "015-egor-krid",
+    "duration": 192.705
+  },
+  {
+    "id": 16,
+    "title": "Сумка Prada",
+    "artist": "Серия Андатры",
+    "src": "https://pub-c07c59e5e88244a6b502d21bf053245d.r2.dev/assets/track-016.mp3",
+    "slug": "016-sumka-prada",
+    "duration": 98.429
+  },
+  {
+    "id": 17,
+    "title": "Компромат",
+    "artist": "Серия Андатры",
+    "src": "https://pub-c07c59e5e88244a6b502d21bf053245d.r2.dev/assets/track-017.mp3",
+    "slug": "017-kompromat",
+    "duration": 198.896
+  },
+  {
+    "id": 18,
+    "title": "feat Lil Simba,Frank White,Lil Cashout,Plasko Коломенское",
+    "artist": "Серия Андатры",
+    "src": "https://pub-c07c59e5e88244a6b502d21bf053245d.r2.dev/assets/track-018.mp3",
+    "slug": "018-feat-lil-simba-frank-white-lil-cashout-plasko-kolomenskoe",
+    "duration": 384.026
+  },
+  {
+    "id": 19,
+    "title": "рожок",
+    "artist": "Серия Андатры",
+    "src": "https://pub-c07c59e5e88244a6b502d21bf053245d.r2.dev/assets/track-019.mp3",
+    "slug": "019-rozhok",
+    "duration": 132.467
+  },
+  {
+    "id": 20,
+    "title": "Нежно грубо",
+    "artist": "Серия Андатры",
+    "src": "https://pub-c07c59e5e88244a6b502d21bf053245d.r2.dev/assets/track-020.mp3",
+    "slug": "020-nezhno-grubo",
+    "duration": 314.723
+  },
+  {
+    "id": 21,
+    "title": "Градом",
+    "artist": "Серия Андатры",
+    "src": "https://pub-c07c59e5e88244a6b502d21bf053245d.r2.dev/assets/track-021.mp3",
+    "slug": "021-gradom",
+    "duration": 166.008
+  },
+  {
+    "id": 22,
+    "title": "Приятный подарок",
+    "artist": "Серия Андатры",
+    "src": "https://pub-c07c59e5e88244a6b502d21bf053245d.r2.dev/assets/track-022.mp3",
+    "slug": "022-priyatnyy-podarok",
+    "duration": 230.269
+  },
+  {
+    "id": 23,
+    "title": "Молодые Ветра",
+    "artist": "Серия Андатры",
+    "src": "https://pub-c07c59e5e88244a6b502d21bf053245d.r2.dev/assets/track-023.mp3",
+    "slug": "023-molodye-vetra",
+    "duration": 356.598
+  },
+  {
+    "id": 24,
+    "title": "Арбитраж",
+    "artist": "Серия Андатры",
+    "src": "https://pub-c07c59e5e88244a6b502d21bf053245d.r2.dev/assets/track-024.mp3",
+    "slug": "024-arbitrazh",
+    "duration": 185.182
+  },
+  {
+    "id": 25,
+    "title": "Мужчинский Реп",
+    "artist": "Серия Андатры",
+    "src": "https://pub-c07c59e5e88244a6b502d21bf053245d.r2.dev/assets/track-025.mp3",
+    "slug": "025-muzhchinskiy-rep",
+    "duration": 258.508
+  },
+  {
+    "id": 26,
+    "title": "На Руси",
+    "artist": "Серия Андатры",
+    "src": "https://pub-c07c59e5e88244a6b502d21bf053245d.r2.dev/assets/track-026.mp3",
+    "slug": "026-na-rusi",
+    "duration": 108.696
+  },
+  {
+    "id": 27,
+    "title": "Волчок",
+    "artist": "Серия Андатры",
+    "src": "https://pub-c07c59e5e88244a6b502d21bf053245d.r2.dev/assets/track-027.mp3",
+    "slug": "027-volchok",
+    "duration": 199.393
+  },
+  {
+    "id": 28,
+    "title": "Мох",
+    "artist": "Серия Андатры",
+    "src": "https://pub-c07c59e5e88244a6b502d21bf053245d.r2.dev/assets/track-028.mp3",
+    "slug": "028-moh",
+    "duration": 356.598
+  },
+  {
+    "id": 29,
+    "title": "Мем",
+    "artist": "Серия Андатры",
+    "src": "https://pub-c07c59e5e88244a6b502d21bf053245d.r2.dev/assets/track-029.mp3",
+    "slug": "029-mem",
+    "duration": 129.071
+  },
+  {
+    "id": 30,
+    "title": "Трезвые",
+    "artist": "Серия Андатры",
+    "src": "https://pub-c07c59e5e88244a6b502d21bf053245d.r2.dev/assets/track-030.mp3",
+    "slug": "030-trezvye",
+    "duration": 136.333
+  },
+  {
+    "id": 31,
+    "title": "feat chekГраната Танцуй на Мне",
+    "artist": "Серия Андатры",
+    "src": "https://pub-c07c59e5e88244a6b502d21bf053245d.r2.dev/assets/track-031.mp3",
+    "slug": "031-feat-chekgranata-tancuy-na-mne",
+    "duration": 297.143
+  },
+  {
+    "id": 33,
+    "title": "На Петлю",
+    "artist": "Серия Андатры",
+    "src": "https://pub-c07c59e5e88244a6b502d21bf053245d.r2.dev/assets/track-033.mp3",
+    "slug": "033-na-petlyu",
+    "duration": 165.982
+  },
+  {
+    "id": 34,
+    "title": "Второй День Лета",
+    "artist": "Серия Андатры",
+    "src": "https://pub-c07c59e5e88244a6b502d21bf053245d.r2.dev/assets/track-034.mp3",
+    "slug": "034-vtoroy-den-leta",
+    "duration": 130.038
+  },
+  {
+    "id": 35,
+    "title": "Гачи",
+    "artist": "Серия Андатры",
+    "src": "https://pub-c07c59e5e88244a6b502d21bf053245d.r2.dev/assets/track-035.mp3",
+    "slug": "035-gachi",
+    "duration": 134.139
+  },
+  {
+    "id": 36,
+    "title": "Старые Пластинки",
+    "artist": "Серия Андатры",
+    "src": "https://pub-c07c59e5e88244a6b502d21bf053245d.r2.dev/assets/track-036.mp3",
+    "slug": "036-starye-plastinki",
+    "duration": 188.264
+  },
+  {
+    "id": 37,
+    "title": "feat Plasko,Bori$ Касание,chekГраната ББПЕ",
+    "artist": "Серия Андатры",
+    "src": "https://pub-c07c59e5e88244a6b502d21bf053245d.r2.dev/assets/track-037.mp3",
+    "slug": "037-feat-plasko-bori-kasanie-chekgranata-bbpe",
+    "duration": 389.538
+  },
+  {
+    "id": 38,
+    "title": "Вайб",
+    "artist": "Серия Андатры",
+    "src": "https://pub-c07c59e5e88244a6b502d21bf053245d.r2.dev/assets/track-038.mp3",
+    "slug": "038-vayb",
+    "duration": 133.407
+  },
+  {
+    "id": 39,
+    "title": "feat ПавеЛенин,Чек Граната,7Kinik,ПАССИВНО АГРЕССИВНЫЙ",
+    "artist": "Серия Андатры",
+    "src": "https://pub-c07c59e5e88244a6b502d21bf053245d.r2.dev/assets/track-039.mp3",
+    "slug": "039-feat-pavelenin-chek-granata-7kinik-passivno-agressivnyy",
+    "duration": 287.295
+  },
+  {
+    "id": 40,
+    "title": "Детство",
+    "artist": "Серия Андатры",
+    "src": "https://pub-c07c59e5e88244a6b502d21bf053245d.r2.dev/assets/track-040.mp3",
+    "slug": "040-detstvo",
+    "duration": 138.501
+  },
+  {
+    "id": 41,
+    "title": "ИКАРУС",
+    "artist": "Серия Андатры",
+    "src": "https://pub-c07c59e5e88244a6b502d21bf053245d.r2.dev/assets/track-041.mp3",
+    "slug": "041-ikarus",
+    "duration": 198.113
+  },
+  {
+    "id": 42,
+    "title": "Кипяток",
+    "artist": "Серия Андатры",
+    "src": "https://pub-c07c59e5e88244a6b502d21bf053245d.r2.dev/assets/track-042.mp3",
+    "slug": "042-kipyatok",
+    "duration": 225.045
+  },
+  {
+    "id": 43,
+    "title": "feat ᚺᚤᛋᛠᚹᛊᛒᛊᚺ GYM",
+    "artist": "Серия Андатры",
+    "src": "https://pub-c07c59e5e88244a6b502d21bf053245d.r2.dev/assets/track-043.mp3",
+    "slug": "043-feat-gym",
+    "duration": 231.863
+  },
+  {
+    "id": 44,
+    "title": "В Мой Город",
+    "artist": "Серия Андатры",
+    "src": "https://pub-c07c59e5e88244a6b502d21bf053245d.r2.dev/assets/track-044.mp3",
+    "slug": "044-v-moy-gorod",
+    "duration": 230.322
+  },
+  {
+    "id": 45,
+    "title": "нет отчаяния",
+    "artist": "Серия Андатры",
+    "src": "https://pub-c07c59e5e88244a6b502d21bf053245d.r2.dev/assets/track-045.mp3",
+    "slug": "045-net-otchayaniya",
+    "duration": 265.822
+  },
+  {
+    "id": 46,
+    "title": "RES1D3NT P1DOR",
+    "artist": "Серия Андатры",
+    "src": "https://pub-c07c59e5e88244a6b502d21bf053245d.r2.dev/assets/track-046.mp3",
+    "slug": "046-res1d3nt-p1dor",
+    "duration": 202.527
+  },
+  {
+    "id": 47,
+    "title": "feat Bori$ Касание & chekГраната Коктейль с Незамерзайкой",
+    "artist": "Серия Андатры",
+    "src": "https://pub-c07c59e5e88244a6b502d21bf053245d.r2.dev/assets/track-047.mp3",
+    "slug": "047-feat-bori-kasanie-chekgranata-kokteyl-s-nezamerzaykoy",
+    "duration": 256.366
+  },
+  {
+    "id": 48,
+    "title": "Фритюрное Масло",
+    "artist": "Серия Андатры",
+    "src": "https://pub-c07c59e5e88244a6b502d21bf053245d.r2.dev/assets/track-048.mp3",
+    "slug": "048-frityurnoe-maslo",
+    "duration": 262.348
+  },
+  {
+    "id": 49,
+    "title": "Чужие губы",
+    "artist": "Серия Андатры",
+    "src": "https://pub-c07c59e5e88244a6b502d21bf053245d.r2.dev/assets/track-049.mp3",
+    "slug": "049-chuzhie-guby",
+    "duration": 148.637
+  },
+  {
+    "id": 50,
+    "title": "P1ZD1T",
+    "artist": "Серия Андатры",
+    "src": "https://pub-c07c59e5e88244a6b502d21bf053245d.r2.dev/assets/track-050.mp3",
+    "slug": "050-p1zd1t",
+    "duration": 256.026
+  },
+  {
+    "id": 51,
+    "title": "FREESTYLE2024",
+    "artist": "Серия Андатры",
+    "src": "https://pub-c07c59e5e88244a6b502d21bf053245d.r2.dev/assets/track-051.mp3",
+    "slug": "051-freestyle2024",
+    "duration": 166.452
+  },
+  {
+    "id": 52,
+    "title": "Благородный Финал",
+    "artist": "Серия Андатры",
+    "src": "https://pub-c07c59e5e88244a6b502d21bf053245d.r2.dev/assets/track-052.mp3",
+    "slug": "052-blagorodnyy-final",
+    "duration": 137.169
+  },
+  {
+    "id": 53,
+    "title": "В Депрессиве",
+    "artist": "Серия Андатры",
+    "src": "https://pub-c07c59e5e88244a6b502d21bf053245d.r2.dev/assets/track-053.mp3",
+    "slug": "053-v-depressive",
+    "duration": 115.226
+  },
+  {
+    "id": 54,
+    "title": ",Терраксом,Z4T Алиби",
+    "artist": "Серия Андатры",
+    "src": "https://pub-c07c59e5e88244a6b502d21bf053245d.r2.dev/assets/track-054.mp3",
+    "slug": "054-terraksom-z4t-alibi",
+    "duration": 180.506
+  },
+  {
+    "id": 55,
+    "title": "feat молодой прогон Чёрный волк",
+    "artist": "Серия Андатры",
+    "src": "https://pub-c07c59e5e88244a6b502d21bf053245d.r2.dev/assets/track-055.mp3",
+    "slug": "055-feat-molodoy-progon-chernyy-volk",
+    "duration": 123.507
+  },
+  {
+    "id": 56,
+    "title": "Сидор",
+    "artist": "Серия Андатры",
+    "src": "https://pub-c07c59e5e88244a6b502d21bf053245d.r2.dev/assets/track-056.mp3",
+    "slug": "056-sidor",
+    "duration": 178.913
+  },
+  {
+    "id": 57,
+    "title": "БастаГуф",
+    "artist": "Серия Андатры",
+    "src": "https://pub-c07c59e5e88244a6b502d21bf053245d.r2.dev/assets/track-057.mp3",
+    "slug": "057-bastaguf",
+    "duration": 174.707
+  },
+  {
+    "id": 58,
+    "title": "Falling Asleep",
+    "artist": "Серия Андатры",
+    "src": "https://pub-c07c59e5e88244a6b502d21bf053245d.r2.dev/assets/track-058.mp3",
+    "slug": "058-falling-asleep",
+    "duration": 229.616
+  },
+  {
+    "id": 59,
+    "title": "Новый Домик",
+    "artist": "Серия Андатры",
+    "src": "https://pub-c07c59e5e88244a6b502d21bf053245d.r2.dev/assets/track-059.mp3",
+    "slug": "059-novyy-domik",
+    "duration": 198.06
+  },
+  {
+    "id": 60,
+    "title": "Сделал Взнос",
+    "artist": "Серия Андатры",
+    "src": "https://pub-c07c59e5e88244a6b502d21bf053245d.r2.dev/assets/track-060.mp3",
+    "slug": "060-sdelal-vznos",
+    "duration": 120.033
+  },
+  {
+    "id": 61,
+    "title": "др freestyle",
+    "artist": "Серия Андатры",
+    "src": "https://pub-c07c59e5e88244a6b502d21bf053245d.r2.dev/assets/track-061.mp3",
+    "slug": "061-dr-freestyle",
+    "duration": 224.549
+  },
+  {
+    "id": 62,
+    "title": "На Даче",
+    "artist": "Серия Андатры",
+    "src": "https://pub-c07c59e5e88244a6b502d21bf053245d.r2.dev/assets/track-062.mp3",
+    "slug": "062-na-dache",
+    "duration": 184.007
+  },
+  {
+    "id": 64,
+    "title": "День Получки",
+    "artist": "Серия Андатры",
+    "src": "https://pub-c07c59e5e88244a6b502d21bf053245d.r2.dev/assets/track-064.mp3",
+    "slug": "064-den-poluchki",
+    "duration": 165.277
+  },
+  {
+    "id": 65,
+    "title": "Нико Беллик",
+    "artist": "Серия Андатры",
+    "src": "https://pub-c07c59e5e88244a6b502d21bf053245d.r2.dev/assets/track-065.mp3",
+    "slug": "065-niko-bellik",
+    "duration": 230.191
+  },
+  {
+    "id": 66,
+    "title": "Коварство или Бессилие",
+    "artist": "Серия Андатры",
+    "src": "https://pub-c07c59e5e88244a6b502d21bf053245d.r2.dev/assets/track-066.mp3",
+    "slug": "066-kovarstvo-ili-bessilie",
+    "duration": 229.904
+  },
+  {
+    "id": 69,
+    "title": "Вприсядку",
+    "artist": "Серия Андатры",
+    "src": "https://pub-c07c59e5e88244a6b502d21bf053245d.r2.dev/assets/track-069.mp3",
+    "slug": "069-vprisyadku",
+    "duration": 140.121
+  },
+  {
+    "id": 70,
+    "title": "Сатира",
+    "artist": "Серия Андатры",
+    "src": "https://pub-c07c59e5e88244a6b502d21bf053245d.r2.dev/assets/track-070.mp3",
+    "slug": "070-satira",
+    "duration": 168.046
+  },
+  {
+    "id": 71,
+    "title": "Fracka Trapper",
+    "artist": "Серия Андатры",
+    "src": "https://pub-c07c59e5e88244a6b502d21bf053245d.r2.dev/assets/track-071.mp3",
+    "slug": "071-fracka-trapper",
+    "duration": 213.368
+  },
+  {
+    "id": 73,
+    "title": "Сырок",
+    "artist": "Серия Андатры",
+    "src": "https://pub-c07c59e5e88244a6b502d21bf053245d.r2.dev/assets/track-073.mp3",
+    "slug": "073-syrok",
+    "duration": 185.522
+  },
+  {
+    "id": 74,
+    "title": "Возвращение Чёрного Короля",
+    "artist": "Серия Андатры",
+    "src": "https://pub-c07c59e5e88244a6b502d21bf053245d.r2.dev/assets/track-074.mp3",
+    "slug": "074-vozvraschenie-chernogo-korolya",
+    "duration": 168.176
+  },
+  {
+    "id": 75,
+    "title": "USDT",
+    "artist": "Серия Андатры",
+    "src": "https://pub-c07c59e5e88244a6b502d21bf053245d.r2.dev/assets/track-075.mp3",
+    "slug": "075-usdt",
+    "duration": 187.35
+  },
+  {
+    "id": 76,
+    "title": "Стак Овец",
+    "artist": "Серия Андатры",
+    "src": "https://pub-c07c59e5e88244a6b502d21bf053245d.r2.dev/assets/track-076.mp3",
+    "slug": "076-stak-ovec",
+    "duration": 208.457
+  },
+  {
+    "id": 77,
+    "title": "Фавела",
+    "artist": "Серия Андатры",
+    "src": "https://pub-c07c59e5e88244a6b502d21bf053245d.r2.dev/assets/track-077.mp3",
+    "slug": "077-favela",
+    "duration": 178.756
+  },
+  {
+    "id": 78,
+    "title": ",Frank White,Terraksom,Lil Cashout Happy New Year",
+    "artist": "Серия Андатры",
+    "src": "https://pub-c07c59e5e88244a6b502d21bf053245d.r2.dev/assets/track-078.mp3",
+    "slug": "078-frank-white-terraksom-lil-cashout-happy-new-year",
+    "duration": 322.952
+  },
+  {
+    "id": 80,
+    "title": "Дырки и Мечты",
+    "artist": "Серия Андатры",
+    "src": "https://pub-c07c59e5e88244a6b502d21bf053245d.r2.dev/assets/track-080.mp3",
+    "slug": "080-dyrki-i-mechty",
+    "duration": 301.74
+  },
+  {
+    "id": 82,
+    "title": "feat Bori$ Касание,chekГраната,Plasko,Александр Дерга4OFF",
+    "artist": "Серия Андатры",
+    "src": "https://pub-c07c59e5e88244a6b502d21bf053245d.r2.dev/assets/track-082.mp3",
+    "slug": "082-feat-bori-kasanie-chekgranata-plasko-aleksandr-derga4off",
+    "duration": 237.767
+  },
+  {
+    "id": 83,
+    "title": "feat chekГраната & ПАССИВНО АГРЕССИВНЫЙ Кирпичики",
+    "artist": "Серия Андатры",
+    "src": "https://pub-c07c59e5e88244a6b502d21bf053245d.r2.dev/assets/track-083.mp3",
+    "slug": "083-feat-chekgranata-passivno-agressivnyy-kirpichiki",
+    "duration": 293.224
+  },
+  {
+    "id": 84,
+    "title": "Восьмиэтажные",
+    "artist": "Серия Андатры",
+    "src": "https://pub-c07c59e5e88244a6b502d21bf053245d.r2.dev/assets/track-084.mp3",
+    "slug": "084-vosmietazhnye",
+    "duration": 254.798
+  },
+  {
+    "id": 85,
+    "title": "Шапито",
+    "artist": "Серия Андатры",
+    "src": "https://pub-c07c59e5e88244a6b502d21bf053245d.r2.dev/assets/track-085.mp3",
+    "slug": "085-shapito",
+    "duration": 147.722
+  },
+  {
+    "id": 86,
+    "title": "feat MilaFe 90ые",
+    "artist": "Серия Андатры",
+    "src": "https://pub-c07c59e5e88244a6b502d21bf053245d.r2.dev/assets/track-086.mp3",
+    "slug": "086-feat-milafe-90ye",
+    "duration": 231.654
+  },
+  {
+    "id": 87,
+    "title": "Хорошие Вести",
+    "artist": "Серия Андатры",
+    "src": "https://pub-c07c59e5e88244a6b502d21bf053245d.r2.dev/assets/track-087.mp3",
+    "slug": "087-horoshie-vesti",
+    "duration": 129.802
+  },
+  {
+    "id": 88,
+    "title": "feat MilaFe Гавана",
+    "artist": "Серия Андатры",
+    "src": "https://pub-c07c59e5e88244a6b502d21bf053245d.r2.dev/assets/track-088.mp3",
+    "slug": "088-feat-milafe-gavana",
+    "duration": 201.77
+  },
+  {
+    "id": 89,
+    "title": "АРБУЗ",
+    "artist": "Серия Андатры",
+    "src": "https://pub-c07c59e5e88244a6b502d21bf053245d.r2.dev/assets/track-089.mp3",
+    "slug": "089-arbuz",
+    "duration": 165.825
+  },
+  {
+    "id": 90,
+    "title": "Аметисты",
+    "artist": "Серия Андатры",
+    "src": "https://pub-c07c59e5e88244a6b502d21bf053245d.r2.dev/assets/track-090.mp3",
+    "slug": "090-ametisty",
+    "duration": 128.026
+  },
+  {
+    "id": 91,
+    "title": "Сын Куклачёва",
+    "artist": "Серия Андатры",
+    "src": "https://pub-c07c59e5e88244a6b502d21bf053245d.r2.dev/assets/track-091.mp3",
+    "slug": "091-syn-kuklacheva",
+    "duration": 189.518
+  },
+  {
+    "id": 92,
+    "title": "(feat. Vin Alo gres) - Увал",
+    "artist": "Серия Андатры",
+    "src": "https://pub-c07c59e5e88244a6b502d21bf053245d.r2.dev/assets/track-092.mp3",
+    "slug": "092-feat-vin-alo-gres-uval",
+    "duration": 206.498
+  },
+  {
+    "id": 93,
+    "title": "Барабан",
+    "artist": "Серия Андатры",
+    "src": "https://pub-c07c59e5e88244a6b502d21bf053245d.r2.dev/assets/track-093.mp3",
+    "slug": "093-baraban",
+    "duration": 328.046
+  },
+  {
+    "id": 94,
+    "title": "feat Frank White HUSTLE",
+    "artist": "Серия Андатры",
+    "src": "https://pub-c07c59e5e88244a6b502d21bf053245d.r2.dev/assets/track-094.mp3",
+    "slug": "094-feat-frank-white-hustle",
+    "duration": 180.349
+  },
+  {
+    "id": 95,
+    "title": "Руслан Гительман",
+    "artist": "Серия Андатры",
+    "src": "https://pub-c07c59e5e88244a6b502d21bf053245d.r2.dev/assets/track-095.mp3",
+    "slug": "095-ruslan-gitelman",
+    "duration": 153.391
+  },
+  {
+    "id": 96,
+    "title": "Немножко по жизе",
+    "artist": "Серия Андатры",
+    "src": "https://pub-c07c59e5e88244a6b502d21bf053245d.r2.dev/assets/track-096.mp3",
+    "slug": "096-nemnozhko-po-zhize",
+    "duration": 455.419
+  },
+  {
+    "id": 97,
+    "title": "Корка",
+    "artist": "Серия Андатры",
+    "src": "https://pub-c07c59e5e88244a6b502d21bf053245d.r2.dev/assets/track-097.mp3",
+    "slug": "097-korka",
+    "duration": 166.217
+  },
+  {
+    "id": 98,
+    "title": "SAAB",
+    "artist": "Серия Андатры",
+    "src": "https://pub-c07c59e5e88244a6b502d21bf053245d.r2.dev/assets/track-098.mp3",
+    "slug": "098-saab",
+    "duration": 305.319
+  },
+  {
+    "id": 99,
+    "title": "Версус",
+    "artist": "Серия Андатры",
+    "src": "https://pub-c07c59e5e88244a6b502d21bf053245d.r2.dev/assets/track-099.mp3",
+    "slug": "099-versus",
+    "duration": 155.429
+  },
+  {
+    "id": 100,
+    "title": "Vladimirskiy",
+    "artist": "Серия Андатры",
+    "src": "https://pub-c07c59e5e88244a6b502d21bf053245d.r2.dev/assets/track-100.mp3",
+    "slug": "100-vladimirskiy",
+    "duration": 127.347
+  },
+  {
+    "id": 101,
+    "title": "Эспандер",
+    "artist": "Серия Андатры",
+    "src": "https://pub-c07c59e5e88244a6b502d21bf053245d.r2.dev/assets/track-101.mp3",
+    "slug": "101-espander",
+    "duration": 181.656
+  },
+  {
+    "id": 102,
+    "title": "Привет!",
+    "artist": "Серия Андатры",
+    "src": "https://pub-c07c59e5e88244a6b502d21bf053245d.r2.dev/assets/track-102.mp3",
+    "slug": "102-privet",
+    "duration": 156.552
+  },
+  {
+    "id": 103,
+    "title": "Гамарджоба",
+    "artist": "Серия Андатры",
+    "src": "https://pub-c07c59e5e88244a6b502d21bf053245d.r2.dev/assets/track-103.mp3",
+    "slug": "103-gamardzhoba",
+    "duration": 167.21
+  },
+  {
+    "id": 104,
+    "title": "Омерека сасатб",
+    "artist": "Серия Андатры",
+    "src": "https://pub-c07c59e5e88244a6b502d21bf053245d.r2.dev/assets/track-104.mp3",
+    "slug": "104-omereka-sasatb",
+    "duration": 157.675
+  },
+  {
+    "id": 105,
+    "title": "Рататуй",
+    "artist": "Серия Андатры",
+    "src": "https://pub-c07c59e5e88244a6b502d21bf053245d.r2.dev/assets/track-105.mp3",
+    "slug": "105-ratatuy",
+    "duration": 288.078
+  },
+  {
+    "id": 106,
+    "title": "Чужих",
+    "artist": "Серия Андатры",
+    "src": "https://pub-c07c59e5e88244a6b502d21bf053245d.r2.dev/assets/track-106.mp3",
+    "slug": "106-chuzhih",
+    "duration": 133.381
+  },
+  {
+    "id": 107,
+    "title": "0D1N0K0 DR041L 2",
+    "artist": "Серия Андатры",
+    "src": "https://pub-c07c59e5e88244a6b502d21bf053245d.r2.dev/assets/track-107.mp3",
+    "slug": "107-0d1n0k0-dr041l-2",
+    "duration": 190.145
+  },
+  {
+    "id": 108,
+    "title": "LES4LIFE",
+    "artist": "Серия Андатры",
+    "src": "https://pub-c07c59e5e88244a6b502d21bf053245d.r2.dev/assets/track-108.mp3",
+    "slug": "108-les4life",
+    "duration": 148.872
+  },
+  {
+    "id": 109,
+    "title": ",Frank White - Ещё Разок",
+    "artist": "Серия Андатры",
+    "src": "https://pub-c07c59e5e88244a6b502d21bf053245d.r2.dev/assets/track-109.mp3",
+    "slug": "109-frank-white-esche-razok",
+    "duration": 263.131
+  },
+  {
+    "id": 110,
+    "title": "feat Frank White Грифоны",
+    "artist": "Серия Андатры",
+    "src": "https://pub-c07c59e5e88244a6b502d21bf053245d.r2.dev/assets/track-110.mp3",
+    "slug": "110-feat-frank-white-grifony",
+    "duration": 212.611
+  },
+  {
+    "id": 113,
+    "title": "ДНЮХА АЛМАЕ ЛЕС 4 НА БИТЕ",
+    "artist": "Серия Андатры",
+    "src": "https://pub-c07c59e5e88244a6b502d21bf053245d.r2.dev/assets/track-113.mp3",
+    "slug": "113-dnyuha-almae-les-4-na-bite",
+    "duration": 202.449
+  },
+  {
+    "id": 114,
+    "title": "Акробатика",
+    "artist": "Серия Андатры",
+    "src": "https://pub-c07c59e5e88244a6b502d21bf053245d.r2.dev/assets/track-114.mp3",
+    "slug": "114-akrobatika",
+    "duration": 130.142
+  },
+  {
+    "id": 115,
+    "title": "Карбонат",
+    "artist": "Серия Андатры",
+    "src": "https://pub-c07c59e5e88244a6b502d21bf053245d.r2.dev/assets/track-115.mp3",
+    "slug": "115-karbonat",
+    "duration": 132.127
+  },
+  {
+    "id": 116,
+    "title": "ГОРА ПРИШЛА",
+    "artist": "Серия Андатры",
+    "src": "https://pub-c07c59e5e88244a6b502d21bf053245d.r2.dev/assets/track-116.mp3",
+    "slug": "116-gora-prishla",
+    "duration": 208.823
+  },
+  {
+    "id": 117,
+    "title": "feat Frank White Кто Ты Такой",
+    "artist": "Серия Андатры",
+    "src": "https://pub-c07c59e5e88244a6b502d21bf053245d.r2.dev/assets/track-117.mp3",
+    "slug": "117-feat-frank-white-kto-ty-takoy",
+    "duration": 164.989
+  },
+  {
+    "id": 118,
+    "title": "DR04EV0",
+    "artist": "Серия Андатры",
+    "src": "https://pub-c07c59e5e88244a6b502d21bf053245d.r2.dev/assets/track-118.mp3",
+    "slug": "118-dr04ev0",
+    "duration": 228.258
+  },
+  {
+    "id": 119,
+    "title": "без ног",
+    "artist": "Серия Андатры",
+    "src": "https://pub-c07c59e5e88244a6b502d21bf053245d.r2.dev/assets/track-119.mp3",
+    "slug": "119-bez-nog",
+    "duration": 149.368
+  },
+  {
+    "id": 120,
+    "title": "feat Frank White&MilaFe Как Пахнет Планета",
+    "artist": "Серия Андатры",
+    "src": "https://pub-c07c59e5e88244a6b502d21bf053245d.r2.dev/assets/track-120.mp3",
+    "slug": "120-feat-frank-white-milafe-kak-pahnet-planeta",
+    "duration": 222.171
+  },
+  {
+    "id": 121,
+    "title": "Свадебный Трек",
+    "artist": "Серия Андатры",
+    "src": "https://pub-c07c59e5e88244a6b502d21bf053245d.r2.dev/assets/track-121.mp3",
+    "slug": "121-svadebnyy-trek",
+    "duration": 301.976
+  },
+  {
+    "id": 122,
+    "title": "0D1N0K0 DR041L",
+    "artist": "Серия Андатры",
+    "src": "https://pub-c07c59e5e88244a6b502d21bf053245d.r2.dev/assets/track-122.mp3",
+    "slug": "122-0d1n0k0-dr041l",
+    "duration": 105.247
+  },
+  {
+    "id": 123,
+    "title": "Молодые Ветра (1)",
+    "artist": "Серия Андатры",
+    "src": "https://pub-c07c59e5e88244a6b502d21bf053245d.r2.dev/assets/track-123.mp3",
+    "slug": "123-molodye-vetra-1",
+    "duration": 356.598
+  },
+  {
+    "id": 124,
+    "title": "8 марта",
+    "artist": "Серия Андатры",
+    "src": "https://pub-c07c59e5e88244a6b502d21bf053245d.r2.dev/assets/track-124.mp3",
+    "slug": "124-8-marta",
+    "duration": 149.368
+  },
+  {
+    "id": 125,
+    "title": "Лазейки",
+    "artist": "Серия Андатры",
+    "src": "https://pub-c07c59e5e88244a6b502d21bf053245d.r2.dev/assets/track-125.mp3",
+    "slug": "125-lazeyki",
+    "duration": 326.818
+  },
+  {
+    "id": 126,
+    "title": "feat Frank White Туда-Сюда",
+    "artist": "Серия Андатры",
+    "src": "https://pub-c07c59e5e88244a6b502d21bf053245d.r2.dev/assets/track-126.mp3",
+    "slug": "126-feat-frank-white-tuda-syuda",
+    "duration": 260.31
+  },
+  {
+    "id": 127,
+    "title": "Вышел Покурить",
+    "artist": "Серия Андатры",
+    "src": "https://pub-c07c59e5e88244a6b502d21bf053245d.r2.dev/assets/track-127.mp3",
+    "slug": "127-vyshel-pokurit",
+    "duration": 96.026
+  },
+  {
+    "id": 129,
+    "title": "Пустоши",
+    "artist": "Серия Андатры",
+    "src": "https://pub-c07c59e5e88244a6b502d21bf053245d.r2.dev/assets/track-129.mp3",
+    "slug": "129-pustoshi",
+    "duration": 145.502
+  },
+  {
+    "id": 130,
+    "title": "Весенний трек",
+    "artist": "Серия Андатры",
+    "src": "https://pub-c07c59e5e88244a6b502d21bf053245d.r2.dev/assets/track-130.mp3",
+    "slug": "130-vesenniy-trek",
+    "duration": 252.343
+  },
+  {
+    "id": 131,
+    "title": "Было грустно",
+    "artist": "Серия Андатры",
+    "src": "https://pub-c07c59e5e88244a6b502d21bf053245d.r2.dev/assets/track-131.mp3",
+    "slug": "131-bylo-grustno",
+    "duration": 442.462
+  },
+  {
+    "id": 132,
+    "title": "Ошибка Фристайла",
+    "artist": "Серия Андатры",
+    "src": "https://pub-c07c59e5e88244a6b502d21bf053245d.r2.dev/assets/track-132.mp3",
+    "slug": "132-oshibka-fristayla",
+    "duration": 327.889
+  },
+  {
+    "id": 133,
+    "title": "Мастера",
+    "artist": "Серия Андатры",
+    "src": "https://pub-c07c59e5e88244a6b502d21bf053245d.r2.dev/assets/track-133.mp3",
+    "slug": "133-mastera",
+    "duration": 155.115
+  },
+  {
+    "id": 134,
+    "title": "feat triple r Визион",
+    "artist": "Серия Андатры",
+    "src": "https://pub-c07c59e5e88244a6b502d21bf053245d.r2.dev/assets/track-134.mp3",
+    "slug": "134-feat-triple-r-vizion",
+    "duration": 208.692
+  },
+  {
+    "id": 135,
+    "title": "Судак",
+    "artist": "Серия Андатры",
+    "src": "https://pub-c07c59e5e88244a6b502d21bf053245d.r2.dev/assets/track-135.mp3",
+    "slug": "135-sudak",
+    "duration": 137.221
+  },
+  {
+    "id": 136,
+    "title": "Оправдания",
+    "artist": "Серия Андатры",
+    "src": "https://pub-c07c59e5e88244a6b502d21bf053245d.r2.dev/assets/track-136.mp3",
+    "slug": "136-opravdaniya",
+    "duration": 174.785
+  }
+]
