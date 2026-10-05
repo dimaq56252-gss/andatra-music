@@ -1,4 +1,3 @@
-import {initTrackEditor} from './studio-editor.js?v=1';
 import {initMastering} from './mastering.js';
 import {saveProject,loadProject,downloadBlob} from './studio-project.js';
 const MAX_SECONDS = 600;
@@ -33,7 +32,6 @@ function initStudio() {
   const tracks = []; let nextId = 1, ctx, mic, analyser, nodes = [], playing = false, recording = false;
   let busy = false, exporting = false, recorder, chunks = [], position = 0, origin = 0, startPosition = 0;
   let recordPosition = 0, recordLead = 0, recordCorrection = 0, recordingStarted = false, unsaved = false, masterNode;
-  let editor;
   const liveGains = new Map();
   const latencyPanel = document.createElement('label');
   latencyPanel.className = 'setting';
@@ -59,7 +57,6 @@ function initStudio() {
   };
   function controls() {
     const locked = busy || exporting || recording;
-    editor?.lock(locked||playing);
     $('play').disabled = !tracks.length || locked;
     $('stop').disabled = !playing || busy || exporting;
     $('record').disabled = busy || exporting;
@@ -134,7 +131,7 @@ function initStudio() {
       let peak=0;for(let i=Math.max(0,from);i<Math.min(to,samples.length);i+=Math.max(1,Math.floor((to-from)/32)))peak=Math.max(peak,Math.abs(samples[i]));
       const size=Math.max(1,peak*height*.44);context.moveTo(x,height/2-size);context.lineTo(x,height/2+size);
     }
-    context.stroke();editor?.drawSelection(context,track,width,height);
+    context.stroke();
   }
   function trackHint(track){const start=track.start+track.offset/1000;return `${time(track.buffer.duration)} · начало ${start<0?'-':''}${time(Math.abs(start))}.${String(Math.round(Math.abs(start)*1000)%1000).padStart(3,'0')}`;}
   function render() {
@@ -161,11 +158,11 @@ function initStudio() {
       };
       offset.oninput=()=>applyOffset(false);offset.onchange=()=>applyOffset(true);
       row.querySelector('.hint').textContent = trackHint(track);
-      row.querySelector('.remove').onclick=()=>{ if(confirm('Удалить эту дорожку? Сначала скачай дубль, если он нужен.')) { editor?.checkpoint();tracks.splice(tracks.indexOf(track),1); unsaved=true; render(); } };
+      row.querySelector('.remove').onclick=()=>{ if(confirm('Удалить эту дорожку? Сначала скачай дубль, если он нужен.')) { tracks.splice(tracks.indexOf(track),1); unsaved=true; render(); } };
       const save=row.querySelector('.save'); if(save) save.onclick=()=>download(track.buffer,track.name);
       $('tracks').append(row); waveform(row.querySelector('canvas'),track);
     }
-    editor?.refresh();controls();
+    controls();
   }
   async function decode(bytes) {
     await audio(); const result=await ctx.decodeAudioData(bytes);
@@ -292,10 +289,9 @@ function initStudio() {
     const file=$('loadProject').files[0];if(!file||busy||exporting||recording||playing)return;
     if(tracks.length&&!confirm('Заменить дорожки студии проектом из файла? Сначала сохрани текущий проект.')){$('loadProject').value='';return;}
     busy=true;controls();
-    try{const p=await loadProject(file,await audio(),status);tracks.splice(0,tracks.length,...p.tracks.map(t=>({...t,id:nextId++})));$('master').value=p.master;$('masterValue').textContent=Math.round(p.master*100)+'%';$('echo').value=p.echo;$('echoValue').textContent=Math.round(p.echo*100)+'%';position=0;unsaved=true;editor?.clearHistory();render();status('Проект загружен. Настрой дорожки или отправь его на обработку ниже.');}
+    try{const p=await loadProject(file,await audio(),status);tracks.splice(0,tracks.length,...p.tracks.map(t=>({...t,id:nextId++})));$('master').value=p.master;$('masterValue').textContent=Math.round(p.master*100)+'%';$('echo').value=p.echo;$('echoValue').textContent=Math.round(p.echo*100)+'%';position=0;unsaved=true;render();status('Проект загружен. Настрой дорожки или отправь его на обработку ниже.');}
     catch(e){status(e.message,true);}finally{busy=false;$('loadProject').value='';controls();}
   };
-  editor=initTrackEditor({tracks,audio,render,endTime,nextId:()=>nextId++,getPosition:cursor,setPosition:value=>{position=value;$('seek').value=value;},markChanged:()=>{unsaved=true;},isLocked:()=>busy||exporting||recording||playing});
   render(); tick();
   const importMode = new URLSearchParams(location.search).get('import');
   if (importMode === 'separated' || importMode === 'remix') {
@@ -323,4 +319,3 @@ function initStudio() {
     })();
   }
 }
-
