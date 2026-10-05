@@ -1,3 +1,4 @@
+import {validateGeneratedAudio} from './audio-validation.js?v=1';
 const $=id=>document.getElementById(id);
 let supported=false,busy=false,music,abort,url;
 const status=(text,error=false)=>{$('status').textContent=text;$('status').classList.toggle('error',error);};
@@ -33,10 +34,7 @@ export async function generate(){
   const seed=Math.max(0,Math.min(4294967295,Number($('seed').value)||0)),durationSeconds=Number($('duration').value),started=performance.now();
   const result=await music.generate({prompt,lyrics:'[Instrumental]',audioQuality:'standard',plannerQuality:'turbo',seed,durationSeconds,sampler:'euler',signal:abort.signal});
   if(abort.signal.aborted)return;
-  const buffer=result.audioBuffer;let peak=0;
-  if(!buffer||buffer.duration<durationSeconds-.5)throw Error('Движок вернул слишком короткий звук.');
-  for(let c=0;c<buffer.numberOfChannels;c++)for(const value of buffer.getChannelData(c)){if(!Number.isFinite(value))throw Error('Модель вернула повреждённый звук.');peak=Math.max(peak,Math.abs(value));}
-  if(peak<1e-5)throw Error('Модель вернула тишину. Попробуй другой вариант.');
+  validateGeneratedAudio(result.audioBuffer,durationSeconds);
   if(url)URL.revokeObjectURL(url);url=URL.createObjectURL(result.wav);$('audio').src=url;$('download').href=url;$('download').download='ANDATRA-neural-'+seed+'.wav';$('result').hidden=false;$('generate').textContent='Создать инструментал';$('timing').textContent=durationSeconds+' секунд музыки · вариант '+seed+' · генерация '+((performance.now()-started)/1000).toFixed(1)+' с';status('Готово. Послушай результат целиком и оцени качество.');
  }catch(e){status(e.name==='AbortError'?'Остановлено. Загруженные части модели остаются в кэше.':'Не удалось создать инструментал: '+e.message,true);music?.dispose();music=undefined;}
  finally{lock(false);$('progress').hidden=true;}
