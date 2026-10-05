@@ -1,6 +1,7 @@
 import {attachSampleCredits} from './sample-engine.js?v=remix-6';
 import {analyzeVocal,alignVocalBeat,estimateVocalTempo} from './adaptation.js?v=remix-6';
 import {estimateTempo,estimateKey,NOTE_NAMES,generateInstrumental,mixRemix,validateSettings,melodySelection,cropAudio,remixChoices} from './music.js?v=variation-9';
+import {separateChannels} from './separation.js?v=remix-6';
 import {wavBytes,measure} from '../audio-processing.js';
 import {downloadBlob} from '../studio-project.js';
 export function initRemixer(){
@@ -34,7 +35,7 @@ export function initRemixer(){
     if(data.type==='progress'){$('progress').value=.3+.45*data.step/data.total;status(`Отделяю твой голос: ${data.step} из ${data.total} фрагментов. Оставь вкладку открытой.`);}
   }
   async function run(newVariant=false){
-    if(!file||busy)return;if(newVariant&&!cache)return;if(cache&&(newVariant||!settingsDirty))variation+=1;
+    if(!file||busy)return;if(newVariant&&!cache)return;if(cache&&(newVariant||!settingsDirty))variation+=7;
     const token=++generation;abort=new AbortController();transferred=false;lock(true);clearResults();$('original').pause();$('progress').hidden=false;$('progress').removeAttribute('value');let context,stage='загрузка песни';
     try{
       if(!cache){
@@ -45,7 +46,10 @@ export function initRemixer(){
         const offline=new OfflineAudioContext(2,Math.ceil(seconds*44100),44100),source=offline.createBufferSource();source.buffer=decoded;source.connect(offline.destination);source.start();const input=await offline.startRendering();if(token!==generation)return;
         if(measure(input).peak<1e-6)throw Error('В файле только тишина.');
         status('Подбираю темп…');let tempo=estimateTempo(input);let vocals,key;
-        vocals=input;key=estimateKey(input);
+        stage='отделение голоса';status('Отделяю голос от старого минуса…');
+        const data=await separateChannels([new Float32Array(input.getChannelData(0)),new Float32Array(input.getChannelData(1))],{signal:abort.signal,onProgress:progress,backend:'wasm'});if(token!==generation)return;
+        vocals=context.createBuffer(2,data.vocals[0].length,44100);for(let c=0;c<2;c++)vocals.copyToChannel(data.vocals[c],c);
+        const accompaniment=context.createBuffer(2,data.instrumental[0].length,44100);for(let c=0;c<2;c++)accompaniment.copyToChannel(data.instrumental[c],c);key=estimateKey(accompaniment);
         if(measure(vocals).peak<1e-6)throw Error('Не найден слышимый вокал. Попробуй другой фрагмент или загрузи отдельный голос.');
         stage='анализ вокала';status('Анализирую акценты, паузы и ноты голоса…');const profile=analyzeVocal(vocals);tempo=estimateVocalTempo(profile,tempo);
         cache={vocals,tempo,key,profile,alignedOffset:alignVocalBeat(profile,tempo.bpm,tempo.offset,true)};automaticTempo();analysis();
