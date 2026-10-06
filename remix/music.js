@@ -1,6 +1,6 @@
 import {EXTRA_STYLES} from './styles.js?v=groove-17';
 import {loadSamples,sampleNote,sampleDrum} from './sample-engine.js?v=groove-17';
-import {structurePlan,arrangeDynamics,editAt,applyPartEdits} from './structure.js?v=arranger-7';
+import {structurePlan,arrangeDynamics,editAt,applyPartEdits} from './structure.js?v=generator-18';
 import {composeMelody,renderLead} from './composer.js?v=groove-17';
 import {activityAt,barActivity,vocalAccentSteps,phraseEndsHere,duckInstrumental} from './adaptation.js?v=remix-6';
 import {trigger} from '../drumpad/audio.js?v=3';
@@ -92,7 +92,7 @@ export function createArrangement(duration,settings,profile=null){
 export async function generateInstrumental(duration,settings,profile=null,segment=null){
   if(!Number.isFinite(duration)||duration<=0||duration>300.01)throw Error('Поддерживаются песни до 5 минут.');
   const s=validateSettings(settings),start=Math.max(0,segment?.start||0),length=Math.min(duration-start,segment?.length||duration);if(length<=0)throw Error('Пустой фрагмент.');
-  const c=new OfflineAudioContext(2,Math.ceil(length*44100),44100),out=c.createGain(),drums=c.createGain(),melodic=c.createBiquadFilter();out.gain.value=.65;out.connect(c.destination);drums.connect(out);melodic.type='lowpass';melodic.frequency.value=4200;melodic.Q.value=.5;melodic.connect(out);if(s.samples)await loadSamples(c);
+  const c=new OfflineAudioContext(2,Math.ceil(length*44100),44100),out=c.createGain(),drums=c.createGain(),melodic=c.createBiquadFilter();out.gain.value=.65;if(s.structure){const end=duration-start,fade=Math.min(2,240/s.bpm);if(end<=length+.01){out.gain.setValueAtTime(.65,Math.max(0,end-fade));out.gain.linearRampToValueAtTime(0,Math.max(0,end));}if(!start){out.gain.setValueAtTime(0,0);out.gain.linearRampToValueAtTime(.65,.025);}}out.connect(c.destination);drums.connect(out);melodic.type='lowpass';melodic.frequency.value=4200;melodic.Q.value=.5;melodic.connect(out);if(s.samples)await loadSamples(c);
   for(const original of createArrangement(duration,s,profile)){
     if(original.when>=start+length||original.when+(original.duration||.4)<=start)continue;
     const event={...original,when:Math.max(0,original.when-start),duration:original.duration?Math.min(original.duration-Math.max(0,start-original.when),start+length-Math.max(start,original.when)):undefined};
@@ -121,3 +121,4 @@ export async function mixRemix(vocals,instrumental,settings){
   const buffer=await c.startRendering(),stats=measure(buffer);limitPeaks(buffer,s.polish&&stats.rms>0?Math.max(.7,Math.min(1.8,.14/stats.rms)):1,.89125094);return buffer;
 }
 export function melodySelection(duration,settings,profile=null){const s=validateSettings(settings);return composeMelody(s.adaptive&&s.fit>0?profile:null,s,duration);}
+

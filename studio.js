@@ -308,14 +308,15 @@ function initStudio() {
         if(importMode==='remix'){
           const loaded=[];
           for(const kind of ['beat','voice']){
-            const entry=item[kind];if(!(entry?.blob instanceof Blob)||entry.blob.size>110*1024*1024)throw Error('Некорректные дорожки ремикса.');
+            const entry=item[kind];if(kind==='voice'&&!entry)continue;if(!(entry?.blob instanceof Blob)||entry.blob.size>110*1024*1024)throw Error('Некорректные дорожки ремикса.');
             const buffer=await decode(await entry.blob.arrayBuffer());
             loaded.push({buffer,name:typeof entry.name==='string'?entry.name.slice(0,160):'Ремикс',kind,gain:Math.max(0,Math.min(1.5,Number(entry.gain)||0))});
           }
           for(const entry of loaded){add(entry.buffer,entry.name,entry.kind);tracks.at(-1).gain=entry.gain;}render();
         }else await loadFile(new File([item.blob],item.name,{type:'audio/wav'}),'beat');
-        history.replaceState(null,'',location.pathname);status(importMode==='remix'?'Ремикс открыт: голос и новый минус на отдельных дорожках.':'Минус готов. Можно записывать голос.');
+        history.replaceState(null,'',location.pathname);status(importMode==='remix'?'Дорожки открыты. Можно записывать голос и работать с минусом.':'Минус готов. Можно записывать голос.');
       } catch(error){status(error.message,true);} finally{busy=false;controls();}
     })();
   }
 }
+
