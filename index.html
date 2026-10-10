@@ -225,6 +225,10 @@ let currentPage = Math.max(1, Number.parseInt(new URLSearchParams(location.searc
 let activeTrack = null;
 let isSeeking = false;
 let playCounts = {};
+let playCountsLoaded = false;
+let playCountsFailed = false;
+try { const cached = JSON.parse(localStorage.getItem('andatra-play-counts-cache') || '{}'); if (cached && typeof cached === 'object' && !Array.isArray(cached)) { for (const [id, count] of Object.entries(cached)) if (Number.isSafeInteger(count) && count >= 0) playCounts[id] = count; } } catch {}
+const savePlayCounts = () => { try { localStorage.setItem('andatra-play-counts-cache', JSON.stringify(playCounts)); } catch {} };
 const playCountApi = 'https://iqcfuwwjtfrmqnrlxhbb.supabase.co/functions/v1/track-plays';
 const playCountCooldown = 30 * 60 * 1000;
 let countedPlayTimes = {};
@@ -238,13 +242,30 @@ let shareData = null;
 const escapeHtml = value => String(value).replace(/[&<>"']/g, character => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[character]));
 const formatTime = value => Number.isFinite(value) ? Math.floor(value / 60) + ':' + Math.floor(value % 60).toString().padStart(2, '0') : '—:—';
 const formatPlays = value => {
+  if (value == null && !playCountsLoaded) return playCountsFailed ? 'Статистика недоступна' : 'Загрузка…';
   const count = Number(value) || 0;
   const mod10 = count % 10, mod100 = count % 100;
   const word = mod10 === 1 && mod100 !== 11 ? 'прослушивание' : mod10 >= 2 && mod10 <= 4 && (mod100 < 12 || mod100 > 14) ? 'прослушивания' : 'прослушиваний';
   return count + ' ' + word;
 };
 const updateVisiblePlayCounts = () => document.querySelectorAll('[data-play-count]').forEach(element => { element.textContent = formatPlays(playCounts[element.dataset.playCount]); });
-async function loadPlayCounts() { try { const result = await fetch(playCountApi, {cache:'no-store'}); if (result.ok) { playCounts = (await result.json()).counts || {}; updateVisiblePlayCounts(); } } catch (error) { console.error(error); } }
+async function loadPlayCounts(attempt = 0) {
+  try {
+    const result = await fetch(playCountApi, {cache:'no-store', signal:AbortSignal.timeout(12000)});
+    if (!result.ok) throw new Error('Не удалось загрузить статистику');
+    const data = await result.json();
+    if (!data.counts || typeof data.counts !== 'object' || Array.isArray(data.counts)) throw new Error('Некорректная статистика');
+    for (const [id, count] of Object.entries(data.counts)) {
+      if (!Number.isSafeInteger(count) || count < 0) throw new Error('Некорректный счётчик');
+    }
+    for (const [id, count] of Object.entries(data.counts)) playCounts[id] = Math.max(Number(playCounts[id]) || 0, count);
+    playCountsLoaded = true; playCountsFailed = false; savePlayCounts();
+  } catch (error) {
+    playCountsFailed = true; console.error(error);
+    if (attempt < 2) setTimeout(() => loadPlayCounts(attempt + 1), 3000 * (attempt + 1));
+  }
+  updateVisiblePlayCounts();
+}
 async function registerPlay(id) {
   const now = Date.now();
   if (countingPlayIds.has(id) || now - (Number(countedPlayTimes[id]) || 0) < playCountCooldown) return;
@@ -253,7 +274,8 @@ async function registerPlay(id) {
     const result = await fetch(playCountApi, {method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({id})});
     if (result.ok) {
       const data = await result.json();
-      playCounts[id] = data.count;
+      playCounts[id] = Math.max(Number(playCounts[id]) || 0, data.count);
+      savePlayCounts();
       countedPlayTimes[id] = now;
       localStorage.setItem('andatra-counted-plays', JSON.stringify(countedPlayTimes));
       updateVisiblePlayCounts();
