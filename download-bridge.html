@@ -1,0 +1,24 @@
+<!doctype html><meta charset="utf-8"><title>ANDATRA download</title>
+<script>
+(() => {
+  const storage = 'https://pub-c07c59e5e88244a6b502d21bf053245d.r2.dev';
+  addEventListener('message', async event => {
+    if (event.source !== parent || !event.data || event.data.type !== 'andatra-download') return;
+    const {id, url} = event.data;
+    const reply = data => event.source.postMessage({type:'andatra-download-result', id, ...data}, event.origin);
+    try {
+      const asset = new URL(url);
+      if (asset.origin !== storage || !/^\/assets\/track-\d+\.mp3$/.test(asset.pathname) || asset.search || asset.hash) throw new Error('Invalid track');
+      const controller = new AbortController();
+      const timer = setTimeout(() => controller.abort(), 180000);
+      try {
+        const response = await fetch(asset.href, {credentials:'omit', signal:controller.signal});
+        if (!response.ok) throw new Error('HTTP ' + response.status);
+        const blob = await response.blob();
+        if (blob.size < 1024 || /text\/html|application\/json/i.test(blob.type)) throw new Error('Invalid audio file');
+        reply({blob});
+      } finally { clearTimeout(timer); }
+    } catch (error) { reply({error:error.message}); }
+  });
+})();
+</script>
