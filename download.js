@@ -1,4 +1,40 @@
 (() => {
+  const canonicalOrigin = 'https://andatra-music.ru';
+  const storageOrigin = 'https://pub-c07c59e5e88244a6b502d21bf053245d.r2.dev';
+  let bridgeReady;
+  let bridgeFrame;
+  let sequence = 0;
+  const throughMainDomain = url => {
+    if (!bridgeReady) {
+      bridgeReady = new Promise((resolve, reject) => {
+        bridgeFrame = document.createElement('iframe');
+        bridgeFrame.hidden = true;
+        bridgeFrame.title = 'Скачивание трека';
+        const timer = setTimeout(() => { bridgeReady = null; bridgeFrame.remove(); reject(new Error('Download service unavailable')); }, 30000);
+        bridgeFrame.onload = () => { clearTimeout(timer); resolve(); };
+        bridgeFrame.src = canonicalOrigin + '/download-bridge.html';
+        document.body.append(bridgeFrame);
+      });
+    }
+    return bridgeReady.then(() => new Promise((resolve, reject) => {
+      const id = 'download-' + (++sequence);
+      const finish = (error, blob) => {
+        clearTimeout(timer);
+        window.removeEventListener('message', receive);
+        error ? reject(new Error(error)) : resolve(blob);
+      };
+      const receive = event => {
+        if (event.origin !== canonicalOrigin || event.source !== bridgeFrame.contentWindow ||
+            event.data?.type !== 'andatra-download-result' || event.data.id !== id) return;
+        if (event.data.error) finish(event.data.error);
+        else if (event.data.blob instanceof Blob) finish(null, event.data.blob);
+        else finish('Invalid audio file');
+      };
+      const timer = setTimeout(() => finish('Download timed out'), 1180000);
+      window.addEventListener('message', receive);
+      bridgeFrame.contentWindow.postMessage({type:'andatra-download', id, url}, canonicalOrigin);
+    }));
+  };
   const filenameFor = link => {
     const explicit = link.getAttribute("download");
     if (explicit && !link.dataset.autoFilename) return explicit.replace(/[<>:"/\\|?*\u0000-\u001f]/g, "_");
@@ -26,9 +62,14 @@
     const controller = new AbortController();
     const timer = setTimeout(() => controller.abort(), 90000);
     try {
-      const response = await fetch(url.href, {signal: controller.signal, credentials: 'omit'});
-      if (!response.ok) throw new Error(`HTTP ${response.status}`);
-      const blob = await response.blob();
+      let blob;
+      if (url.origin === storageOrigin && location.origin !== canonicalOrigin) {
+        blob = await throughMainDomain(url.href);
+      } else {
+        const response = await fetch(url.href, {signal: controller.signal, credentials: 'omit'});
+        if (!response.ok) throw new Error(`HTTP ${response.status}`);
+        blob = await response.blob();
+      }
       if (blob.size < 1024 || /text\/html|application\/json/i.test(blob.type)) throw new Error('Invalid audio file');
       const blobUrl = URL.createObjectURL(blob);
       const save = document.createElement('a');
