@@ -7,7 +7,7 @@ import {estimateTempo,estimateKey,NOTE_NAMES,generateInstrumental,mixRemix,valid
 import {separateChannels} from './separation.js?v=remix-6';
 import {wavBytes,measure} from '../audio-processing.js';
 import {downloadBlob} from '../studio-project.js';
-import {encodeMp3} from './export.js?v=generator-18';
+import {encodeMp3} from './export.js?v=mp3-32';
 export function initRemixer(){
   const $=id=>document.getElementById(id),status=(text,error=false)=>{$('status').textContent=text;$('status').classList.toggle('error',error);};
   const newSeed=()=>crypto.getRandomValues(new Uint32Array(1))[0];
