@@ -1,8 +1,22 @@
 // Seeded musical phrases: new note paths and durations, rather than rotated preset loops.
-import {randomSource,songSeed} from './production.js?v=library-30';
+import {randomSource,songSeed} from './production.js?v=rap-31';
 const pick=(rng,items)=>items[Math.floor(rng()*items.length)];
 const bounds=(x,lo,hi)=>Math.max(lo,Math.min(hi,x));
+export const RAP_STYLES=new Set(['rap','boom','trap','drill','lofi','bounce','phonk','rnb']);
+function rapPhrase(s,development,phraseBars){
+ const rng=randomSource(songSeed(s,700)),bars=phraseBars||4,anchor=pick(rng,[0,2,4]),cells=[[0,6,12,19,24],[0,3,10,18,26],[2,8,14,20,27],[0,7,12,22,28],[0,4,11,18,25],[2,6,14,19,26],[0,6,10,20,28],[0,3,12,22,27]],cell=cells[(s.variation+Math.floor(rng()*8))%cells.length];
+ const tones=cell.map((_,i)=>i===0?anchor:anchor+pick(rng,[-2,-1,0,2,4]));
+ const steps=[],degrees=[],lengths=[];
+ for(let offset=0;offset<bars*16;offset+=32)for(let i=0;i<cell.length;i++){
+  const t=offset+cell[i];if(t>=bars*16-2)continue;
+  steps.push(t);degrees.push(i===cell.length-1?(development%2?anchor+2:anchor):tones[i]);
+  lengths.push(pick(rng,[1.2,1.6,2.2,2.8]));
+ }
+ // The same cell returns; only its final answer changes as the song develops.
+ return {bars,steps,degrees,lengths,family:s.variation%8,anchor};
+}
 export function inventPhrase(s,development=0,phraseBars=null){
+ if(RAP_STYLES.has(s.style))return rapPhrase(s,development,phraseBars);
  const rng=randomSource(songSeed(s,700+development)),family=((s.variation||0)+development)%8;
  const bars=phraseBars||(['trap','drill','rnb','dnb','synth'].includes(s.style)?4:pick(rng,[2,4])),total=bars*16;
  const sparse=['trap','drill','rnb','lofi','dnb'].includes(s.style),gaps=sparse?[3,4,5,6,7,8,10]:[2,3,4,5,6,8];

@@ -1,9 +1,9 @@
-import {inventPhrase} from './phrases.js?v=library-30';
-import {extraMelodies,STYLE_SOUNDS} from './styles.js?v=library-30';
+import {inventPhrase,RAP_STYLES} from './phrases.js?v=rap-31';
+import {extraMelodies,STYLE_SOUNDS} from './styles.js?v=rap-31';
 import {catalog,note} from '../drumpad/melodies.js?v=3';
 import {activityAt} from './adaptation.js?v=remix-6';
-import {editAt,structurePlan} from './structure.js?v=library-30';
-import {randomSource,songSeed} from './production.js?v=library-30';
+import {editAt,structurePlan} from './structure.js?v=rap-31';
+import {randomSource,songSeed} from './production.js?v=rap-31';
 const styleMap={rap:['boom','funk'],trap:['trap'],house:['house'],drill:['drill'],lofi:['lofi','ambient'],synth:['synth']};
 const pc=(n)=>((n%12)+12)%12;
 const midi=(degree,root,scale,octave)=>12*(octave+1)+root+scale[((degree%7)+7)%7]+12*Math.floor(degree/7);
@@ -11,7 +11,7 @@ const midi=(degree,root,scale,octave)=>12*(octave+1)+root+scale[((degree%7)+7)%7
 export function harmonicPlan(profile,settings,duration,progression){
  const bar=240/settings.bpm,scale=settings.mode==='major'?[0,2,4,5,7,9,11]:[0,2,3,5,7,8,10],first=Math.floor(-settings.offset/bar)-1,count=Math.ceil(duration/bar)+3,degrees=[0,1,2,3,4,5,6],states=[];
  let cursor=0;
- for(let b=first;b<first+count;b++){const start=settings.offset+b*bar,end=start+bar;while(cursor<(profile?.pitches.length||0)&&profile.pitches[cursor].time<start)cursor++;const tones=[];for(let i=cursor;i<(profile?.pitches.length||0)&&profile.pitches[i].time<end;i++)tones.push(profile.pitches[i]);const harmonicBar=Math.floor(b/(['trap','drill','synth','dnb'].includes(settings.style)?2:1)),prior=progression[((harmonicBar%progression.length)+progression.length)%progression.length];
+ for(let b=first;b<first+count;b++){const start=settings.offset+b*bar,end=start+bar;while(cursor<(profile?.pitches.length||0)&&profile.pitches[cursor].time<start)cursor++;const tones=[];for(let i=cursor;i<(profile?.pitches.length||0)&&profile.pitches[i].time<end;i++)tones.push(profile.pitches[i]);const harmonicBar=Math.floor(b/((RAP_STYLES.has(settings.style)||['synth','dnb'].includes(settings.style))?2:1)),prior=progression[((harmonicBar%progression.length)+progression.length)%progression.length];
   const scores=degrees.map(d=>{const chord=[0,2,4].map(n=>pc(settings.root+scale[(d+n)%7]));let total=0,weight=0;for(const p of tones){const w=p.weight||1,distance=Math.min(...chord.map(n=>Math.min(pc(p.note-n),pc(n-p.note))));total+=w*(distance===0?1:distance===1?-.75:distance===2?.08:-.3);weight+=w;}return (weight?total/weight:0)*(settings.adaptive&&profile?.key?settings.fit:0)+(d===prior?.18:.0)+(d===0?.04:0);});
   const prev=states.at(-1),row=degrees.map((d,i)=>{if(!prev)return {score:scores[i],from:0};let best=-Infinity,from=0;prev.forEach((p,j)=>{const distance=Math.abs(d-degrees[j]),transition=d===degrees[j]?.04:distance===3||distance===4?.02:-.07;const score=p.score+scores[i]+transition;if(score>best){best=score;from=j;}});return {score:best,from};});states.push(row);
  }
@@ -27,7 +27,7 @@ export function composeMelody(profile,s,duration){
  const {plan,scale,bar}=harmonicPlan(profile,s,duration,progression),step=bar/16,events=[],sections=structurePlan(duration,s,profile);
  const theme=inventPhrase(s),palette=STYLE_SOUNDS[s.style]||STYLE_SOUNDS.rap;
  const mids=profile?.pitches.map(p=>p.midi).filter(Number.isFinite).sort((a,b)=>a-b)||[],voiceMedian=mids[Math.floor(mids.length/2)]||60,octave=voiceMedian>66?3:4;
- const hookSettings={...s,seed:(s.seed^0x9e3779b9)>>>0,variation:(s.variation+3)%10000},hook=inventPhrase(hookSettings,4,theme.bars);
+ const hookSettings={...s,seed:(s.seed^0x9e3779b9)>>>0,variation:(s.variation+3)%10000},hook=RAP_STYLES.has(s.style)?{...theme,degrees:theme.degrees.map((d,i)=>i%5===3?d+2:d),lengths:theme.lengths.map(n=>n*1.2)}:inventPhrase(hookSettings,4,theme.bars);
  const segments=[];for(const part of sections){const last=segments.at(-1);if(last?.type===part.type)last.end=part.end;else segments.push({...part});}
  let verseNumber=0;
  for(const segment of segments){
@@ -43,13 +43,13 @@ export function composeMelody(profile,s,duration){
     if(s.structure&&(section==='intro'&&i>2||section==='outro'&&i%2))continue;
     const important=i===0||i===phrase.steps.length-1||r%8===0;
     const spare=chorus?.3:.65;
-    if(!important&&(s.character==='calm'&&decision()<.3||active>.5&&decision()<active*spare||section==='verse'&&i%4===2))continue;
+    if(!important&&(s.character==='calm'&&decision()<.3||active>.5&&decision()<active*spare||section==='verse'&&!RAP_STYLES.has(s.style)&&i%4===2))continue;
     const singing=profile?.key&&vocalNoteAt(profile,when),version=editAt(s,when)?.versions.lead||0;
     const degree=plan.get(absoluteBar)??0;let d=phrase.degrees[i]+degree;
     if(version){const edited=inventPhrase({...s,variation:s.variation+version},verseNumber,theme.bars);d=edited.degrees[i%edited.degrees.length]+degree;}
     if(response&&i>=phrase.steps.length-2)d=degree+(i===phrase.steps.length-1?0:2);
     if(singing&&active>.3){const candidate=[d,d-1,d+1].find(x=>[0,3,4,7,8,9].includes(pc(midi(x,s.root,scale,octave)-singing.note)));if(candidate!==undefined)d=candidate;}
-    const length=Math.min(phrase.lengths[i]*step,duration-when,segment.end-when);if(length<.03)continue;
+    const length=Math.min(phrase.lengths[i]*step,duration-when,segment.end-when,...(RAP_STYLES.has(s.style)&&active>.25?[step*2]:[]));if(length<.03)continue;
     const baseInstrument=s.instrument==='auto'?palette[Math.floor(s.seed/17)%palette.length]:s.instrument;
     const index=Math.max(0,palette.indexOf(baseInstrument)),instrument=s.autoInstrument&&chorus?palette[(index+1)%palette.length]:baseInstrument;
     let pitch=midi(d,s.root,scale,octave);if(chorus&&pitch<64)pitch+=12;while(pitch>79)pitch-=12;while(pitch<48)pitch+=12;
