@@ -38,15 +38,17 @@ const bassPatterns={
  rnb:[[0,7,8,10],[0,6,10,14]]
 };
 export function composeBacking(duration,s,profile,composition,style){
- const step=60/s.bpm/4,bar=step*16,scale=composition.scale,plan=structurePlan(duration,s,profile),palette=PALETTES[s.style]||PALETTES.rap,events=[],rng=randomSource(songSeed(s)),compInstrument=choose(rng,palette.chord),bassPool=bassPatterns[s.style]||bassPatterns.rap;
- const family=choose(rng,bassPool),alternate=choose(rng,bassPool),swing=s.swing;
+ const step=60/s.bpm/4,bar=step*16,scale=composition.scale,plan=structurePlan(duration,s,profile),palette=PALETTES[s.style]||PALETTES.rap,events=[],rng=randomSource(songSeed(s)),compInstrument=palette.chord[s.variation%palette.chord.length],bassPool=bassPatterns[s.style]||bassPatterns.rap;
+ const family=bassPool[s.variation%bassPool.length],alternate=bassPool[(s.variation+1)%bassPool.length],swing=s.swing;
  const pitch=(degree,octave)=>12*(octave+1)+s.root+scale[((degree%7)+7)%7]+12*Math.floor(degree/7);
  function add(e){if(e.when>=0&&e.when<duration&&(!e.duration||e.duration>.015)){if(e.duration)e.duration=Math.min(e.duration,duration-e.when);events.push(e);}}
  for(let b=Math.floor(-s.offset/bar)-1;s.offset+b*bar<duration;b++){
   const start=s.offset+b*bar,local=randomSource(songSeed(s,b+100)),phase=((b%8)+8)%8,section=sectionAt(plan,Math.max(0,start)),density=barActivity(profile,start,bar),degree=composition.plan.get(b)??0;
   const isBreak=s.structure&&section==='break',intro=s.structure&&section==='intro',outro=s.structure&&section==='outro',chorus=section==='chorus',nextSection=sectionAt(plan,start+bar),transition=s.structure&&nextSection!==section;
   const time=i=>start+i*step+(Math.floor(i)%2?swing*step:0);
-  const accents=vocalAccentSteps(profile,start,step),kicks=[...style.kick];
+  const accents=vocalAccentSteps(profile,start,step);
+  const kickFamilies={rap:[[0,6,8,14],[0,3,8,11],[0,7,10,14],[0,5,8,15]],boom:[[0,6,8,11],[0,3,8,14],[0,7,10,15]],trap:[[0,7,10],[0,3,6,11],[0,5,10,14],[0,6,9,15]],drill:[[0,5,10,14],[0,3,9,14],[0,6,11,15]],lofi:[[0,6,9],[0,7,10],[0,3,8,14]],bounce:[[0,3,8,10,14],[0,6,8,11],[0,2,7,10,15]],phonk:[[0,3,7,8,11,14],[0,6,8,10,15],[0,2,7,10,14]],dnb:[[0,6,10],[0,3,10,14],[0,7,8,10]],afro:[[0,7,10],[0,3,8,14],[0,6,10,15]],rnb:[[0,7,10],[0,3,8,14],[0,6,10,15]]};
+  const families=kickFamilies[s.style],kicks=[...(families?families[s.variation%families.length]:style.kick)];
   if(!fourFloor.has(s.style)&&!['reggaeton'].includes(s.style)){
    if(phase===2||phase===6){const movable=kicks.findIndex(k=>k%4!==0);if(movable>=0)kicks[movable]=Math.max(1,Math.min(15,kicks[movable]+(local()<.5?-1:1)));}
    if(phase===3||phase===7)kicks.push(choose(local,[13,14,15]));

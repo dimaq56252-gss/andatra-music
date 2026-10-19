@@ -2,7 +2,7 @@ import {extraMelodies,STYLE_SOUNDS} from './styles.js?v=production-20';
 import {catalog,note} from '../drumpad/melodies.js?v=3';
 import {activityAt,barActivity,phraseEndsHere} from './adaptation.js?v=remix-6';
 import {editAt,structurePlan,sectionAt} from './structure.js?v=production-20';
-import {randomSource,songSeed} from './production.js?v=production-20';
+import {randomSource,songSeed} from './production.js?v=renew-24';
 const styleMap={rap:['boom','funk'],trap:['trap'],house:['house'],drill:['drill'],lofi:['lofi','ambient'],synth:['synth']};
 const clamp=(v,a,b)=>Math.max(a,Math.min(b,v));
 const pc=(n)=>((n%12)+12)%12;

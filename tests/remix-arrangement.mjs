@@ -17,3 +17,13 @@ for(const style of Object.keys(STYLES)){
 }
 for(const [bpm,offset]of [[40,-2],[240,4]])assert.ok(createArrangement(300,{...base,style:'drill',bpm,offset}).every(e=>e.when>=0&&e.when<300));
 console.log('PASS: 14 styles, composition stability, variants, parts, musical sections, mute controls, timing boundaries');
+// Refresh must change prominent parts, not just gain values or tiny timing offsets.
+for(const style of ['rap','trap','drill','lofi','boom','bounce','dnb','afro','rnb']){
+ const first=createArrangement(60,{...base,style,variation:0}),next=createArrangement(60,{...base,style,variation:1});
+ const kicks=events=>events.filter(e=>e.kind==='drum'&&e.index===0).map(e=>+e.when.toFixed(2));
+ const bass=events=>events.filter(e=>e.role==='bass').map(e=>[+e.when.toFixed(2),e.note,+e.duration.toFixed(2)]);
+ assert.notDeepEqual(kicks(first),kicks(next),style+': main kick pattern repeated');
+ assert.notDeepEqual(bass(first),bass(next),style+': bass phrase repeated');
+ assert.notEqual(first.find(e=>e.role==='chord')?.instrument,next.find(e=>e.role==='chord')?.instrument,style+': automatic comp instrument repeated');
+}
+console.log('PASS: prominent kick, bass and automatic instrument changes on refresh');
