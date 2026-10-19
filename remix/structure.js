@@ -4,6 +4,7 @@ export function structurePlan(duration,s,profile){
  return Array.from({length:count},(_,b)=>{
   const start=b*bar,end=Math.min(duration,(b+1)*bar),phase=(b-edge)/middle;let type='verse';
   if(b<edge)type='intro';else if(b>=count-edge)type='outro';else if(phase<.28)type='verse';else if(phase<.48)type='chorus';else if(phase<.65)type='verse';else if(phase<.75&&count>20)type='break';else type='chorus';
+  if(count>64&&b>=edge&&b<count-edge){const position=profile&&first<=bar?b:b-edge;type=position%24<16?'verse':'chorus';if(b>=count-edge-8)type='chorus';}
   // Vocal loudness alone cannot identify a chorus. Keep a bounded musical form,
   // while respecting leading/trailing silence and explicit section edits.
   if(profile){if(end<=first)type='intro';else if(start>=last&&b>=count-4)type='outro';else if((type==='intro'||type==='outro')&&start<last&&end>first)type='verse';}

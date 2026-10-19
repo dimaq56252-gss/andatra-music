@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
-import {createArrangement,validateSettings,STYLES,describeStructure} from '../remix/music.js?v=form-27';
-import {structurePlan} from '../remix/structure.js?v=form-27';
+import {createArrangement,validateSettings,STYLES,describeStructure} from '../remix/music.js?v=form-28';
+import {structurePlan} from '../remix/structure.js?v=form-28';
 const profile={accents:[],rate:20,duration:120,active:new Float32Array(2400).fill(.8),rms:new Float32Array(2400).fill(.1),pitches:[],phrases:[{start:0,end:120}],peak:.2};
 const base={seed:734829,bpm:100,root:9,instrument:'piano',autoInstrument:false,adaptive:true,fit:.85,structure:true};
 for(const style of Object.keys(STYLES)){
@@ -21,3 +21,8 @@ for(const style of Object.keys(STYLES)){
 const automatic=createArrangement(120,{...base,style:'rap',autoInstrument:true,instrument:'guitar'},profile);
 assert.ok(automatic.some(e=>e.theme==='hook'&&e.instrument==='strings'));
 console.log('PASS: distinct verse/hook notes, bass, drums and atmosphere; bounded chorus with constant-energy voice; manual timbre and structure-off controls; deterministic rebuild');
+
+const longForm=describeStructure(300,validateSettings({...base,adaptive:false,bpm:120}));
+assert.ok(longForm.filter(p=>p.type==='chorus').length>=3);
+assert.ok(longForm.filter(p=>p.type==='verse').every(p=>p.end-p.start<=16*2+.01));
+console.log('PASS: long tracks alternate bounded verses and hooks instead of stretching one loop');

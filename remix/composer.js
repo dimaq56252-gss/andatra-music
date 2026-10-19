@@ -1,9 +1,9 @@
-import {inventPhrase} from './phrases.js?v=form-27';
+import {inventPhrase} from './phrases.js?v=form-28';
 import {extraMelodies,STYLE_SOUNDS} from './styles.js?v=space-26';
 import {catalog,note} from '../drumpad/melodies.js?v=3';
 import {activityAt} from './adaptation.js?v=remix-6';
-import {editAt,structurePlan} from './structure.js?v=form-27';
-import {randomSource,songSeed} from './production.js?v=form-27';
+import {editAt,structurePlan} from './structure.js?v=form-28';
+import {randomSource,songSeed} from './production.js?v=form-28';
 const styleMap={rap:['boom','funk'],trap:['trap'],house:['house'],drill:['drill'],lofi:['lofi','ambient'],synth:['synth']};
 const pc=(n)=>((n%12)+12)%12;
 const midi=(degree,root,scale,octave)=>12*(octave+1)+root+scale[((degree%7)+7)%7]+12*Math.floor(degree/7);
@@ -36,7 +36,7 @@ export function composeMelody(profile,s,duration){
   const themeName=chorus?'hook':segment.type==='verse'?'verse-'+verseNumber:segment.type;
   const first=Math.floor((segment.start-s.offset)/bar);
   for(let b=first;s.offset+b*bar<segment.end;b+=theme.bars){
-   const phrase=sectionTheme,response=((Math.floor((b-first)/theme.bars)%2)+2)%2===1,decision=randomSource(songSeed(s,b+900));
+   const development=Math.floor((b-first)/8),phrase=segment.type==='verse'&&development>0?inventPhrase(s,verseNumber*7+development,theme.bars):sectionTheme,response=((Math.floor((b-first)/theme.bars)%2)+2)%2===1,decision=randomSource(songSeed(s,b+900));
    for(let i=0;i<phrase.steps.length;i++){
     const r=phrase.steps[i],absoluteBar=b+Math.floor(r/16),when=s.offset+b*bar+r*step+(r%2?s.swing*step:0);if(when<segment.start||when>=segment.end||when<0||when>=duration)continue;
     const section=segment.type,activity=activityAt(profile,when),active=s.adaptive?s.fit*activity:0;

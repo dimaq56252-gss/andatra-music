@@ -1,6 +1,6 @@
 // Original arrangement and synthesis; no remote generation or borrowed song loops.
 import {barActivity,activityAt,vocalAccentSteps} from './adaptation.js?v=remix-6';
-import {structurePlan,sectionAt} from './structure.js?v=form-27';
+import {structurePlan,sectionAt} from './structure.js?v=form-28';
 export function randomSource(seed){let state=seed>>>0;return ()=>{state=(state+0x6D2B79F5)>>>0;let t=state;t=Math.imul(t^(t>>>15),t|1);t^=t+Math.imul(t^(t>>>7),t|61);return ((t^(t>>>14))>>>0)/4294967296;};}
 export function songSeed(s,salt=0){return (Math.imul((s.seed||1)^(s.variation+1),2654435761)^Math.imul(salt+1,2246822519)^Array.from(s.style).reduce((a,c)=>Math.imul(a,31)+c.charCodeAt(0),0))>>>0;}
 const choose=(rng,items)=>items[Math.floor(rng()*items.length)];
@@ -77,7 +77,7 @@ export function composeBacking(duration,s,profile,composition,style){
    if(halfTime.has(s.style)&&(phase===3||phase===7))for(const i of [13,13.5,14,14.5,15,15.5])add({kind:'drum',index:3,when:time(i),level:.16+(i-13)*.025,kit:style.kit});
    if(phase===7||transition){for(const i of [13,14,14.5,15,15.5])add({kind:'drum',index:i<14?6:1,when:time(i),level:.2+(i-13)*.11,kit:style.kit});}
   }
-  const pattern=chorus?alternate:phase===7?alternate:family,root=pitch(degree,1);
+  const pattern=chorus?alternate:(Math.floor(Math.max(0,b)/8)%2===1||phase===7)?alternate:family,root=pitch(degree,1);
   if(!isBreak&&(!intro||b%2===1))for(let j=0;j<pattern.length;j++){
    const i=pattern[j];if(silentTail&&i>=14)continue;
    const next=pattern[j+1]??16,gap=next-i;

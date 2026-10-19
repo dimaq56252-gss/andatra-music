@@ -1,5 +1,5 @@
 // Seeded musical phrases: new note paths and durations, rather than rotated preset loops.
-import {randomSource,songSeed} from './production.js?v=form-27';
+import {randomSource,songSeed} from './production.js?v=form-28';
 const pick=(rng,items)=>items[Math.floor(rng()*items.length)];
 const bounds=(x,lo,hi)=>Math.max(lo,Math.min(hi,x));
 export function inventPhrase(s,development=0,phraseBars=null){
