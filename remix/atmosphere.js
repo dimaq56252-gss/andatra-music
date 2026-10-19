@@ -1,15 +1,15 @@
+import {structurePlan,sectionAt} from './structure.js?v=form-27';
 // Original sustained timbres and a damped stereo reverb; no additional sound downloads.
-const clamp=(x,a,b)=>Math.max(a,Math.min(b,x));
 export function atmosphereEvents(duration,s,composition){
  if(!s.harmony||s.atmosphere<=0)return [];
- const bar=240/s.bpm,events=[],scale=composition.scale;
+ const bar=240/s.bpm,events=[],scale=composition.scale,plan=structurePlan(duration,s,composition.profile);
  const color=['trap','drill','phonk'].includes(s.style)?'dark':['lofi','rnb','boom'].includes(s.style)?'warm':s.style==='synth'?'wide':'air';
  for(let b=Math.floor(-s.offset/bar)-1;s.offset+b*bar<duration;b++){
   const when=s.offset+b*bar;if(when<0)continue;
-  const degree=composition.plan.get(b)??0;
-  for(const [voice,d]of [degree,degree+4].entries()){
+  const degree=composition.plan.get(b)??0,chorus=sectionAt(plan,when)==='chorus',voices=chorus?[degree,degree+4,degree+9]:[degree,degree+4];
+  for(const [voice,d]of voices.entries()){
    let note=48+s.root+scale[d%7]+12*Math.floor(d/7);while(note>72)note-=12;
-   events.push({kind:'atmosphere',role:'chord',instrument:color,note,when,duration:Math.min(bar,duration-when),level:s.atmosphere*.075*(voice?.8:1),pan:voice?.55:-.55});
+   events.push({kind:'atmosphere',role:'chord',instrument:color,note,when,duration:Math.min(bar,duration-when),level:s.atmosphere*.075*(voice===2?.3:voice?.8:1)*(chorus?1.08:1),pan:voice===2?0:voice?(chorus?.8:.4):(chorus?-.8:-.4)});
   }
  }
  return events;
@@ -19,11 +19,11 @@ export function createSpace(c,out,s){
  hp.type='highpass';hp.frequency.value=180;low.type='lowpass';low.frequency.value=['trap','drill','phonk'].includes(s.style)?3400:5200;
  pad.connect(hp).connect(low).connect(dry).connect(out);dry.gain.value=.85;
  low.connect(send);send.gain.value=s.atmosphere;
- const input=c.createGain(),pre=c.createDelay(.1),cut=c.createBiquadFilter();input.gain.value=.13*s.atmosphere;input.connect(send);send.connect(pre).connect(cut);pre.delayTime.value=.019;cut.type='highpass';cut.frequency.value=220;
+ const input=c.createGain(),pre=c.createDelay(.1),cut=c.createBiquadFilter();input.gain.value=.13*s.atmosphere;input.connect(send);send.connect(pre).connect(cut);pre.delayTime.value=Math.round(.019*c.sampleRate)/c.sampleRate;cut.type='highpass';cut.frequency.value=220;
  // Four comb branches with different stereo positions and low-pass feedback diffuse the tail.
  for(const [i,t]of [.037,.053,.079,.113].entries()){
   const delay=c.createDelay(1),damp=c.createBiquadFilter(),feedback=c.createGain(),wet=c.createGain(),pan=c.createStereoPanner();
-  delay.delayTime.value=t*(1+(s.seed%13)*.003);damp.type='lowpass';damp.frequency.value=2500+i*650;
+  delay.delayTime.value=Math.round(t*(1+(s.seed%13)*.003)*c.sampleRate)/c.sampleRate;damp.type='lowpass';damp.frequency.value=2500+i*650;
   feedback.gain.value=.66+i*.025;wet.gain.value=.17;pan.pan.value=[-.85,.7,-.45,.9][i];
   cut.connect(delay);delay.connect(damp).connect(feedback).connect(delay);damp.connect(wet).connect(pan).connect(out);
  }

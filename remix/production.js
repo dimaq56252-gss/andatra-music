@@ -1,6 +1,6 @@
 // Original arrangement and synthesis; no remote generation or borrowed song loops.
 import {barActivity,activityAt,vocalAccentSteps} from './adaptation.js?v=remix-6';
-import {structurePlan,sectionAt} from './structure.js?v=production-20';
+import {structurePlan,sectionAt} from './structure.js?v=form-27';
 export function randomSource(seed){let state=seed>>>0;return ()=>{state=(state+0x6D2B79F5)>>>0;let t=state;t=Math.imul(t^(t>>>15),t|1);t^=t+Math.imul(t^(t>>>7),t|61);return ((t^(t>>>14))>>>0)/4294967296;};}
 export function songSeed(s,salt=0){return (Math.imul((s.seed||1)^(s.variation+1),2654435761)^Math.imul(salt+1,2246822519)^Array.from(s.style).reduce((a,c)=>Math.imul(a,31)+c.charCodeAt(0),0))>>>0;}
 const choose=(rng,items)=>items[Math.floor(rng()*items.length)];
@@ -48,7 +48,7 @@ export function composeBacking(duration,s,profile,composition,style){
   const time=i=>start+i*step+(Math.floor(i)%2?swing*step:0);
   const accents=vocalAccentSteps(profile,start,step);
   const kickFamilies={rap:[[0,6,8,14],[0,3,8,11],[0,7,10,14],[0,5,8,15]],boom:[[0,6,8,11],[0,3,8,14],[0,7,10,15]],trap:[[0,7,10],[0,3,6,11],[0,5,10,14],[0,6,9,15]],drill:[[0,5,10,14],[0,3,9,14],[0,6,11,15]],lofi:[[0,6,9],[0,7,10],[0,3,8,14]],bounce:[[0,3,8,10,14],[0,6,8,11],[0,2,7,10,15]],phonk:[[0,3,7,8,11,14],[0,6,8,10,15],[0,2,7,10,14]],dnb:[[0,6,10],[0,3,10,14],[0,7,8,10]],afro:[[0,7,10],[0,3,8,14],[0,6,10,15]],rnb:[[0,7,10],[0,3,8,14],[0,6,10,15]]};
-  const families=kickFamilies[s.style],kicks=[...(families?families[s.variation%families.length]:style.kick)];
+  const families=kickFamilies[s.style],kicks=[...(families?families[(s.variation+(chorus?1:0))%families.length]:style.kick)];
   if(!fourFloor.has(s.style)&&!['reggaeton'].includes(s.style)){
    if(phase===2||phase===6){const movable=kicks.findIndex(k=>k%4!==0);if(movable>=0)kicks[movable]=Math.max(1,Math.min(15,kicks[movable]+(local()<.5?-1:1)));}
    if(phase===3||phase===7)kicks.push(choose(local,[13,14,15]));
@@ -59,11 +59,12 @@ export function composeBacking(duration,s,profile,composition,style){
   for(const [name,index] of [['kick',0],['snare',1],['clap',2],['hat',3],['open',4]]){
    if(isBreak&&(index<3||index===4))continue;
    if(intro&&(index===1||index===2||b%2===0&&index===0))continue;
-   const rhythm=name==='kick'?[...new Set(kicks)]:style[name];
+   const rhythm=name==='kick'?[...new Set(kicks)]:name==='hat'&&chorus?[...new Set([...style.hat,...(halfTime.has(s.style)?[3,7,11,15]:[3,11])])]:style[name];
    for(const i of rhythm){
     if(silentTail&&i>=14&&index!==1)continue;
     if(intro&&index===3&&i%4!==0||outro&&index===3&&i%4!==0)continue;
     if(isBreak&&i%8!==0)continue;
+    if(section==='verse'&&name==='hat'&&phase%2===1&&i%4===2)continue;
     const activity=activityAt(profile,time(i)),velocity=(index===0?1.08:index===1?.94:index===2?.52:index===3?.25:.30)*(i%4===0?1:choose(local,[.74,.83,.91]));
     const human=index>=3?(local()-.5)*Math.min(.012,step*.12):0;
     add({kind:'drum',index,when:time(i)+human,level:velocity*(index>=3?1-.25*activity*s.fit:1),kit:style.kit});
@@ -76,7 +77,7 @@ export function composeBacking(duration,s,profile,composition,style){
    if(halfTime.has(s.style)&&(phase===3||phase===7))for(const i of [13,13.5,14,14.5,15,15.5])add({kind:'drum',index:3,when:time(i),level:.16+(i-13)*.025,kit:style.kit});
    if(phase===7||transition){for(const i of [13,14,14.5,15,15.5])add({kind:'drum',index:i<14?6:1,when:time(i),level:.2+(i-13)*.11,kit:style.kit});}
   }
-  const pattern=phase>=4?alternate:family,root=pitch(degree,1);
+  const pattern=chorus?alternate:phase===7?alternate:family,root=pitch(degree,1);
   if(!isBreak&&(!intro||b%2===1))for(let j=0;j<pattern.length;j++){
    const i=pattern[j];if(silentTail&&i>=14)continue;
    const next=pattern[j+1]??16,gap=next-i;
@@ -91,10 +92,12 @@ export function composeBacking(duration,s,profile,composition,style){
    // Keep comping in a stable middle register with connected inversions.
    const inversion=(Math.floor(Math.max(0,b)/4)+s.seed)%3;voicing=voicing.map((n,i)=>i<inversion?n+12:n).sort((a,b)=>a-b);while(voicing[0]>62)voicing=voicing.map(n=>n-12);
    const compPatterns=[palette.comp,s.style==='house'?[2,5,10,13]:[0,5,11],s.style==='house'?[3,6,11,14]:[2,7,12],s.style==='synth'?[0]:[0,7,14]];
-   const rhythm=isBreak?[0]:intro?[0,8]:compPatterns[s.variation%compPatterns.length];
+   const comp=compPatterns[(s.variation+(chorus?1:0))%compPatterns.length];
+   const rhythm=isBreak?[0]:intro?[0,8]:section==='verse'?comp.filter((_,i)=>i%2===0):comp;
+   const sectionInstrument=chorus?palette.chord[(s.variation+1)%palette.chord.length]:compInstrument;
    for(const i of rhythm){
     if(density>.65&&i!==0&&activityAt(profile,time(i))>.6&&i%4!==2)continue;
-    for(let n=0;n<voicing.length;n++)add({kind:'note',role:'chord',instrument:compInstrument,note:voicing[n],when:time(i)+n*.009,duration:step*(isBreak?14:palette.length),level:.052*(1-.3*activityAt(profile,time(i))*s.fit),pan:(n-(voicing.length-1)/2)*.13});
+    for(let n=0;n<voicing.length;n++)add({kind:'note',role:'chord',instrument:sectionInstrument,note:voicing[n],when:time(i)+n*.009,duration:step*(isBreak?14:palette.length),level:.052*(1-.3*activityAt(profile,time(i))*s.fit),pan:(n-(voicing.length-1)/2)*.13});
    }
    // A slower bed in the hook contrasts with rhythmic comping in the verse.
    if(chorus||isBreak||s.style==='synth')for(const d of [degree,degree+4])add({kind:'note',role:'chord',instrument:palette.pad,note:pitch(d,3),when:start,duration:bar*.96,level:chorus?.032:.023,pan:d===degree?-.4:.4});

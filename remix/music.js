@@ -1,9 +1,9 @@
-import {atmosphereEvents,createSpace,renderAtmosphere} from './atmosphere.js?v=space-26';
-import {composeBacking,createProductionBus,renderBass,renderNoiseFx} from './production.js?v=space-26';
+import {atmosphereEvents,createSpace,renderAtmosphere} from './atmosphere.js?v=form-27';
+import {composeBacking,createProductionBus,renderBass,renderNoiseFx} from './production.js?v=form-27';
 import {EXTRA_STYLES} from './styles.js?v=space-26';
 import {loadSamples,sampleNote,sampleDrum} from './sample-engine.js?v=production-20';
-import {structurePlan,arrangeDynamics,applyPartEdits} from './structure.js?v=production-20';
-import {composeMelody,renderLead} from './composer.js?v=space-26';
+import {structurePlan,arrangeDynamics,applyPartEdits} from './structure.js?v=form-27';
+import {composeMelody,renderLead} from './composer.js?v=form-27';
 import {duckInstrumental} from './adaptation.js?v=remix-6';
 import {trigger} from '../drumpad/audio.js?v=3';
 import {limitPeaks,measure} from '../audio-processing.js';
@@ -52,13 +52,13 @@ export function validateSettings(s){
   const num=(value,min,max,fallback)=>Number.isFinite(Number(value))?Math.max(min,Math.min(max,Number(value))):fallback;
   const roles=['drum','bass','chord','lead'],partGains=Object.fromEntries(roles.map(role=>[role,num(s.partGains?.[role],0,1.5,1)]));
   const edits=(Array.isArray(s.edits)?s.edits:[]).slice(0,100).filter(e=>Number.isFinite(e.start)&&Number.isFinite(e.end)&&e.end>e.start).map(e=>({start:Math.max(0,e.start),end:Math.min(300,e.end),type:['intro','verse','chorus','break','outro'].includes(e.type)?e.type:'auto',gains:Object.fromEntries(roles.map(role=>[role,num(e.gains?.[role],0,1.5,1)])),versions:Object.fromEntries(roles.map(role=>[role,Math.round(num(e.versions?.[role],0,9999,0))]))}));
-  return {atmosphere:num(s.atmosphere,0,1,.65),seed:Math.round(num(s.seed,0,4294967295,1)),partGains,edits,swing:num(s.swing,0,.35,STYLES[s.style]?.swing??.06),samples:s.samples!==false,structure:s.structure!==false,character:['calm','dense','experimental'].includes(s.character)?s.character:'dense',style:STYLES[s.style]?s.style:'rap',bpm:num(s.bpm,40,240,100),offset:num(s.offset,-2,4,0),root:Math.round(num(s.root,0,11,9)),mode:s.mode==='major'?'major':'minor',variation:Math.round(num(s.variation,0,9999,0)),harmony:s.harmony!==false,adaptive:s.adaptive!==false,fit:num(s.fit,0,1,.85),melody:num(s.melody,0,1,.55),instrument:['auto','piano','epiano','bell','pluck','strings','pad','lead','guitar','organ','chip'].includes(s.instrument)?s.instrument:'auto',polish:s.polish!==false,voice:num(s.voice,0,1.5,1),beat:num(s.beat,0,1.5,.7)};
+  return {autoInstrument:s.autoInstrument===true||!s.instrument||s.instrument==='auto',atmosphere:num(s.atmosphere,0,1,.65),seed:Math.round(num(s.seed,0,4294967295,1)),partGains,edits,swing:num(s.swing,0,.35,STYLES[s.style]?.swing??.06),samples:s.samples!==false,structure:s.structure!==false,character:['calm','dense','experimental'].includes(s.character)?s.character:'dense',style:STYLES[s.style]?s.style:'rap',bpm:num(s.bpm,40,240,100),offset:num(s.offset,-2,4,0),root:Math.round(num(s.root,0,11,9)),mode:s.mode==='major'?'major':'minor',variation:Math.round(num(s.variation,0,9999,0)),harmony:s.harmony!==false,adaptive:s.adaptive!==false,fit:num(s.fit,0,1,.85),melody:num(s.melody,0,1,.55),instrument:['auto','piano','epiano','bell','pluck','strings','pad','lead','guitar','organ','chip'].includes(s.instrument)?s.instrument:'auto',polish:s.polish!==false,voice:num(s.voice,0,1.5,1),beat:num(s.beat,0,1.5,.7)};
 }
 export function createArrangement(duration,settings,profile=null){
  const s=validateSettings(settings),v=s.adaptive&&s.fit?profile:null,composition=composeMelody(v,s,duration);
  const events=composeBacking(duration,s,v,composition,STYLES[s.style]);
  if(s.melody>0)events.push(...composition.events);
- events.push(...atmosphereEvents(duration,s,composition));
+ events.push(...atmosphereEvents(duration,s,{...composition,profile:v}));
  return applyPartEdits(arrangeDynamics(events,structurePlan(duration,s,v),s),s).sort((a,b)=>a.when-b.when);
 }
 export async function generateInstrumental(duration,settings,profile=null,segment=null){
@@ -87,7 +87,7 @@ export function remixChoices(settings){const s=validateSettings(settings);return
  {id:'dense',name:'Плотный',settings:{...s,character:'dense',swing:.06,variation:s.variation+1}},
  {id:'experimental',name:'Экспериментальный',settings:{...s,character:'experimental',swing:.3,variation:s.variation+5,instrument:s.instrument==='auto'?'guitar':s.instrument}}
 ];}
-export function describeStructure(duration,settings,profile){const plan=structurePlan(duration,validateSettings(settings),profile),labels={intro:'Вступление',verse:'Куплет',chorus:'Припев / усиление',break:'Пауза / переход',outro:'Концовка'},segments=[];for(const part of plan){const last=segments.at(-1);if(last?.type===part.type)last.end=part.end;else segments.push({...part,label:labels[part.type]});}return segments;}
+export function describeStructure(duration,settings,profile){const s=validateSettings(settings),plan=structurePlan(duration,s,s.adaptive&&s.fit?profile:null),labels={intro:'Вступление',verse:'Куплет',chorus:'Припев / усиление',break:'Пауза / переход',outro:'Концовка'},segments=[];for(const part of plan){const last=segments.at(-1);if(last?.type===part.type)last.end=part.end;else segments.push({...part,label:labels[part.type]});}return segments;}
 
 export async function mixRemix(vocals,instrumental,settings){
   if(Math.abs(vocals.duration-instrumental.duration)>.02)throw Error('Длины голоса и минуса не совпадают.');
