@@ -7,20 +7,20 @@ const choose=(rng,items)=>items[Math.floor(rng()*items.length)];
 const fourFloor=new Set(['house','techno','synth']);
 const halfTime=new Set(['trap','drill']);
 export const PALETTES={
- rap:{chord:['epiano','piano','guitar'],pad:'strings',bass:'round',comp:[0,6,10],length:3.8,perc:[3,7,11,15]},
- boom:{chord:['epiano','piano','guitar'],pad:'strings',bass:'round',comp:[0,7,10],length:4.6,perc:[3,10,15]},
- trap:{chord:['piano','strings','pad'],pad:'pad',bass:'808',comp:[0,10],length:7,perc:[6,14]},
- drill:{chord:['strings','piano','pad'],pad:'strings',bass:'808',comp:[0,7,12],length:5,perc:[3,11]},
- lofi:{chord:['epiano','guitar','piano'],pad:'pad',bass:'round',comp:[0,6,11],length:5.4,perc:[3,7,14]},
- house:{chord:['organ','epiano','piano'],pad:'pad',bass:'pulse',comp:[2,6,10,14],length:1.5,perc:[3,7,11,15]},
+ rap:{chord:['pad','guitar','strings'],pad:'strings',bass:'round',comp:[0,6,10],length:3.8,perc:[3,7,11,15]},
+ boom:{chord:['guitar','strings','organ'],pad:'strings',bass:'round',comp:[0,7,10],length:4.6,perc:[3,10,15]},
+ trap:{chord:['pad','strings','lead'],pad:'pad',bass:'808',comp:[0,10],length:7,perc:[6,14]},
+ drill:{chord:['strings','pad','guitar'],pad:'strings',bass:'808',comp:[0,7,12],length:5,perc:[3,11]},
+ lofi:{chord:['guitar','pad','epiano'],pad:'pad',bass:'round',comp:[0,6,11],length:5.4,perc:[3,7,14]},
+ house:{chord:['organ','pad','guitar'],pad:'pad',bass:'pulse',comp:[2,6,10,14],length:1.5,perc:[3,7,11,15]},
  synth:{chord:['pad','strings','organ'],pad:'pad',bass:'pulse',comp:[0,8],length:7.6,perc:[6,14]},
  bounce:{chord:['epiano','guitar','organ'],pad:'strings',bass:'funk',comp:[2,7,10,14],length:1.7,perc:[3,6,11,15]},
- phonk:{chord:['piano','organ','epiano'],pad:'strings',bass:'808',comp:[0,6,8,14],length:2.5,perc:[3,7,11,15]},
+ phonk:{chord:['pad','organ','strings'],pad:'strings',bass:'808',comp:[0,6,8,14],length:2.5,perc:[3,7,11,15]},
  dnb:{chord:['pad','epiano','strings'],pad:'pad',bass:'reese',comp:[0,10],length:5.7,perc:[3,7,11,15]},
  techno:{chord:['organ','pad','strings'],pad:'pad',bass:'pulse',comp:[2,5,10,13],length:.9,perc:[1,3,7,9,11,15]},
- reggaeton:{chord:['guitar','piano','epiano'],pad:'pad',bass:'round',comp:[0,3,6,8,11,14],length:1.1,perc:[2,5,10,13]},
- afro:{chord:['guitar','epiano','piano'],pad:'strings',bass:'round',comp:[0,3,6,10,13],length:1.4,perc:[1,4,7,9,12,15]},
- rnb:{chord:['epiano','guitar','piano'],pad:'pad',bass:'round',comp:[0,7,10],length:5.5,perc:[3,6,11,14]}
+ reggaeton:{chord:['guitar','pad','organ'],pad:'pad',bass:'round',comp:[0,3,6,8,11,14],length:1.1,perc:[2,5,10,13]},
+ afro:{chord:['guitar','pad','strings'],pad:'strings',bass:'round',comp:[0,3,6,10,13],length:1.4,perc:[1,4,7,9,12,15]},
+ rnb:{chord:['pad','guitar','epiano'],pad:'pad',bass:'round',comp:[0,7,10],length:5.5,perc:[3,6,11,14]}
 };
 const bassPatterns={
  rap:[[0,6,8,14],[0,3,8,11],[0,7,10,14],[0,6,10,15]],

@@ -1,8 +1,9 @@
-import {composeBacking,createProductionBus,renderBass,renderNoiseFx} from './production.js?v=melody-25';
-import {EXTRA_STYLES} from './styles.js?v=production-20';
+import {atmosphereEvents,createSpace,renderAtmosphere} from './atmosphere.js?v=space-26';
+import {composeBacking,createProductionBus,renderBass,renderNoiseFx} from './production.js?v=space-26';
+import {EXTRA_STYLES} from './styles.js?v=space-26';
 import {loadSamples,sampleNote,sampleDrum} from './sample-engine.js?v=production-20';
 import {structurePlan,arrangeDynamics,applyPartEdits} from './structure.js?v=production-20';
-import {composeMelody,renderLead} from './composer.js?v=melody-25';
+import {composeMelody,renderLead} from './composer.js?v=space-26';
 import {duckInstrumental} from './adaptation.js?v=remix-6';
 import {trigger} from '../drumpad/audio.js?v=3';
 import {limitPeaks,measure} from '../audio-processing.js';
@@ -51,24 +52,27 @@ export function validateSettings(s){
   const num=(value,min,max,fallback)=>Number.isFinite(Number(value))?Math.max(min,Math.min(max,Number(value))):fallback;
   const roles=['drum','bass','chord','lead'],partGains=Object.fromEntries(roles.map(role=>[role,num(s.partGains?.[role],0,1.5,1)]));
   const edits=(Array.isArray(s.edits)?s.edits:[]).slice(0,100).filter(e=>Number.isFinite(e.start)&&Number.isFinite(e.end)&&e.end>e.start).map(e=>({start:Math.max(0,e.start),end:Math.min(300,e.end),type:['intro','verse','chorus','break','outro'].includes(e.type)?e.type:'auto',gains:Object.fromEntries(roles.map(role=>[role,num(e.gains?.[role],0,1.5,1)])),versions:Object.fromEntries(roles.map(role=>[role,Math.round(num(e.versions?.[role],0,9999,0))]))}));
-  return {seed:Math.round(num(s.seed,0,4294967295,1)),partGains,edits,swing:num(s.swing,0,.35,STYLES[s.style]?.swing??.06),samples:s.samples!==false,structure:s.structure!==false,character:['calm','dense','experimental'].includes(s.character)?s.character:'dense',style:STYLES[s.style]?s.style:'rap',bpm:num(s.bpm,40,240,100),offset:num(s.offset,-2,4,0),root:Math.round(num(s.root,0,11,9)),mode:s.mode==='major'?'major':'minor',variation:Math.round(num(s.variation,0,9999,0)),harmony:s.harmony!==false,adaptive:s.adaptive!==false,fit:num(s.fit,0,1,.85),melody:num(s.melody,0,1,.55),instrument:['auto','piano','epiano','bell','pluck','strings','pad','lead','guitar','organ','chip'].includes(s.instrument)?s.instrument:'auto',polish:s.polish!==false,voice:num(s.voice,0,1.5,1),beat:num(s.beat,0,1.5,.7)};
+  return {atmosphere:num(s.atmosphere,0,1,.65),seed:Math.round(num(s.seed,0,4294967295,1)),partGains,edits,swing:num(s.swing,0,.35,STYLES[s.style]?.swing??.06),samples:s.samples!==false,structure:s.structure!==false,character:['calm','dense','experimental'].includes(s.character)?s.character:'dense',style:STYLES[s.style]?s.style:'rap',bpm:num(s.bpm,40,240,100),offset:num(s.offset,-2,4,0),root:Math.round(num(s.root,0,11,9)),mode:s.mode==='major'?'major':'minor',variation:Math.round(num(s.variation,0,9999,0)),harmony:s.harmony!==false,adaptive:s.adaptive!==false,fit:num(s.fit,0,1,.85),melody:num(s.melody,0,1,.55),instrument:['auto','piano','epiano','bell','pluck','strings','pad','lead','guitar','organ','chip'].includes(s.instrument)?s.instrument:'auto',polish:s.polish!==false,voice:num(s.voice,0,1.5,1),beat:num(s.beat,0,1.5,.7)};
 }
 export function createArrangement(duration,settings,profile=null){
  const s=validateSettings(settings),v=s.adaptive&&s.fit?profile:null,composition=composeMelody(v,s,duration);
  const events=composeBacking(duration,s,v,composition,STYLES[s.style]);
  if(s.melody>0)events.push(...composition.events);
+ events.push(...atmosphereEvents(duration,s,composition));
  return applyPartEdits(arrangeDynamics(events,structurePlan(duration,s,v),s),s).sort((a,b)=>a.when-b.when);
 }
 export async function generateInstrumental(duration,settings,profile=null,segment=null){
   if(!Number.isFinite(duration)||duration<=0||duration>300.01)throw Error('Поддерживаются песни до 5 минут.');
   const s=validateSettings(settings),start=Math.max(0,segment?.start||0),length=Math.min(duration-start,segment?.length||duration);if(length<=0)throw Error('Пустой фрагмент.');
-  const c=new OfflineAudioContext(2,Math.ceil(length*44100),44100),out=c.createGain();const buses=createProductionBus(c,out,s),drums=buses.drums,melodic=buses.music;out.gain.value=.65;if(s.structure){const end=duration-start,fade=Math.min(2,240/s.bpm);if(end<=length+.01){out.gain.setValueAtTime(.65,Math.max(0,end-fade));out.gain.linearRampToValueAtTime(0,Math.max(0,end));}if(!start){out.gain.setValueAtTime(0,0);out.gain.linearRampToValueAtTime(.65,.025);}}out.connect(c.destination);if(s.samples)await loadSamples(c);
+  const c=new OfflineAudioContext(2,Math.ceil(length*44100),44100),out=c.createGain();const buses=createProductionBus(c,out,s),space=createSpace(c,out,s),drums=buses.drums,melodic=buses.music;melodic.connect(space.send);out.gain.value=.65;if(s.structure){const end=duration-start,fade=Math.min(2,240/s.bpm);if(end<=length+.01){out.gain.setValueAtTime(.65,Math.max(0,end-fade));out.gain.linearRampToValueAtTime(0,Math.max(0,end));}if(!start){out.gain.setValueAtTime(0,0);out.gain.linearRampToValueAtTime(.65,.025);}}out.connect(c.destination);if(s.samples)await loadSamples(c);
   const arrangement=createArrangement(duration,s,profile);
   for(const e of arrangement)if(e.kind==='drum'&&e.index===0&&e.when>=start&&e.when<start+length){const t=e.when-start;for(const [bus,depth]of [[melodic,.82],[buses.bass,.66]]){bus.gain.setValueAtTime(depth,t);bus.gain.linearRampToValueAtTime(1,t+Math.min(.13,30/s.bpm));}}
   for(const original of arrangement){
     if(original.when>=start+length||original.when+(original.duration||.4)<=start)continue;
-    const event={...original,when:Math.max(0,original.when-start),duration:original.duration?Math.min(original.duration-Math.max(0,start-original.when),start+length-Math.max(start,original.when)):undefined};
-    if(event.kind==='fx'){renderNoiseFx(c,drums,event,s.seed);}
+    const event={...original,elapsed:Math.max(0,start-original.when),when:Math.max(0,original.when-start),duration:original.duration?Math.min(original.duration-Math.max(0,start-original.when),start+length-Math.max(start,original.when)):undefined};
+    if(event.kind==='atmosphere'){renderAtmosphere(c,space.pad,event);}
+    else if(['pad','strings','lead','organ'].includes(event.instrument)&&event.role!=='bass'){renderAtmosphere(c,event.instrument==='pad'?space.pad:melodic,event);}
+    else if(event.kind==='fx'){renderNoiseFx(c,drums,event,s.seed);}
     else if(event.role==='bass'){renderBass(c,buses.bass,event);}
     else if(event.kind==='drum'){if(!(s.samples&&event.kit==='classic'&&sampleDrum(c,drums,event.index,event.when,event.level)))trigger(c,drums,event.index,event.when,event.level,event.kit);}
     else if(event.kind==='lead'){if(!(s.samples&&sampleNote(c,melodic,event.instrument,event.note,event.when,event.duration,event.level*2.5)))renderLead(c,melodic,event);}

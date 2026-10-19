@@ -9,7 +9,7 @@ export const EXTRA_STYLES={
  afro:{name:'Afrobeats · перкуссия',kit:'classic',kick:[0,7,10],snare:[4,12],clap:[6,14],hat:[0,3,6,8,11,14],open:[15],bass:[0,3,7,10,14],swing:.08,instruments:['guitar','epiano','piano'],motif:[0,2,1,4,2,5,3,1],rhythm:[0,3,5,6,8,11,13,14],progression:[0,3,1,4]},
  rnb:{name:'R&B · мягкий грув',kit:'classic',kick:[0,7,10],snare:[4,12],clap:[],hat:[0,2,5,6,8,10,13,14],open:[],bass:[0,7,8,10],swing:.2,instruments:['epiano','guitar','strings'],motif:[0,2,4,6,5,3,2,0],rhythm:[0,3,6,7,8,11,13,15],progression:[0,5,1,4]}
 };
-export const STYLE_SOUNDS={rap:['epiano','guitar','piano'],trap:['strings','epiano','pad'],drill:['strings','piano','guitar'],lofi:['epiano','guitar','piano'],house:['organ','epiano','pad'],synth:['pad','strings','organ'],...Object.fromEntries(Object.entries(EXTRA_STYLES).map(([key,value])=>[key,value.instruments]))};
+export const STYLE_SOUNDS={rap:['pluck','guitar','strings','lead'],boom:['guitar','strings','organ'],trap:['pad','strings','pluck','lead'],drill:['strings','pad','guitar'],lofi:['guitar','pad','epiano'],house:['pluck','organ','lead'],synth:['lead','pad','organ'],bounce:['lead','guitar','organ'],phonk:['bell','lead','organ'],dnb:['pad','lead','strings'],techno:['lead','pad','organ'],reggaeton:['guitar','pluck','pad'],afro:['guitar','pluck','strings'],rnb:['guitar','pad','epiano']};
 export const extraMelodies=Object.entries(EXTRA_STYLES).flatMap(([style,p])=>Array.from({length:12},(_,variant)=>({
  id:style+'-'+variant,style,genre:p.name,name:'Грув '+(variant+1),mode:'minor',instrument:p.instruments[variant%p.instruments.length],
  motif:p.motif.map((_,i)=>p.motif[(i+variant%4)%8]+(variant>=8&&i%3===0?-1:variant>=4&&i%3===1?1:0)),
