@@ -1,7 +1,9 @@
-import {STYLE_TEMPOS,STYLE_SOUNDS} from './styles.js?v=space-26';
-import {attachSampleCredits} from './sample-engine.js?v=production-20';
+import {SYNTHS} from './synth-engine.js?v=library-30';
+import {SAMPLE_INSTRUMENTS} from './sample-engine.js?v=library-30';
+import {STYLE_TEMPOS,STYLE_SOUNDS} from './styles.js?v=library-30';
+import {attachSampleCredits} from './sample-engine.js?v=library-30';
 import {analyzeVocal,alignVocalBeat,estimateVocalTempo,chooseRemixTempo} from './adaptation.js?v=timing-16';
-import {estimateTempo,estimateKey,NOTE_NAMES,generateInstrumental,mixRemix,validateSettings,melodySelection,cropAudio,remixChoices,describeStructure} from './music.js?v=groove-29';
+import {estimateTempo,estimateKey,NOTE_NAMES,generateInstrumental,mixRemix,validateSettings,melodySelection,cropAudio,remixChoices,describeStructure} from './music.js?v=library-30';
 import {separateChannels} from './separation.js?v=remix-6';
 import {wavBytes,measure} from '../audio-processing.js';
 import {downloadBlob} from '../studio-project.js';
@@ -22,7 +24,7 @@ export function initRemixer(){
   $('mode').onchange=()=>{resetCache();if(beatMode()&&$('autoTempo').checked)$('bpm').value=STYLE_TEMPOS[$('style').value]||94;$('generator').hidden=!beatMode();$('previewBeatPanel').hidden=beatMode();$('voiceHelp').hidden=beatMode();$('timingHelp').hidden=beatMode();$('uploadPanel').hidden=beatMode();for(const id of ['autoTempo','adaptive','fit','voiceGain','offset'])$(id).closest('label').hidden=beatMode();$('vocals').closest('.card').hidden=beatMode();$('saveVoice').hidden=beatMode();$('saveBeat').hidden=beatMode();$('build').textContent=beatMode()?'Собрать минус':'Собрать ремикс';$('saveMix').textContent=beatMode()?'Скачать минус · WAV':'Скачать ремикс · WAV';$('results').querySelector('h2').textContent=beatMode()?'4. Твой минус':'4. Твой ремикс';$('key').options[0].textContent=beatMode()?'По настроению':'Подобрать по голосу';$('original').pause();analysis();status(beatMode()?'Выбери стиль и нажми «Подготовить пробу».':'Загрузи песню, чтобы начать.');lock(false);};
   for(const id of ['duration','mood'])$(id).onchange=()=>{changed();analysis();};
   function changed(){clearResults();$('run').textContent=previewAttempts>0?'Обновить пробу':'Подготовить пробу';status(beatMode()?'Настройки изменились. Подготовь новую пробу.':cache?'Настройки изменились. Пересобери ремикс — голос уже готов.':'Настройки выбраны. Загрузи песню и создай ремикс.');}
-  for(const id of ['style','key','harmony','instrument','polish','samples','structure'])$(id).onchange=()=>{if(id==='style'&&beatMode()&&$('autoTempo').checked)$('bpm').value=STYLE_TEMPOS[$('style').value]||94;changed();analysis();};
+  for(const id of ['style','key','harmony','instrument','polish','samples','structure','drumKit','bassTone'])$(id).onchange=()=>{if(id==='style'&&beatMode()&&$('autoTempo').checked)$('bpm').value=STYLE_TEMPOS[$('style').value]||94;changed();analysis();};
   $('offset').onchange=()=>{manualOffset=true;changed();analysis();};
   function automaticTempo(){if(!cache||!$('autoTempo').checked)return;$('bpm').value=cache.tempo.bpm;if(!manualOffset)$('offset').value=Math.round(cache.tempo.offset*1000);}
 
@@ -41,7 +43,7 @@ export function initRemixer(){
   $('fit').oninput=()=>{$('fitOut').textContent=$('fit').value+'%';automaticTempo();changed();analysis();};
   $('bpm').onchange=()=>{$('autoTempo').checked=false;const s=validateSettings({bpm:$('bpm').value});$('bpm').value=s.bpm;edits=[];changed();};
   for(const [id,out]of [['voiceGain','voiceOut'],['beatGain','beatOut'],['melody','melodyOut'],['drumGain','drumOut'],['bassGain','bassOut'],['atmosphere','atmosphereOut']])$(id).oninput=()=>{$(out).textContent=$(id).value+'%';changed();};
-  function settings(){const key=$('key').value==='auto'?($('adaptive').checked&&Number($('fit').value)>0&&cache?.profile?.key?cache.profile.key:cache?.key||{root:beatMode()?[0,2,4,5,7,9][songSeed%6]:9,mode:$('mood').value==='bright'?'major':'minor'}):{root:Number($('key').value.split(':')[0]),mode:$('key').value.split(':')[1]};return validateSettings({atmosphere:Number($('atmosphere').value)/100,seed:songSeed,partGains:{drum:Number($('drumGain').value)/100,bass:Number($('bassGain').value)/100},style:$('style').value,bpm:$('bpm').value,offset:beatMode()?0:Number($('offset').value)/1000,root:key.root,mode:key.mode,harmony:$('harmony').checked,character:beatMode()?($('mood').value==='calm'?'calm':$('mood').value==='energetic'?'experimental':'dense'):'dense',adaptive:!beatMode()&&$('adaptive').checked,fit:Number($('fit').value)/100,voice:Number($('voiceGain').value)/100,beat:Number($('beatGain').value)/100,melody:Number($('melody').value)/100,instrument:$('instrument').value,polish:$('polish').checked,samples:$('samples').value==='sample',structure:$('structure').checked,variation,edits});}
+  function settings(){const key=$('key').value==='auto'?($('adaptive').checked&&Number($('fit').value)>0&&cache?.profile?.key?cache.profile.key:cache?.key||{root:beatMode()?[0,2,4,5,7,9][songSeed%6]:9,mode:$('mood').value==='bright'?'major':'minor'}):{root:Number($('key').value.split(':')[0]),mode:$('key').value.split(':')[1]};return validateSettings({drumKit:$('drumKit').value,bassTone:$('bassTone').value,atmosphere:Number($('atmosphere').value)/100,seed:songSeed,partGains:{drum:Number($('drumGain').value)/100,bass:Number($('bassGain').value)/100},style:$('style').value,bpm:$('bpm').value,offset:beatMode()?0:Number($('offset').value)/1000,root:key.root,mode:key.mode,harmony:$('harmony').checked,character:beatMode()?($('mood').value==='calm'?'calm':$('mood').value==='energetic'?'experimental':'dense'):'dense',adaptive:!beatMode()&&$('adaptive').checked,fit:Number($('fit').value)/100,voice:Number($('voiceGain').value)/100,beat:Number($('beatGain').value)/100,melody:Number($('melody').value)/100,instrument:$('instrument').value,polish:$('polish').checked,samples:$('samples').value==='sample',structure:$('structure').checked,variation,edits});}
   function singleChoice(s){
     const choices=remixChoices(s),choice=beatMode()?{settings:s}:choices[[1,2,0][s.variation%3]];
     const palette=STYLE_SOUNDS[s.style]||STYLE_SOUNDS.rap;
@@ -109,5 +111,10 @@ export function initRemixer(){
   lock(false);
 }
 if(typeof document!=='undefined')initRemixer();
+
+
+
+// Expose every added voice without replacing existing controls.
+for(const [label,items] of [["Инструменты · сэмплы",SAMPLE_INSTRUMENTS],["Синтезаторы",SYNTHS]]){const group=document.createElement("optgroup");group.label=label;for(const [value,name]of Object.entries(items)){const option=document.createElement("option");option.value=value;option.textContent=name;group.append(option);}document.getElementById("instrument").append(group);}
 
 

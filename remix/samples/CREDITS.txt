@@ -1,9 +1,10 @@
-ANDATRA remix samples
-FluidR3_GM SoundFont recordings, subset and MP3 conversion from MIDI.js Soundfonts.
-Fluid SoundFont creators: Frank Wen, Josh Green, S. Christian Collins and contributors.
-Source melodic samples: https://github.com/gleitz/midi-js-soundfonts/tree/gh-pages/FluidR3_GM
-Source drum samples: https://github.com/dave4mpls/midi-js-soundfonts-with-drums/tree/gh-pages/FluidR3_GM/drums-mp3
-License for FluidR3_GM sample recordings: Creative Commons Attribution 3.0 US
+ANDATRA remix sample library
+FluidR3_GM SoundFont recordings. Creators: Frank Wen, Josh Green, S. Christian Collins and contributors.
+MP3 conversions and source melodic recordings: https://github.com/gleitz/midi-js-soundfonts/tree/gh-pages/FluidR3_GM
+Source drum recordings: https://github.com/dave4mpls/midi-js-soundfonts-with-drums/tree/gh-pages/FluidR3_GM
+Sample recording license: Creative Commons Attribution 3.0 US
 https://creativecommons.org/licenses/by/3.0/us/
-Changes: selected notes, bundled in JSON and pitch-shifted/enveloped during playback.
-These credits must accompany redistributions of the sample recordings.
+Changes: selected notes and percussion, bundled into JSON; normalized, pitch shifted and enveloped during playback.
+The library-30 expansion adds 28 melodic banks and extends percussion to GM notes 35–81. Each new bank includes its source URL.
+Retain these credits with redistributed recordings.
+The Web Audio synth voices in synth-engine.js are original procedural ANDATRA synthesis, not sampled recordings.

@@ -1,12 +1,17 @@
-import {atmosphereEvents,createSpace,renderAtmosphere} from './atmosphere.js?v=groove-29';
-import {composeBacking,createProductionBus,renderBass,renderNoiseFx} from './production.js?v=groove-29';
-import {EXTRA_STYLES} from './styles.js?v=space-26';
-import {loadSamples,sampleNote,sampleDrum} from './sample-engine.js?v=production-20';
-import {structurePlan,arrangeDynamics,applyPartEdits} from './structure.js?v=groove-29';
-import {composeMelody,renderLead} from './composer.js?v=groove-29';
+import {SYNTHS,renderSynth} from './synth-engine.js?v=library-30';
+import {atmosphereEvents,createSpace,renderAtmosphere} from './atmosphere.js?v=library-30';
+import {composeBacking,createProductionBus,renderBass,renderNoiseFx} from './production.js?v=library-30';
+import {EXTRA_STYLES} from './styles.js?v=library-30';
+import {loadSamples,sampleNote,sampleDrum,SAMPLE_INSTRUMENTS} from './sample-engine.js?v=library-30';
+import {structurePlan,arrangeDynamics,applyPartEdits} from './structure.js?v=library-30';
+import {composeMelody,renderLead} from './composer.js?v=library-30';
 import {duckInstrumental} from './adaptation.js?v=remix-6';
 import {trigger} from '../drumpad/audio.js?v=3';
 import {limitPeaks,measure} from '../audio-processing.js';
+function fallbackNote(c,out,e){
+ if(SAMPLE_INSTRUMENTS[e.instrument]){const voice=['nylon','steel','jazzguitar','cleanguitar','mutedguitar','harp','sitar','koto','pizzicato'].includes(e.instrument)?'karplus':['rhodes','fmkeys','vibes','marimba','musicbox'].includes(e.instrument)?'fm':['choir','voices','synthstrings','violin','cello'].includes(e.instrument)?'shimmer':'analog';return renderSynth(c,out,{...e,instrument:voice});}
+ return renderLead(c,out,e);
+}
 export const STYLES={...EXTRA_STYLES,rap:{name:'Рэп',kit:'classic',kick:[0,6,8,14],snare:[4,12],clap:[],hat:[0,2,4,6,8,10,12,14],open:[15]},trap:{name:'Трэп',kit:'trap',kick:[0,7,10],snare:[8],clap:[8],hat:[0,2,4,6,7,8,10,12,14,15],open:[11]},drill:{name:'Дрилл',kit:'trap',kick:[0,5,10,14],snare:[8],clap:[8],hat:[0,2,4,6,7,10,12,14],open:[11]},lofi:{name:'Lo-fi',kit:'classic',kick:[0,6,9],snare:[4,12],clap:[],hat:[0,3,4,7,8,11,12,15],open:[]},synth:{name:'Synthwave',kit:'electro',kick:[0,4,8,12],snare:[4,12],clap:[],hat:[0,2,4,6,8,10,12,14],open:[10]},house:{name:'Хаус',kit:'electro',kick:[0,4,8,12],snare:[],clap:[4,12],hat:[2,6,10,14],open:[2,10]}};
 export const NOTE_NAMES=['C','C♯','D','D♯','E','F','F♯','G','G♯','A','A♯','B'];
 export function estimateTempo(buffer){
@@ -52,11 +57,12 @@ export function validateSettings(s){
   const num=(value,min,max,fallback)=>Number.isFinite(Number(value))?Math.max(min,Math.min(max,Number(value))):fallback;
   const roles=['drum','bass','chord','lead'],partGains=Object.fromEntries(roles.map(role=>[role,num(s.partGains?.[role],0,1.5,1)]));
   const edits=(Array.isArray(s.edits)?s.edits:[]).slice(0,100).filter(e=>Number.isFinite(e.start)&&Number.isFinite(e.end)&&e.end>e.start).map(e=>({start:Math.max(0,e.start),end:Math.min(300,e.end),type:['intro','verse','chorus','break','outro'].includes(e.type)?e.type:'auto',gains:Object.fromEntries(roles.map(role=>[role,num(e.gains?.[role],0,1.5,1)])),versions:Object.fromEntries(roles.map(role=>[role,Math.round(num(e.versions?.[role],0,9999,0))]))}));
-  return {autoInstrument:s.autoInstrument===true||!s.instrument||s.instrument==='auto',atmosphere:num(s.atmosphere,0,1,.65),seed:Math.round(num(s.seed,0,4294967295,1)),partGains,edits,swing:num(s.swing,0,.35,STYLES[s.style]?.swing??.06),samples:s.samples!==false,structure:s.structure!==false,character:['calm','dense','experimental'].includes(s.character)?s.character:'dense',style:STYLES[s.style]?s.style:'rap',bpm:num(s.bpm,40,240,100),offset:num(s.offset,-2,4,0),root:Math.round(num(s.root,0,11,9)),mode:s.mode==='major'?'major':'minor',variation:Math.round(num(s.variation,0,9999,0)),harmony:s.harmony!==false,adaptive:s.adaptive!==false,fit:num(s.fit,0,1,.85),melody:num(s.melody,0,1,.55),instrument:['auto','piano','epiano','bell','pluck','strings','pad','lead','guitar','organ','chip'].includes(s.instrument)?s.instrument:'auto',polish:s.polish!==false,voice:num(s.voice,0,1.5,1),beat:num(s.beat,0,1.5,.7)};
+  return {bassTone:['auto','808','round','reese','pulse','funk','fingerbass','pickedbass','slapbass'].includes(s.bassTone)?s.bassTone:'auto',drumKit:['auto','classic','trap','electro'].includes(s.drumKit)?s.drumKit:'auto',autoInstrument:s.autoInstrument===true||!s.instrument||s.instrument==='auto',atmosphere:num(s.atmosphere,0,1,.65),seed:Math.round(num(s.seed,0,4294967295,1)),partGains,edits,swing:num(s.swing,0,.35,STYLES[s.style]?.swing??.06),samples:s.samples!==false,structure:s.structure!==false,character:['calm','dense','experimental'].includes(s.character)?s.character:'dense',style:STYLES[s.style]?s.style:'rap',bpm:num(s.bpm,40,240,100),offset:num(s.offset,-2,4,0),root:Math.round(num(s.root,0,11,9)),mode:s.mode==='major'?'major':'minor',variation:Math.round(num(s.variation,0,9999,0)),harmony:s.harmony!==false,adaptive:s.adaptive!==false,fit:num(s.fit,0,1,.85),melody:num(s.melody,0,1,.55),instrument:['auto','piano','epiano','bell','pluck','strings','pad','lead','guitar','organ','chip',...Object.keys(SAMPLE_INSTRUMENTS),...Object.keys(SYNTHS)].includes(s.instrument)?s.instrument:'auto',polish:s.polish!==false,voice:num(s.voice,0,1.5,1),beat:num(s.beat,0,1.5,.7)};
 }
 export function createArrangement(duration,settings,profile=null){
  const s=validateSettings(settings),v=s.adaptive&&s.fit?profile:null,composition=composeMelody(v,s,duration);
  const events=composeBacking(duration,s,v,composition,STYLES[s.style]);
+ if(s.drumKit!=='auto')for(const event of events)if(event.kind==='drum')event.kit=s.drumKit;
  if(s.melody>0)events.push(...composition.events);
  events.push(...atmosphereEvents(duration,s,{...composition,profile:v}));
  return applyPartEdits(arrangeDynamics(events,structurePlan(duration,s,v),s),s).sort((a,b)=>a.when-b.when);
@@ -64,19 +70,21 @@ export function createArrangement(duration,settings,profile=null){
 export async function generateInstrumental(duration,settings,profile=null,segment=null){
   if(!Number.isFinite(duration)||duration<=0||duration>300.01)throw Error('Поддерживаются песни до 5 минут.');
   const s=validateSettings(settings),start=Math.max(0,segment?.start||0),length=Math.min(duration-start,segment?.length||duration);if(length<=0)throw Error('Пустой фрагмент.');
-  const c=new OfflineAudioContext(2,Math.ceil(length*44100),44100),out=c.createGain();const buses=createProductionBus(c,out,s),space=createSpace(c,out,s),drums=buses.drums,melodic=buses.music;melodic.connect(space.send);out.gain.value=.65;if(s.structure){const end=duration-start,fade=Math.min(2,240/s.bpm);if(end<=length+.01){out.gain.setValueAtTime(.65,Math.max(0,end-fade));out.gain.linearRampToValueAtTime(0,Math.max(0,end));}if(!start){out.gain.setValueAtTime(0,0);out.gain.linearRampToValueAtTime(.65,.025);}}out.connect(c.destination);if(s.samples)await loadSamples(c);
+  const c=new OfflineAudioContext(2,Math.ceil(length*44100),44100),out=c.createGain();const buses=createProductionBus(c,out,s),space=createSpace(c,out,s),drums=buses.drums,melodic=buses.music;melodic.connect(space.send);out.gain.value=.65;if(s.structure){const end=duration-start,fade=Math.min(2,240/s.bpm);if(end<=length+.01){out.gain.setValueAtTime(.65,Math.max(0,end-fade));out.gain.linearRampToValueAtTime(0,Math.max(0,end));}if(!start){out.gain.setValueAtTime(0,0);out.gain.linearRampToValueAtTime(.65,.025);}}out.connect(c.destination);
   const arrangement=createArrangement(duration,s,profile);
+  if(s.samples){const relevant=arrangement.filter(e=>e.when<start+length&&e.when+(e.duration||.4)>start);await loadSamples(c,fetch,['drums',...relevant.filter(e=>e.kind!=='atmosphere').map(e=>e.instrument)]);}
   for(const e of arrangement)if(e.kind==='drum'&&e.index===0&&e.when>=start&&e.when<start+length){const t=e.when-start;for(const [bus,depth]of [[melodic,.82],[buses.bass,.66]]){bus.gain.setValueAtTime(depth,t);bus.gain.linearRampToValueAtTime(1,t+Math.min(.13,30/s.bpm));}}
   for(const original of arrangement){
     if(original.when>=start+length||original.when+(original.duration||.4)<=start)continue;
     const event={...original,elapsed:Math.max(0,start-original.when),when:Math.max(0,original.when-start),duration:original.duration?Math.min(original.duration-Math.max(0,start-original.when),start+length-Math.max(start,original.when)):undefined};
     if(event.kind==='atmosphere'){renderAtmosphere(c,space.pad,event);}
+    else if(SYNTHS[event.instrument]){renderSynth(c,melodic,event);}
     else if(['pad','strings','lead','organ'].includes(event.instrument)&&event.role!=='bass'){renderAtmosphere(c,event.instrument==='pad'?space.pad:melodic,event);}
     else if(event.kind==='fx'){renderNoiseFx(c,drums,event,s.seed);}
-    else if(event.role==='bass'){renderBass(c,buses.bass,event);}
-    else if(event.kind==='drum'){if(!(s.samples&&event.kit==='classic'&&sampleDrum(c,drums,event.index,event.when,event.level)))trigger(c,drums,event.index,event.when,event.level,event.kit);}
-    else if(event.kind==='lead'){if(!(s.samples&&sampleNote(c,melodic,event.instrument,event.note,event.when,event.duration,event.level*2.5)))renderLead(c,melodic,event);}
-    else {const instrument=event.instrument||'epiano';if(!(s.samples&&sampleNote(c,melodic,instrument,event.note,event.when,event.duration,event.level*2.7)))renderLead(c,melodic,{...event,instrument,level:event.level*3});}
+    else if(event.role==='bass'){if(!(s.samples&&sampleNote(c,buses.bass,event.instrument,event.note,event.when,event.duration,event.level*.8)))renderBass(c,buses.bass,{...event,instrument:['fingerbass','pickedbass','slapbass'].includes(event.instrument)?'round':event.instrument});}
+    else if(event.kind==='drum'){if(!(s.samples&&event.kit==='classic'&&sampleDrum(c,drums,event.index,event.when,event.level,(s.seed+s.variation)%3)))trigger(c,drums,event.index,event.when,event.level,event.kit);}
+    else if(event.kind==='lead'){if(!(s.samples&&sampleNote(c,melodic,event.instrument,event.note,event.when,event.duration,event.level*2.5)))fallbackNote(c,melodic,event);}
+    else {const instrument=event.instrument||'epiano';if(!(s.samples&&sampleNote(c,melodic,instrument,event.note,event.when,event.duration,event.level*2.7)))fallbackNote(c,melodic,{...event,instrument,level:event.level*3});}
   }
   const buffer=await c.startRendering(),stats=measure(buffer);if(stats.peak>0)limitPeaks(buffer,Math.min(2,.18/Math.max(.001,stats.rms)),.75);
   if(s.adaptive){let duckProfile=profile;if(start&&profile){const shift=Math.floor(start*profile.rate);duckProfile={...profile,active:profile.active.subarray(shift),duration:length};}duckInstrumental(buffer,duckProfile,s.fit);}return buffer;

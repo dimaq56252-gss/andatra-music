@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
-import {createArrangement,validateSettings,STYLES,describeStructure} from '../remix/music.js?v=groove-29';
-import {structurePlan} from '../remix/structure.js?v=groove-29';
+import {createArrangement,validateSettings,STYLES,describeStructure} from '../remix/music.js?v=library-30';
+import {structurePlan} from '../remix/structure.js?v=library-30';
 const profile={accents:[],rate:20,duration:120,active:new Float32Array(2400).fill(.8),rms:new Float32Array(2400).fill(.1),pitches:[],phrases:[{start:0,end:120}],peak:.2};
 const base={seed:734829,bpm:100,root:9,instrument:'piano',autoInstrument:false,adaptive:true,fit:.85,structure:true};
 for(const style of Object.keys(STYLES)){

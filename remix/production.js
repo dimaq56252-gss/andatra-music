@@ -1,6 +1,6 @@
 // Original arrangement and synthesis; no remote generation or borrowed song loops.
 import {barActivity,activityAt,vocalAccentSteps} from './adaptation.js?v=remix-6';
-import {structurePlan,sectionAt} from './structure.js?v=groove-29';
+import {structurePlan,sectionAt} from './structure.js?v=library-30';
 export function randomSource(seed){let state=seed>>>0;return ()=>{state=(state+0x6D2B79F5)>>>0;let t=state;t=Math.imul(t^(t>>>15),t|1);t^=t+Math.imul(t^(t>>>7),t|61);return ((t^(t>>>14))>>>0)/4294967296;};}
 export function songSeed(s,salt=0){return (Math.imul((s.seed||1)^(s.variation+1),2654435761)^Math.imul(salt+1,2246822519)^Array.from(s.style).reduce((a,c)=>Math.imul(a,31)+c.charCodeAt(0),0))>>>0;}
 const choose=(rng,items)=>items[Math.floor(rng()*items.length)];
@@ -35,7 +35,8 @@ export function soundSet(s){
   {chord:'guitar',answer:'strings',brightness:1.1,bassBody:.25},
   {chord:'organ',answer:'pad',brightness:.8,bassBody:.28}
  ];
- return sets[(s.seed+s.variation)%sets.length];
+ const base=sets[(s.seed+s.variation)%sets.length],extra=['lofi','rnb','boom'].includes(s.style)?['rhodes','jazzguitar','vibes','nylon']:['trap','drill','phonk'].includes(s.style)?['choir','synthstrings','cello','shimmer']:['cleanguitar','drawbar','fm','softpluck'];
+ const index=(s.seed+s.variation)%6;return index<2?base:{...base,chord:extra[(index-2)%extra.length]};
 }
 export function bassGroove(kicks,family,style){
  if(fourFloor.has(style)||['reggaeton','afro'].includes(style))return [...family];
@@ -78,6 +79,7 @@ export function composeBacking(duration,s,profile,composition,style){
    if(profile&&density>.2)for(const a of accents.slice(0,2))if(!style.snare.includes(a)&&!style.clap.includes(a))kicks.push(a);
   }
   if(s.structure&&transition&&nextSection==='chorus'){const length=Math.min(bar*.65,2);add({kind:'fx',role:'drum',rise:true,when:start+bar-length,duration:length*.98,level:.052});add({kind:'fx',role:'drum',rise:false,when:start+bar,duration:1.1,level:.085});}
+  if(transition&&nextSection==='chorus')add({kind:'drum',index:5,when:start+bar,level:.19,kit:style.kit});
   const silentTail=(transition||phase===7)&&!fourFloor.has(s.style)&&!isBreak;
   for(const [name,index] of [['kick',0],['snare',1],['clap',2],['hat',3],['open',4]]){
    if(isBreak&&(index<3||index===4))continue;
@@ -96,6 +98,7 @@ export function composeBacking(duration,s,profile,composition,style){
   // Ghost snares, hand percussion, and rolls support a groove without copying every bar.
   if(!intro&&!outro&&!isBreak){
    if(!fourFloor.has(s.style)&&phase%2===1)add({kind:'drum',index:1,when:time(halfTime.has(s.style)?7:11),level:.15,kit:style.kit});
+   if(['afro','reggaeton','bounce'].includes(s.style))for(const i of [3,7,10,15])add({kind:'drum',index:phase%2?8:9,when:time(i),level:.12,kit:style.kit});
    for(const i of palette.perc)if((phase+i)%3!==0)add({kind:'drum',index:7,when:time(i)+.005,level:(s.style==='afro'?.28:.13)*(local()*.35+.8),kit:style.kit});
    if(halfTime.has(s.style)&&(phase===3||phase===7))for(const i of [13,13.5,14,14.5,15,15.5])add({kind:'drum',index:3,when:time(i),level:.16+(i-13)*.025,kit:style.kit});
    if(phase===7||transition){for(const i of [13,14,14.5,15,15.5])add({kind:'drum',index:i<14?6:1,when:time(i),level:.2+(i-13)*.11,kit:style.kit});}
@@ -107,7 +110,7 @@ export function composeBacking(duration,s,profile,composition,style){
    // Root stays in the sub register; octave/fifth pickups lead into the next chord.
    const pickup=j===pattern.length-1&&phase%2===1,interval=pickup?choose(local,[0,7,12]):palette.bass==='funk'&&j%3===1?12:0;
    const length=step*Math.max(.5,gap*(palette.bass==='808'?.94:palette.bass==='round'?.84:.63));
-   add({kind:'note',role:'bass',instrument:palette.bass,note:root+interval,when:time(i)+.003,duration:length,level:(palette.bass==='808'?.36:.30)*(j===0?1:.88),body:texture.bassBody,glide:s.style==='drill'&&pickup?root:undefined});
+   add({kind:'note',role:'bass',instrument:s.bassTone&&s.bassTone!=='auto'?s.bassTone:palette.bass,note:root+interval,when:time(i)+.003,duration:length,level:(palette.bass==='808'?.36:.30)*(j===0?1:.88),body:texture.bassBody,glide:s.style==='drill'&&pickup?root:undefined});
   }
   if(s.harmony){
    const extension=['lofi','rnb','afro','house'].includes(s.style),degrees=[degree,degree+2,degree+4,...(extension?[degree+6]:[])];

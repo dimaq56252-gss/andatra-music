@@ -1,9 +1,9 @@
-import {inventPhrase} from './phrases.js?v=groove-29';
-import {extraMelodies,STYLE_SOUNDS} from './styles.js?v=space-26';
+import {inventPhrase} from './phrases.js?v=library-30';
+import {extraMelodies,STYLE_SOUNDS} from './styles.js?v=library-30';
 import {catalog,note} from '../drumpad/melodies.js?v=3';
 import {activityAt} from './adaptation.js?v=remix-6';
-import {editAt,structurePlan} from './structure.js?v=groove-29';
-import {randomSource,songSeed} from './production.js?v=groove-29';
+import {editAt,structurePlan} from './structure.js?v=library-30';
+import {randomSource,songSeed} from './production.js?v=library-30';
 const styleMap={rap:['boom','funk'],trap:['trap'],house:['house'],drill:['drill'],lofi:['lofi','ambient'],synth:['synth']};
 const pc=(n)=>((n%12)+12)%12;
 const midi=(degree,root,scale,octave)=>12*(octave+1)+root+scale[((degree%7)+7)%7]+12*Math.floor(degree/7);
