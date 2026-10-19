@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
-import {createArrangement,STYLES} from '../remix/music.js?v=klassika-33';
-import {STYLE_SOUNDS} from '../remix/styles.js?v=klassika-33';
+import {createArrangement,STYLES} from '../remix/music.js?v=shared-34';
+import {STYLE_SOUNDS} from '../remix/styles.js?v=shared-34';
 for(const style of Object.keys(STYLES))for(let variation=0;variation<8;variation++){
  const settings={style,bpm:100,seed:734829,variation,adaptive:false,instrument:STYLE_SOUNDS[style][variation%STYLE_SOUNDS[style].length]},events=createArrangement(60,settings);
  assert.ok(!events.some(e=>e.instrument==='piano'),style+': auto acoustic piano still present');

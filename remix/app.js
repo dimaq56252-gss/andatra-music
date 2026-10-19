@@ -1,13 +1,13 @@
-import {SYNTHS} from './synth-engine.js?v=klassika-33';
-import {SAMPLE_INSTRUMENTS} from './sample-engine.js?v=klassika-33';
-import {STYLE_TEMPOS,STYLE_SOUNDS} from './styles.js?v=klassika-33';
-import {attachSampleCredits} from './sample-engine.js?v=klassika-33';
+import {SYNTHS} from './synth-engine.js?v=shared-34';
+import {SAMPLE_INSTRUMENTS} from './sample-engine.js?v=shared-34';
+import {STYLE_TEMPOS,STYLE_SOUNDS,pickAutoTempo} from './styles.js?v=shared-34';
+import {attachSampleCredits} from './sample-engine.js?v=shared-34';
 import {analyzeVocal,alignVocalBeat,estimateVocalTempo,chooseRemixTempo} from './adaptation.js?v=timing-16';
-import {estimateTempo,estimateKey,NOTE_NAMES,generateInstrumental,mixRemix,validateSettings,melodySelection,cropAudio,remixChoices,describeStructure} from './music.js?v=klassika-33';
+import {estimateTempo,estimateKey,NOTE_NAMES,generateInstrumental,mixRemix,validateSettings,melodySelection,cropAudio,remixChoices,describeStructure} from './music.js?v=shared-34';
 import {separateChannels} from './separation.js?v=remix-6';
 import {wavBytes,measure} from '../audio-processing.js';
 import {downloadBlob} from '../studio-project.js';
-import {encodeMp3} from './export.js?v=klassika-33';
+import {encodeMp3} from './export.js?v=shared-34';
 export function initRemixer(){
   const $=id=>document.getElementById(id),status=(text,error=false)=>{$('status').textContent=text;$('status').classList.toggle('error',error);};
   const newSeed=()=>crypto.getRandomValues(new Uint32Array(1))[0];
@@ -76,7 +76,7 @@ export function initRemixer(){
 
       }
       if(token!==generation)return;
-      stage='подготовка проб';const s=settings();$('bpm').value=s.bpm;$('offset').value=Math.round(s.offset*1000);
+      stage='подготовка проб';if(beatMode()&&$('autoTempo').checked&&previewAttempts>1)$('bpm').value=pickAutoTempo($('style').value,songSeed);const s=settings();$('bpm').value=s.bpm;$('offset').value=Math.round(s.offset*1000);
       const duration=beatMode()?Number($('duration').value):cache.vocals.duration;
       const start=beatMode()?Math.min(240/s.bpm*4,Math.max(0,duration-30)):Math.min(Math.max(0,duration-30),Math.max(0,(cache.profile.phrases[0]?.start||0)-.25)),length=Math.min(30,duration-start),choices=[singleChoice(s)],prepared=[];
       const voice=beatMode()?null:cropAudio(new OfflineAudioContext(2,Math.ceil(length*44100),44100),cache.vocals,start,length);

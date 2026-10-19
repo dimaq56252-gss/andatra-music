@@ -1,14 +1,13 @@
 // Original arrangement and synthesis; no remote generation or borrowed song loops.
 import {barActivity,activityAt,vocalAccentSteps} from './adaptation.js?v=remix-6';
-import {structurePlan,sectionAt} from './structure.js?v=klassika-33';
+import {structurePlan,sectionAt} from './structure.js?v=shared-34';
 export function randomSource(seed){let state=seed>>>0;return ()=>{state=(state+0x6D2B79F5)>>>0;let t=state;t=Math.imul(t^(t>>>15),t|1);t^=t+Math.imul(t^(t>>>7),t|61);return ((t^(t>>>14))>>>0)/4294967296;};}
 export function songSeed(s,salt=0){return (Math.imul((s.seed||1)^(s.variation+1),2654435761)^Math.imul(salt+1,2246822519)^Array.from(s.style).reduce((a,c)=>Math.imul(a,31)+c.charCodeAt(0),0))>>>0;}
 const choose=(rng,items)=>items[Math.floor(rng()*items.length)];
 const fourFloor=new Set(['house','techno','synth']);
-const rapStyles=new Set(['klassika','rap','boom','trap','drill','lofi','bounce','phonk','rnb']);
-const halfTime=new Set(['klassika','trap','drill']);
+const rapStyles=new Set(['rap','boom','trap','drill','lofi','bounce','phonk','rnb']);
+const halfTime=new Set(['trap','drill']);
 export const PALETTES={
- klassika:{chord:['mutedguitar','pad','choir'],pad:'pad',bass:'808',comp:[0,8],length:7,perc:[6,14]},
  rap:{chord:['pad','guitar','strings'],pad:'strings',bass:'round',comp:[0,6,10],length:3.8,perc:[3,7,11,15]},
  boom:{chord:['guitar','strings','organ'],pad:'strings',bass:'round',comp:[0,7,10],length:4.6,perc:[3,10,15]},
  trap:{chord:['pad','strings','lead'],pad:'pad',bass:'808',comp:[0,10],length:7,perc:[6,14]},
@@ -48,7 +47,6 @@ export function bassGroove(kicks,family,style){
  return [...new Set([...anchors,...(answer===undefined?[]:[answer])])].sort((a,b)=>a-b);
 }
 const bassPatterns={
- klassika:[[0,12],[6,12]],
  rap:[[0,6,8,14],[0,3,8,11],[0,7,10,14],[0,6,10,15]],
  trap:[[0,7,10],[0,6,11,14],[0,3,10],[0,7,12,15]],
  drill:[[0,5,10,14],[0,3,9,14],[0,6,10,15],[0,5,11,14]],
@@ -63,6 +61,13 @@ const bassPatterns={
  afro:[[0,3,7,10,14],[0,6,8,11,14]],
  rnb:[[0,7,8,10],[0,6,10,14]]
 };
+// Two-bar syncopation joins the regular rap groove pool; tempo controls the backbeat spacing.
+export function sharedRapGroove(s,bar,base){
+ const family=((s.seed>>>0)+s.variation)%4,odd=((bar%2)+2)%2===1;
+ const kicks=family===1?(odd?[6,12]:[0,12]):family===2?(odd?[0,6,12]:[0,7,12]):base.kick;
+ const snare=s.bpm>=120&&family===1?(odd?[2,8]:[8,14]):base.snare;
+ return {...base,kick:kicks,snare};
+}
 export function composeBacking(duration,s,profile,composition,style){
  const step=60/s.bpm/4,bar=step*16,scale=composition.scale,plan=structurePlan(duration,s,profile),palette=PALETTES[s.style]||PALETTES.rap,events=[],rng=randomSource(songSeed(s)),texture=soundSet(s),compInstrument=texture.chord,bassPool=bassPatterns[s.style]||bassPatterns.rap;
  const family=bassPool[s.variation%bassPool.length],alternate=bassPool[(s.variation+1)%bassPool.length],swing=s.swing,rapFocus=rapStyles.has(s.style);
@@ -73,10 +78,10 @@ export function composeBacking(duration,s,profile,composition,style){
   const start=s.offset+b*bar,local=randomSource(songSeed(s,b+100)),phase=((b%8)+8)%8,section=sectionAt(plan,Math.max(0,start)),density=barActivity(profile,start,bar),degree=composition.plan.get(b)??0;
   const isBreak=s.structure&&section==='break',intro=s.structure&&section==='intro',outro=s.structure&&section==='outro',chorus=section==='chorus',nextSection=sectionAt(plan,start+bar),transition=s.structure&&nextSection!==section;
   const time=i=>start+i*step+(Math.floor(i)%2?swing*step:0);
-  const barStyle=s.style==='klassika'?{...style,kick:b%2===0?[0,12]:[6,12],snare:b%2===0?[8,14]:[2,8]}:style;
   const accents=vocalAccentSteps(profile,start,step);
   const kickFamilies={rap:[[0,6,8,14],[0,3,8,11],[0,7,10,14],[0,5,8,15]],boom:[[0,6,8,11],[0,3,8,14],[0,7,10,15]],trap:[[0,7,10],[0,3,6,11],[0,5,10,14],[0,6,9,15]],drill:[[0,5,10,14],[0,3,9,14],[0,6,11,15]],lofi:[[0,6,9],[0,7,10],[0,3,8,14]],bounce:[[0,3,8,10,14],[0,6,8,11],[0,2,7,10,15]],phonk:[[0,3,7,8,11,14],[0,6,8,10,15],[0,2,7,10,14]],dnb:[[0,6,10],[0,3,10,14],[0,7,8,10]],afro:[[0,7,10],[0,3,8,14],[0,6,10,15]],rnb:[[0,7,10],[0,3,8,14],[0,6,10,15]]};
-  const families=kickFamilies[s.style],kicks=[...(families?families[(s.variation+(!rapFocus&&chorus?1:0))%families.length]:barStyle.kick)];
+  const families=kickFamilies[s.style],baseKicks=families?families[(s.variation+(!rapFocus&&chorus?1:0))%families.length]:style.kick;
+  const barStyle=rapFocus?sharedRapGroove(s,b,{...style,kick:baseKicks}):style,kicks=[...barStyle.kick];
   if(!fourFloor.has(s.style)&&!['reggaeton'].includes(s.style)){
    if(!rapFocus&&(phase===2||phase===6)){const movable=kicks.findIndex(k=>k%4!==0);if(movable>=0)kicks[movable]=Math.max(1,Math.min(15,kicks[movable]+(local()<.5?-1:1)));}
    if((!rapFocus&&phase===3)||phase===7)kicks.push(choose(local,[13,14,15]));
