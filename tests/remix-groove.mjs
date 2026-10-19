@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
-import {createArrangement,STYLES} from '../remix/music.js?v=karaoke-35';
-import {soundSet} from '../remix/production.js?v=karaoke-35';
+import {createArrangement,STYLES} from '../remix/music.js?v=catalog-36';
+import {soundSet} from '../remix/production.js?v=catalog-36';
 for(const style of Object.keys(STYLES))for(const seed of [1,52,734829]){
  const settings={style,seed,variation:2,bpm:100,offset:.17,structure:false,adaptive:false};
  const events=createArrangement(45,settings),bass=events.filter(e=>e.role==='bass'),kicks=events.filter(e=>e.kind==='drum'&&e.index===0);

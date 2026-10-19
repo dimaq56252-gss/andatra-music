@@ -1,4 +1,4 @@
-import {TEMPO_VOCABULARY} from './vocabulary.js?v=karaoke-35';
+import {TEMPO_VOCABULARY} from './vocabulary.js?v=catalog-36';
 // Original rhythm and melody presets, authored for ANDATRA.
 export const EXTRA_STYLES={
  boom:{name:'Boom bap · жёсткие барабаны',kit:'classic',kick:[0,6,8,11],snare:[4,12],clap:[],hat:[0,2,4,6,8,10,12,14],open:[15],bass:[0,6,8,11],swing:.16,instruments:['epiano','guitar','piano'],motif:[0,2,4,1,0,3,2,0],rhythm:[0,3,6,8,11,12,14,15],progression:[0,5,3,4]},
@@ -28,7 +28,7 @@ export const STYLE_TEMPOS={rap:94,boom:90,bounce:96,trap:140,drill:142,lofi:78,h
 for(const style of ['rap','boom','trap','drill','bounce','phonk','rnb'])for(const voice of ['mutedguitar','choir','analog','nylon','bellfm','shimmer'])if(!STYLE_SOUNDS[style].includes(voice))STYLE_SOUNDS[style].push(voice);
 export const RAP_TEMPOS={rap:[88,94,100,138],boom:[86,90,96,138],bounce:[90,96,104,138],trap:[132,138,140,146],drill:[136,138,142,148],phonk:[130,138,140,150]};
 for(const [style,pool]of Object.entries(RAP_TEMPOS)){
- const low=['rap','boom','bounce'].includes(style)?70:115,high=['rap','boom','bounce'].includes(style)?140:160;
+ const low=style==='rap'?60:['boom','bounce'].includes(style)?70:115,high=style==='rap'?160:['boom','bounce'].includes(style)?140:180;
  for(const bpm of TEMPO_VOCABULARY)if(bpm>=low&&bpm<=high&&!pool.includes(bpm))pool.push(bpm);
 }
 export function pickAutoTempo(style,seed){const pool=RAP_TEMPOS[style];return pool?pool[(seed>>>0)%pool.length]:STYLE_TEMPOS[style]||94;}

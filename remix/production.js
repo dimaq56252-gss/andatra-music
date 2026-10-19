@@ -1,7 +1,7 @@
-import {GROOVE_VOCABULARY,TEXTURE_SHAPES} from './vocabulary.js?v=karaoke-35';
+import {GROOVE_VOCABULARY,TEXTURE_SHAPES} from './vocabulary.js?v=catalog-36';
 // Original arrangement and synthesis; no remote generation or borrowed song loops.
 import {barActivity,activityAt,vocalAccentSteps} from './adaptation.js?v=remix-6';
-import {structurePlan,sectionAt} from './structure.js?v=karaoke-35';
+import {structurePlan,sectionAt} from './structure.js?v=catalog-36';
 export function randomSource(seed){let state=seed>>>0;return ()=>{state=(state+0x6D2B79F5)>>>0;let t=state;t=Math.imul(t^(t>>>15),t|1);t^=t+Math.imul(t^(t>>>7),t|61);return ((t^(t>>>14))>>>0)/4294967296;};}
 export function songSeed(s,salt=0){return (Math.imul((s.seed||1)^(s.variation+1),2654435761)^Math.imul(salt+1,2246822519)^Array.from(s.style).reduce((a,c)=>Math.imul(a,31)+c.charCodeAt(0),0))>>>0;}
 const choose=(rng,items)=>items[Math.floor(rng()*items.length)];

@@ -1,6 +1,6 @@
-import {PHRASE_ONSETS} from './vocabulary.js?v=karaoke-35';
+import {PHRASE_ONSETS} from './vocabulary.js?v=catalog-36';
 // Seeded musical phrases: new note paths and durations, rather than rotated preset loops.
-import {randomSource,songSeed} from './production.js?v=karaoke-35';
+import {randomSource,songSeed} from './production.js?v=catalog-36';
 const pick=(rng,items)=>items[Math.floor(rng()*items.length)];
 const bounds=(x,lo,hi)=>Math.max(lo,Math.min(hi,x));
 export const RAP_STYLES=new Set(['rap','boom','trap','drill','lofi','bounce','phonk','rnb']);

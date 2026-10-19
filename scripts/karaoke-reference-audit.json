@@ -1,0 +1,81 @@
+{
+  "inventoryCount": 135,
+  "analyzedCount": 135,
+  "errors": [],
+  "acceptedCount": 124,
+  "retainedBaselineGrooves": 10,
+  "excluded": [
+    {
+      "id": 7,
+      "source": "https://andatra-music.ru/assets/karaoke/007-instrumental.mp3",
+      "reason": "low_grid_confidence",
+      "confidence": 0.277
+    },
+    {
+      "id": 27,
+      "source": "https://andatra-music.ru/assets/karaoke/027-instrumental.mp3",
+      "reason": "low_grid_confidence",
+      "confidence": 0.308
+    },
+    {
+      "id": 40,
+      "source": "https://andatra-music.ru/assets/karaoke/040-instrumental.mp3",
+      "reason": "low_grid_confidence",
+      "confidence": 0.295
+    },
+    {
+      "id": 58,
+      "source": "https://andatra-music.ru/assets/karaoke/058-instrumental.mp3",
+      "reason": "low_grid_confidence",
+      "confidence": 0.334
+    },
+    {
+      "id": 65,
+      "source": "https://andatra-music.ru/assets/karaoke/065-instrumental.mp3",
+      "reason": "low_grid_confidence",
+      "confidence": 0.436
+    },
+    {
+      "id": 71,
+      "source": "https://andatra-music.ru/assets/karaoke/071-instrumental.mp3",
+      "reason": "low_grid_confidence",
+      "confidence": 0.402
+    },
+    {
+      "id": 78,
+      "source": "https://andatra-music.ru/assets/karaoke/078-instrumental.mp3",
+      "reason": "low_grid_confidence",
+      "confidence": 0.223
+    },
+    {
+      "id": 102,
+      "source": "https://andatra-music.ru/assets/karaoke/102-instrumental.mp3",
+      "reason": "low_grid_confidence",
+      "confidence": 0.429
+    },
+    {
+      "id": 118,
+      "source": "https://andatra-music.ru/assets/karaoke/118-instrumental.mp3",
+      "reason": "low_grid_confidence",
+      "confidence": 0.387
+    },
+    {
+      "id": 119,
+      "source": "https://andatra-music.ru/assets/karaoke/119-instrumental.mp3",
+      "reason": "low_grid_confidence",
+      "confidence": 0.424
+    },
+    {
+      "id": 122,
+      "source": "https://andatra-music.ru/assets/karaoke/122-instrumental.mp3",
+      "reason": "low_grid_confidence",
+      "confidence": 0.413
+    }
+  ],
+  "poolCounts": {
+    "grooves": 121,
+    "phraseCells": 109,
+    "tempos": 68,
+    "textures": 67
+  }
+}

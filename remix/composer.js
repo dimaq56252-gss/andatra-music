@@ -1,9 +1,9 @@
-import {inventPhrase,RAP_STYLES} from './phrases.js?v=karaoke-35';
-import {extraMelodies,STYLE_SOUNDS} from './styles.js?v=karaoke-35';
+import {inventPhrase,RAP_STYLES} from './phrases.js?v=catalog-36';
+import {extraMelodies,STYLE_SOUNDS} from './styles.js?v=catalog-36';
 import {catalog,note} from '../drumpad/melodies.js?v=3';
 import {activityAt} from './adaptation.js?v=remix-6';
-import {editAt,structurePlan} from './structure.js?v=karaoke-35';
-import {randomSource,songSeed} from './production.js?v=karaoke-35';
+import {editAt,structurePlan} from './structure.js?v=catalog-36';
+import {randomSource,songSeed} from './production.js?v=catalog-36';
 const styleMap={rap:['boom','funk'],trap:['trap'],house:['house'],drill:['drill'],lofi:['lofi','ambient'],synth:['synth']};
 const pc=(n)=>((n%12)+12)%12;
 const midi=(degree,root,scale,octave)=>12*(octave+1)+root+scale[((degree%7)+7)%7]+12*Math.floor(degree/7);
