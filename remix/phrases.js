@@ -1,5 +1,5 @@
 // Seeded musical phrases: new note paths and durations, rather than rotated preset loops.
-import {randomSource,songSeed} from './production.js?v=form-28';
+import {randomSource,songSeed} from './production.js?v=groove-29';
 const pick=(rng,items)=>items[Math.floor(rng()*items.length)];
 const bounds=(x,lo,hi)=>Math.max(lo,Math.min(hi,x));
 export function inventPhrase(s,development=0,phraseBars=null){
@@ -28,6 +28,9 @@ export function inventPhrase(s,development=0,phraseBars=null){
   if(i&&Math.abs(next-previous)>4&&family!==6)next=previous+Math.sign(next-previous)*pick(rng,[2,3,4]);
   next=bounds(next,-3,10);degrees.push(next);previous=next;
  }
+ // Repeat the opening cell as an answer, with one changed ending instead of a new random walk.
+ const midpoint=total/2,opening=unique.map((t,i)=>({t,i})).filter(x=>x.t<midpoint-2),answer=unique.map((t,i)=>({t,i})).filter(x=>x.t>=midpoint);
+ for(let j=0;j<answer.length-1&&opening.length;j++)degrees[answer[j].i]=degrees[opening[j%opening.length].i];
  const resolution=pick(rng,[0,2,4]);degrees[degrees.length-1]=anchor+resolution;
  const lengths=unique.map((t,i)=>{const gap=(unique[i+1]??total)-t,legato=i===unique.length-1?.9:pick(rng,[.48,.62,.78,.92]);return Math.max(.65,gap*legato);});
  return {bars,steps:unique,degrees,lengths,family,anchor};
