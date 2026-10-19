@@ -16,3 +16,6 @@ export const extraMelodies=Object.entries(EXTRA_STYLES).flatMap(([style,p])=>Arr
  rhythm:p.rhythm.map((r,i)=>variant%3===1&&i%2===1?Math.min(15,r+1):variant%3===2&&i%2===0?Math.max(0,r-1):r),
  progression:variant%2?[p.progression[0],p.progression[2],p.progression[1],p.progression[3]]:p.progression
 })));
+
+
+export const STYLE_TEMPOS={rap:94,boom:90,bounce:96,trap:140,drill:142,lofi:78,house:124,synth:105,phonk:140,dnb:172,techno:132,reggaeton:96,afro:106,rnb:84};

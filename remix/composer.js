@@ -1,7 +1,8 @@
-import {extraMelodies} from './styles.js?v=groove-17';
+import {extraMelodies,STYLE_SOUNDS} from './styles.js?v=production-20';
 import {catalog,note} from '../drumpad/melodies.js?v=3';
 import {activityAt,barActivity,phraseEndsHere} from './adaptation.js?v=remix-6';
-import {editAt} from './structure.js?v=arranger-7';
+import {editAt,structurePlan,sectionAt} from './structure.js?v=production-20';
+import {randomSource,songSeed} from './production.js?v=production-20';
 const styleMap={rap:['boom','funk'],trap:['trap'],house:['house'],drill:['drill'],lofi:['lofi','ambient'],synth:['synth']};
 const clamp=(v,a,b)=>Math.max(a,Math.min(b,v));
 const pc=(n)=>((n%12)+12)%12;
@@ -10,7 +11,7 @@ const midi=(degree,root,scale,octave)=>12*(octave+1)+root+scale[((degree%7)+7)%7
 export function harmonicPlan(profile,settings,duration,progression){
  const bar=240/settings.bpm,scale=settings.mode==='major'?[0,2,4,5,7,9,11]:[0,2,3,5,7,8,10],first=Math.floor(-settings.offset/bar)-1,count=Math.ceil(duration/bar)+3,degrees=[0,1,2,3,4,5,6],states=[];
  let cursor=0;
- for(let b=first;b<first+count;b++){const start=settings.offset+b*bar,end=start+bar;while(cursor<(profile?.pitches.length||0)&&profile.pitches[cursor].time<start)cursor++;const tones=[];for(let i=cursor;i<(profile?.pitches.length||0)&&profile.pitches[i].time<end;i++)tones.push(profile.pitches[i]);const prior=progression[((b%4)+4)%4];
+ for(let b=first;b<first+count;b++){const start=settings.offset+b*bar,end=start+bar;while(cursor<(profile?.pitches.length||0)&&profile.pitches[cursor].time<start)cursor++;const tones=[];for(let i=cursor;i<(profile?.pitches.length||0)&&profile.pitches[i].time<end;i++)tones.push(profile.pitches[i]);const harmonicBar=Math.floor(b/(['trap','drill','synth','dnb'].includes(settings.style)?2:1)),prior=progression[((harmonicBar%progression.length)+progression.length)%progression.length];
   const scores=degrees.map(d=>{const chord=[0,2,4].map(n=>pc(settings.root+scale[(d+n)%7]));let total=0,weight=0;for(const p of tones){const w=p.weight||1,distance=Math.min(...chord.map(n=>Math.min(pc(p.note-n),pc(n-p.note))));total+=w*(distance===0?1:distance===1?-.75:distance===2?.08:-.3);weight+=w;}return (weight?total/weight:0)*(settings.adaptive&&profile?.key?settings.fit:0)+(d===prior?.18:.0)+(d===0?.04:0);});
   const prev=states.at(-1),row=degrees.map((d,i)=>{if(!prev)return {score:scores[i],from:0};let best=-Infinity,from=0;prev.forEach((p,j)=>{const distance=Math.abs(d-degrees[j]),transition=d===degrees[j]?.04:distance===3||distance===4?.02:-.07;const score=p.score+scores[i]+transition;if(score>best){best=score;from=j;}});return {score:best,from};});states.push(row);
  }
@@ -20,12 +21,33 @@ function vocalNoteAt(profile,time){if(!profile?.pitches.length)return null;let l
 export function rankMelodies(profile,s,duration){const group=extraMelodies.some(p=>p.style===s.style)?[s.style]:styleMap[s.style]||styleMap.rap,scale=s.mode==='major'?[0,2,4,5,7,9,11]:[0,2,3,5,7,8,10],bar=240/s.bpm,step=bar/16;const candidates=[...catalog,...extraMelodies].filter(p=>group.includes(p.style));
  return candidates.map(p=>{let score=0,n=0;for(let b=0;b<Math.min(32,Math.ceil(duration/bar));b++)for(let i=0;i<8;i++){const songBar=Math.floor(b*Math.max(1,Math.ceil(duration/bar)-1)/Math.max(1,Math.min(32,Math.ceil(duration/bar))-1)),phase=((songBar%4)+4)%4;const time=s.offset+songBar*bar+p.rhythm[i]*step;if(time<0||time>=duration)continue;const pitch=vocalNoteAt(profile,time),lead=pc(s.root+scale[((p.motif[(i+(phase===2?2:0))%8]+p.progression[phase])%7+7)%7]),activity=activityAt(profile,time);score+=(1-activity)*.35;if(pitch&&profile?.key){const distance=pc(lead-pitch.note);score+=[0,3,4,7,8,9].includes(distance)?.8:[1,2,6,10,11].includes(distance)?-.8:.1;}n++;}score/=Math.max(1,n);score+=p.mode===s.mode?.08:0;return {preset:p,score};}).sort((a,b)=>b.score-a.score||a.preset.id.localeCompare(b.preset.id));
 }
-export function composeMelody(profile,s,duration){const ranked=rankMelodies(profile,s,duration),choice=ranked[s.variation%ranked.length],p=choice.preset,{plan,scale,bar}=harmonicPlan(profile,s,duration,p.progression),step=bar/16,events=[];
+export function composeMelody(profile,s,duration){
+ const ranked=rankMelodies(profile,s,duration),rng=randomSource(songSeed(s,11)),choice=ranked[Math.floor(rng()*Math.min(8,ranked.length))],p=choice.preset;
+ const progressions=[p.progression,[0,5,3,4],[0,3,5,4],[0,6,5,3],[0,0,3,4],[0,2,5,4]],progression=progressions[Math.floor(rng()*progressions.length)];
+ const {plan,scale,bar}=harmonicPlan(profile,s,duration,progression),step=bar/16,events=[],sections=structurePlan(duration,s,profile);
+ const phraseRhythms=[[0,6,10,14,19,22,26,30],[0,3,7,12,18,23,27,30],[0,4,10,15,20,24,27,31],[2,6,11,14,18,22,26,29],[0,7,12,14,20,23,28,30]];
+ const rhythm=phraseRhythms[Math.floor(rng()*phraseRhythms.length)],rotation=Math.floor(rng()*4),palette=STYLE_SOUNDS[s.style]||STYLE_SOUNDS.rap;
  const mids=profile?.pitches.map(p=>p.midi).filter(Number.isFinite).sort((a,b)=>a-b)||[],voiceMedian=mids[Math.floor(mids.length/2)]||60,octave=voiceMedian>66?3:4;
- for(const [b,degree]of [...plan].sort((a,b)=>a[0]-b[0])){const start=s.offset+b*bar,density=barActivity(profile,start,bar);for(let i=0;i<8;i++){const rhythm=s.character==='experimental'?(p.rhythm[i]+(i%2?1:0))%16:p.rhythm[i],when=start+rhythm*step+(rhythm%2?(s.swing||0)*step:0);if(when<0||when>=duration)continue;const version=editAt(s,when)?.versions.lead||0,local=version?ranked[(s.variation+version)%ranked.length].preset:p;const activity=activityAt(profile,when),active=s.adaptive?s.fit*activity:0,singing=profile?.key&&vocalNoteAt(profile,when);if(i%2===1&&!phraseEndsHere(profile,when-step*2,when)&&s.style!=='synth')continue;if(singing&&active>.45&&i%4!==0)continue;if(active>.6&&i%2!==0)continue;const phase=((b%4)+4)%4;let d=local.motif[(i+(phase===2?2:0))%8]+degree;if(phase===3&&i>=6)d=degree+(i===6?2:0);
- // At simultaneous sung notes, prefer a nearby consonant note within the chosen scale.
- if(singing&&active>.3){const candidates=[d-1,d,d+1].map(x=>({degree:x,distance:pc(midi(x,s.root,scale,octave)-singing.note)}));const consonant=candidates.find(x=>[0,3,4,7,8,9].includes(x.distance));if(consonant)d=consonant.degree;}
- const phraseFill=s.adaptive&&phraseEndsHere(profile,when-step*2,when)&&activity<.3;const following=Array.from({length:8},(_,j)=>s.character==='experimental'?(p.rhythm[j]+(j%2?1:0))%16:p.rhythm[j]).filter(r=>r>rhythm);const next=Math.min(16,...following),length=Math.min((next-rhythm)*.7*step,duration-when);if(length<.03)continue;
- events.push({kind:'lead',note:clamp(midi(d,s.root,scale,octave),45,79),when,duration:length,level:s.melody*.25*(1-.8*active)*(phraseFill?1.12:1)*(density>.8?.8:1),instrument:s.instrument==='auto'?(s.character==='calm'?'epiano':local.instrument):s.instrument});
- }}return {events,plan,preset:p,score:choice.score,ranked:ranked.slice(0,8).map(x=>({name:x.preset.genre+' · '+x.preset.name,score:x.score})),scale};}
+ const first=Math.floor((-s.offset/bar)/2)*2-2;
+ for(let b=first;s.offset+b*bar<duration;b+=2){
+  const phrase=randomSource(songSeed(s,Math.floor(b/8)+200)),response=((b%4)+4)%4===2;
+  for(let i=0;i<rhythm.length;i++){
+   const r=rhythm[i],absoluteBar=b+Math.floor(r/16),when=s.offset+b*bar+r*step+(r%2?s.swing*step:0);if(when<0||when>=duration)continue;
+   const section=sectionAt(sections,when),activity=activityAt(profile,when),active=s.adaptive?s.fit*activity:0;
+   // Actual rests, two-bar calls/answers and longer note values replace an endless arpeggio.
+   if(s.structure&&(section==='intro'&&i>2||section==='outro'&&i%2))continue;
+   if(s.character==='calm'&&i%3===1||section==='verse'&&i===3||active>.5&&i%3!==0)continue;
+   const singing=profile?.key&&vocalNoteAt(profile,when),version=editAt(s,when)?.versions.lead||0,local=version?ranked[(s.variation+version)%ranked.length].preset:p;
+   const degree=plan.get(absoluteBar)??0;let d=local.motif[(i+rotation+(response?2:0))%8]+degree;
+   if(response&&i>=6)d=degree+(i===6?2:0);
+   if(phrase()<.22&&i%3===0)d+=i<4?2:-1;
+   if(singing&&active>.3){const candidate=[d,d-1,d+1].find(x=>[0,3,4,7,8,9].includes(pc(midi(x,s.root,scale,octave)-singing.note)));if(candidate!==undefined)d=candidate;}
+   const gap=(rhythm[i+1]??32)-r,length=Math.min(gap*step*(i===7?.85:.72),duration-when);if(length<.03)continue;
+   const instrument=s.instrument==='auto'?palette[(Math.floor(s.seed/17)+(section==='chorus'?1:0))%palette.length]:s.instrument;
+   events.push({kind:'lead',note:clamp(midi(d,s.root,scale,octave),48,79),when,duration:length,level:s.melody*.23*(1-.75*active)*(i%3===0?1:.8),instrument});
+  }
+ }
+ return {events,plan,preset:p,score:choice.score,ranked:ranked.slice(0,8).map(x=>({name:x.preset.genre+' · '+x.preset.name,score:x.score})),scale};
+}
 export function renderLead(c,out,event){const pan=c.createStereoPanner();pan.pan.value=Math.sin(event.when*.3)*.22;pan.connect(out);const item=note(c,pan,event.note,event.when,event.duration,.8,event.instrument,event.level),last=item.nodes.filter(n=>typeof n.start==='function').at(-1),cleanup=last.onended;last.onended=()=>{cleanup();pan.disconnect();};return item;}
+
