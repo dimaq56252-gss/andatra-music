@@ -1,6 +1,6 @@
-import {getConcept} from './concepts.js?v=variety-38';
+import {getConcept} from './concepts.js?v=hybrid-39';
 import {GROOVE_VOCABULARY,TEXTURE_SHAPES} from './vocabulary.js?v=composition-37';
-// Original arrangement and synthesis; no remote generation or borrowed song loops.
+// Procedural backing; instrumental phrase playback is implemented in hybrid.js.
 import {barActivity,activityAt,vocalAccentSteps} from './adaptation.js?v=remix-6';
 import {structurePlan,sectionAt} from './structure.js?v=composition-37';
 export function randomSource(seed){let state=seed>>>0;return ()=>{state=(state+0x6D2B79F5)>>>0;let t=state;t=Math.imul(t^(t>>>15),t|1);t^=t+Math.imul(t^(t>>>7),t|61);return ((t^(t>>>14))>>>0)/4294967296;};}

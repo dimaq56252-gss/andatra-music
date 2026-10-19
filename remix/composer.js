@@ -1,11 +1,11 @@
-import {getConcept} from './concepts.js?v=variety-38';
+import {getConcept} from './concepts.js?v=hybrid-39';
 import {fitThemeNote} from './harmony.js?v=composition-37';
-import {inventPhrase,RAP_STYLES} from './phrases.js?v=variety-38';
+import {inventPhrase,RAP_STYLES} from './phrases.js?v=hybrid-39';
 import {extraMelodies,STYLE_SOUNDS} from './styles.js?v=composition-37';
 import {catalog,note} from '../drumpad/melodies.js?v=3';
 import {activityAt} from './adaptation.js?v=remix-6';
 import {editAt,structurePlan} from './structure.js?v=composition-37';
-import {randomSource,songSeed,soundSet} from './production.js?v=variety-38';
+import {randomSource,songSeed,soundSet} from './production.js?v=hybrid-39';
 const styleMap={rap:['boom','funk'],trap:['trap'],house:['house'],drill:['drill'],lofi:['lofi','ambient'],synth:['synth']};
 const pc=(n)=>((n%12)+12)%12;
 const midi=(degree,root,scale,octave)=>12*(octave+1)+root+scale[((degree%7)+7)%7]+12*Math.floor(degree/7);

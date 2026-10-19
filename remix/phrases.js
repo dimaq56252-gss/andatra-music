@@ -1,7 +1,7 @@
-import {getConcept} from './concepts.js?v=variety-38';
+import {getConcept} from './concepts.js?v=hybrid-39';
 import {PHRASE_ONSETS} from './vocabulary.js?v=composition-37';
 // Seeded musical phrases: new note paths and durations, rather than rotated preset loops.
-import {randomSource,songSeed} from './production.js?v=variety-38';
+import {randomSource,songSeed} from './production.js?v=hybrid-39';
 const pick=(rng,items)=>items[Math.floor(rng()*items.length)];
 const bounds=(x,lo,hi)=>Math.max(lo,Math.min(hi,x));
 export const RAP_STYLES=new Set(['rap','boom','trap','drill','lofi','bounce','phonk','rnb']);
