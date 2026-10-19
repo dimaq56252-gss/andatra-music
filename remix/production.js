@@ -90,7 +90,8 @@ export function composeBacking(duration,s,profile,composition,style){
    let voicing=degrees.map(d=>pitch(d,3));
    // Keep comping in a stable middle register with connected inversions.
    const inversion=(Math.floor(Math.max(0,b)/4)+s.seed)%3;voicing=voicing.map((n,i)=>i<inversion?n+12:n).sort((a,b)=>a-b);while(voicing[0]>62)voicing=voicing.map(n=>n-12);
-   const rhythm=isBreak?[0]:intro?[0,8]:palette.comp;
+   const compPatterns=[palette.comp,s.style==='house'?[2,5,10,13]:[0,5,11],s.style==='house'?[3,6,11,14]:[2,7,12],s.style==='synth'?[0]:[0,7,14]];
+   const rhythm=isBreak?[0]:intro?[0,8]:compPatterns[s.variation%compPatterns.length];
    for(const i of rhythm){
     if(density>.65&&i!==0&&activityAt(profile,time(i))>.6&&i%4!==2)continue;
     for(let n=0;n<voicing.length;n++)add({kind:'note',role:'chord',instrument:compInstrument,note:voicing[n],when:time(i)+n*.009,duration:step*(isBreak?14:palette.length),level:.052*(1-.3*activityAt(profile,time(i))*s.fit),pan:(n-(voicing.length-1)/2)*.13});

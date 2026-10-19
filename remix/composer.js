@@ -1,10 +1,10 @@
+import {inventPhrase} from './phrases.js?v=melody-25';
 import {extraMelodies,STYLE_SOUNDS} from './styles.js?v=production-20';
 import {catalog,note} from '../drumpad/melodies.js?v=3';
-import {activityAt,barActivity,phraseEndsHere} from './adaptation.js?v=remix-6';
+import {activityAt} from './adaptation.js?v=remix-6';
 import {editAt,structurePlan,sectionAt} from './structure.js?v=production-20';
-import {randomSource,songSeed} from './production.js?v=renew-24';
+import {randomSource,songSeed} from './production.js?v=melody-25';
 const styleMap={rap:['boom','funk'],trap:['trap'],house:['house'],drill:['drill'],lofi:['lofi','ambient'],synth:['synth']};
-const clamp=(v,a,b)=>Math.max(a,Math.min(b,v));
 const pc=(n)=>((n%12)+12)%12;
 const midi=(degree,root,scale,octave)=>12*(octave+1)+root+scale[((degree%7)+7)%7]+12*Math.floor(degree/7);
 // Prefer consonant harmony over bars, with transition costs instead of chasing every syllable.
@@ -23,31 +23,33 @@ export function rankMelodies(profile,s,duration){const group=extraMelodies.some(
 }
 export function composeMelody(profile,s,duration){
  const ranked=rankMelodies(profile,s,duration),rng=randomSource(songSeed(s,11)),choice=ranked[Math.floor(rng()*Math.min(8,ranked.length))],p=choice.preset;
- const progressions=[p.progression,[0,5,3,4],[0,3,5,4],[0,6,5,3],[0,0,3,4],[0,2,5,4]],progression=progressions[Math.floor(rng()*progressions.length)];
+ const progressions=[[0,5,3,4],[0,3,5,4],[0,6,5,3],[0,0,3,4],[0,2,5,4],[0,4,5,3],[0,5,2,4],[0,3,1,4],[0,2,3,6]],progression=progressions[Math.floor(rng()*progressions.length)];
  const {plan,scale,bar}=harmonicPlan(profile,s,duration,progression),step=bar/16,events=[],sections=structurePlan(duration,s,profile);
- const phraseRhythms=[[0,6,10,14,19,22,26,30],[0,3,7,12,18,23,27,30],[0,4,10,15,20,24,27,31],[2,6,11,14,18,22,26,29],[0,7,12,14,20,23,28,30]];
- const rhythm=phraseRhythms[Math.floor(rng()*phraseRhythms.length)],rotation=Math.floor(rng()*4),palette=STYLE_SOUNDS[s.style]||STYLE_SOUNDS.rap;
+ const theme=inventPhrase(s),palette=STYLE_SOUNDS[s.style]||STYLE_SOUNDS.rap;
  const mids=profile?.pitches.map(p=>p.midi).filter(Number.isFinite).sort((a,b)=>a-b)||[],voiceMedian=mids[Math.floor(mids.length/2)]||60,octave=voiceMedian>66?3:4;
- const first=Math.floor((-s.offset/bar)/2)*2-2;
- for(let b=first;s.offset+b*bar<duration;b+=2){
-  const phrase=randomSource(songSeed(s,Math.floor(b/8)+200)),response=((b%4)+4)%4===2;
-  for(let i=0;i<rhythm.length;i++){
-   const r=rhythm[i],absoluteBar=b+Math.floor(r/16),when=s.offset+b*bar+r*step+(r%2?s.swing*step:0);if(when<0||when>=duration)continue;
+ const first=Math.floor((-s.offset/bar)/theme.bars)*theme.bars-theme.bars;
+ for(let b=first;s.offset+b*bar<duration;b+=theme.bars){
+  const development=Math.max(0,Math.floor(b/8)),phrase=development%3===2?inventPhrase(s,development,theme.bars):theme,response=((Math.floor(b/theme.bars)%2)+2)%2===1;
+  const decision=randomSource(songSeed(s,b+900));
+  for(let i=0;i<phrase.steps.length;i++){
+   const r=phrase.steps[i],absoluteBar=b+Math.floor(r/16),when=s.offset+b*bar+r*step+(r%2?s.swing*step:0);if(when<0||when>=duration)continue;
    const section=sectionAt(sections,when),activity=activityAt(profile,when),active=s.adaptive?s.fit*activity:0;
-   // Actual rests, two-bar calls/answers and longer note values replace an endless arpeggio.
    if(s.structure&&(section==='intro'&&i>2||section==='outro'&&i%2))continue;
-   if(s.character==='calm'&&i%3===1||section==='verse'&&i===3||active>.5&&i%3!==0)continue;
-   const singing=profile?.key&&vocalNoteAt(profile,when),version=editAt(s,when)?.versions.lead||0,local=version?ranked[(s.variation+version)%ranked.length].preset:p;
-   const degree=plan.get(absoluteBar)??0;let d=local.motif[(i+rotation+(response?2:0))%8]+degree;
-   if(response&&i>=6)d=degree+(i===6?2:0);
-   if(phrase()<.22&&i%3===0)d+=i<4?2:-1;
+   const important=i===0||i===phrase.steps.length-1||r%8===0;
+   if(!important&&(s.character==='calm'&&decision()<.3||active>.5&&decision()<active*.65))continue;
+   const singing=profile?.key&&vocalNoteAt(profile,when),version=editAt(s,when)?.versions.lead||0;
+   const degree=plan.get(absoluteBar)??0;let d=phrase.degrees[i]+degree;
+   if(version){const edited=inventPhrase({...s,variation:s.variation+version},development,theme.bars);d=edited.degrees[i%edited.degrees.length]+degree;}
+   if(response&&i>=phrase.steps.length-2)d=degree+(i===phrase.steps.length-1?0:2);
    if(singing&&active>.3){const candidate=[d,d-1,d+1].find(x=>[0,3,4,7,8,9].includes(pc(midi(x,s.root,scale,octave)-singing.note)));if(candidate!==undefined)d=candidate;}
-   const gap=(rhythm[i+1]??32)-r,length=Math.min(gap*step*(i===7?.85:.72),duration-when);if(length<.03)continue;
+   const length=Math.min(phrase.lengths[i]*step,duration-when);if(length<.03)continue;
    const instrument=s.instrument==='auto'?palette[(Math.floor(s.seed/17)+(section==='chorus'?1:0))%palette.length]:s.instrument;
-   events.push({kind:'lead',note:clamp(midi(d,s.root,scale,octave),48,79),when,duration:length,level:s.melody*.23*(1-.75*active)*(i%3===0?1:.8),instrument});
+   // Fold by octaves instead of clipping different high notes to the same MIDI pitch.
+   let pitch=midi(d,s.root,scale,octave);while(pitch>79)pitch-=12;while(pitch<48)pitch+=12;
+   events.push({kind:'lead',note:pitch,when,duration:length,level:s.melody*.23*(1-.75*active)*(important?1:.8),instrument});
   }
  }
- return {events,plan,preset:p,score:choice.score,ranked:ranked.slice(0,8).map(x=>({name:x.preset.genre+' · '+x.preset.name,score:x.score})),scale};
+ return {events,plan,preset:{...p,name:'Новая фраза '+(s.variation+1)},phrase:theme,score:choice.score,ranked:ranked.slice(0,8).map(x=>({name:x.preset.genre+' · '+x.preset.name,score:x.score})),scale};
 }
 export function renderLead(c,out,event){const pan=c.createStereoPanner();pan.pan.value=Math.sin(event.when*.3)*.22;pan.connect(out);const item=note(c,pan,event.note,event.when,event.duration,.8,event.instrument,event.level),last=item.nodes.filter(n=>typeof n.start==='function').at(-1),cleanup=last.onended;last.onended=()=>{cleanup();pan.disconnect();};return item;}
 
