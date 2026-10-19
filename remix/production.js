@@ -1,3 +1,4 @@
+import {getConcept} from './concepts.js?v=variety-38';
 import {GROOVE_VOCABULARY,TEXTURE_SHAPES} from './vocabulary.js?v=composition-37';
 // Original arrangement and synthesis; no remote generation or borrowed song loops.
 import {barActivity,activityAt,vocalAccentSteps} from './adaptation.js?v=remix-6';
@@ -25,16 +26,6 @@ export const PALETTES={
  rnb:{chord:['pad','guitar','epiano'],pad:'pad',bass:'round',comp:[0,7,10],length:5.5,perc:[3,6,11,14]}
 };
 // A song keeps one coherent texture; the hook adds layers instead of swapping its identity.
-const RAP_ENSEMBLES={
- rap:[['mutedguitar','pad','choir'],['analog','rhodes','shimmer'],['nylon','pad','strings']],
- boom:[['jazzguitar','rhodes','flute'],['nylon','pad','vibes'],['rhodes','pad','guitar']],
- trap:[['softpluck','pad','choir'],['analog','synthstrings','glass'],['bellfm','pad','strings']],
- drill:[['pizzicato','pad','cello'],['analog','choir','strings'],['mutedguitar','synthstrings','shimmer']],
- lofi:[['rhodes','pad','nylon'],['fm','guitar','vibes'],['nylon','pad','flute']],
- bounce:[['analog','rhodes','sax'],['cleanguitar','pad','drawbar'],['fm','guitar','shimmer']],
- phonk:[['bellfm','pad','analog'],['analog','synthstrings','glass'],['softpluck','pad','choir']],
- rnb:[['rhodes','pad','voices'],['fm','guitar','shimmer'],['nylon','pad','vibes']]
-};
 export function soundSet(s){
  const sets=['trap','drill','phonk'].includes(s.style)?[
   {chord:'pad',answer:'strings',brightness:.72,bassBody:.34},
@@ -49,7 +40,7 @@ export function soundSet(s){
  ];
  const base=sets[(s.seed+s.variation)%sets.length],extra=['lofi','rnb','boom'].includes(s.style)?['rhodes','jazzguitar','vibes','nylon']:['trap','drill','phonk'].includes(s.style)?['choir','synthstrings','cello','shimmer']:['cleanguitar','drawbar','fm','softpluck'];
  const index=(s.seed+s.variation)%6,shape=TEXTURE_SHAPES[((s.seed>>>0)+s.variation)%TEXTURE_SHAPES.length],texture=index<2?base:{...base,chord:extra[(index-2)%extra.length]};
- const ensemble=RAP_ENSEMBLES[s.style]?.[((s.seed>>>0)+s.variation)%RAP_ENSEMBLES[s.style].length];
+ const concept=getConcept(s),ensemble=concept?[concept.lead,concept.chord,concept.answer]:undefined;
  return {...texture,...(ensemble?{lead:ensemble[0],chord:ensemble[1],answer:ensemble[2]}:{}),brightness:rapStyles.has(s.style)?(texture.brightness+shape.brightness)/2:texture.brightness,bassBody:rapStyles.has(s.style)?shape.bassBody:texture.bassBody};
 }
 export function bassGroove(kicks,family,style){
@@ -77,15 +68,15 @@ const bassPatterns={
 // Two-bar syncopation joins the regular rap groove pool; tempo controls the backbeat spacing.
 export function sharedRapGroove(s,bar,base){
  const family=((s.seed>>>0)+s.variation)%(GROOVE_VOCABULARY.length+2),odd=((bar%2)+2)%2===1;
- if(family===0)return base;
+ if(family===0){const concept=getConcept(s);return concept?{...base,kick:concept.kick[odd?1:0],snare:concept.snare,hat:concept.hat}:base;}
  if(family===1)return {...base,kick:odd?[6,12]:[0,12],snare:s.bpm>=120?(odd?[2,8]:[8,14]):base.snare};
  // Match beat spacing to the selected tempo; sample each component independently of song identity.
  const candidates=GROOVE_VOCABULARY.filter(g=>(g.bpm>=115)===(s.bpm>=115)),pool=candidates.length?candidates:GROOVE_VOCABULARY,g=pool[(family-2)%pool.length],offset=odd?16:0;
  const kick=g.kick.filter(i=>i>=offset&&i<offset+16).map(i=>i-offset),snare=g.snare.filter(i=>i>=offset&&i<offset+16).map(i=>i-offset);
- return {...base,kick:kick.length?kick:base.kick,snare:snare.length?snare:base.snare};
+ const concept=getConcept(s);return {...base,kick:kick.length?kick:base.kick,snare:concept?concept.snare:(snare.length?snare:base.snare),hat:concept?concept.hat:base.hat};
 }
 export function composeBacking(duration,s,profile,composition,style){
- const step=60/s.bpm/4,bar=step*16,scale=composition.scale,plan=structurePlan(duration,s,profile),palette=PALETTES[s.style]||PALETTES.rap,events=[],rng=randomSource(songSeed(s)),texture=soundSet(s),compInstrument=texture.chord,bassPool=bassPatterns[s.style]||bassPatterns.rap;
+ const step=60/s.bpm/4,bar=step*16,scale=composition.scale,plan=structurePlan(duration,s,profile),concept=getConcept(s),palette=concept?{...(PALETTES[s.style]||PALETTES.rap),bass:concept.bass}:PALETTES[s.style]||PALETTES.rap,events=[],rng=randomSource(songSeed(s)),texture=soundSet(s),compInstrument=texture.chord,bassPool=bassPatterns[s.style]||bassPatterns.rap;
  const family=bassPool[s.variation%bassPool.length],alternate=bassPool[(s.variation+1)%bassPool.length],swing=s.swing,rapFocus=rapStyles.has(s.style);
  const pitch=(degree,octave)=>12*(octave+1)+s.root+scale[((degree%7)+7)%7]+12*Math.floor(degree/7);
  function add(e){if(e.when>=0&&e.when<duration&&(!e.duration||e.duration>.015)){if(e.duration)e.duration=Math.min(e.duration,duration-e.when);events.push(e);}}
@@ -104,7 +95,7 @@ export function composeBacking(duration,s,profile,composition,style){
    if(profile&&density>.2&&(!rapFocus||phase===7))for(const a of accents.slice(0,2))if(!barStyle.snare.includes(a)&&!barStyle.clap.includes(a))kicks.push(a);
   }
   if(s.structure&&transition&&nextSection==='chorus'){const length=Math.min(bar*.65,2);add({kind:'fx',role:'drum',rise:true,when:start+bar-length,duration:length*.98,level:.052});add({kind:'fx',role:'drum',rise:false,when:start+bar,duration:1.1,level:.085});}
-  if(transition&&nextSection==='chorus')add({kind:'drum',index:5,when:start+bar,level:.19,kit:style.kit});
+  if(transition&&nextSection==='chorus')add({kind:'drum',index:5,when:start+bar,level:.19,kit:concept?.kit||style.kit});
   const silentTail=(transition||!rapFocus&&phase===7)&&!fourFloor.has(s.style)&&!isBreak;
   for(const [name,index] of [['kick',0],['snare',1],['clap',2],['hat',3],['open',4]]){
    if(isBreak&&(index<3||index===4))continue;
@@ -146,11 +137,11 @@ export function composeBacking(duration,s,profile,composition,style){
    if(previousVoicing){voicing=voicing.map((n,i)=>[n-12,n,n+12].sort((a,b)=>Math.abs(a-previousVoicing[i%previousVoicing.length])-Math.abs(b-previousVoicing[i%previousVoicing.length]))[0]).sort((a,b)=>a-b);}previousVoicing=voicing;
    const compPatterns=[palette.comp,s.style==='house'?[2,5,10,13]:[0,5,11],s.style==='house'?[3,6,11,14]:[2,7,12],s.style==='synth'?[0]:[0,7,14]];
    const comp=compPatterns[(s.variation+(chorus?1:0))%compPatterns.length];
-   const rhythm=isBreak?[0]:intro?[0,8]:rapFocus?(chorus?[0,8]:[0]):section==='verse'?comp.filter((_,i)=>i%2===0):comp;
+   const rhythm=isBreak?[0]:intro?[0,8]:rapFocus?(b%concept.chordEvery===0?(chorus&&concept.chordEvery>1?[0,8]:concept.comp):[]):section==='verse'?comp.filter((_,i)=>i%2===0):comp;
    const sectionInstrument=compInstrument;
    for(const i of rhythm){
     if(density>.65&&i!==0&&activityAt(profile,time(i))>.6&&i%4!==2)continue;
-    for(let n=0;n<voicing.length;n++)add({kind:'note',role:'chord',instrument:sectionInstrument,note:voicing[n],when:time(i)+n*.009,duration:step*(isBreak?14:rapFocus?(chorus?6:10):palette.length),level:(rapFocus?.038:.052)*(1-.3*activityAt(profile,time(i))*s.fit),pan:(n-(voicing.length-1)/2)*.13});
+    for(let n=0;n<voicing.length;n++)add({kind:'note',role:'chord',instrument:sectionInstrument,note:voicing[n],when:time(i)+n*.009,duration:step*(isBreak?14:rapFocus?concept.length:palette.length),level:(rapFocus?.038:.052)*(1-.3*activityAt(profile,time(i))*s.fit),pan:(n-(voicing.length-1)/2)*.13});
    }
    // Sparse upper answers occupy the gaps, leaving the main motif readable.
    if(chorus&&phase%2===1&&s.melody>0)for(const [j,i]of [6,14].entries()){if(activityAt(profile,time(i))>.55)continue;const leadNearby=composition.events.some(e=>Math.abs(e.when-time(i))<step*1.5);if(!leadNearby)add({kind:'note',role:'chord',instrument:texture.answer,note:j?voicing.at(-1):voicing[Math.max(0,voicing.length-2)]+12,when:time(i),duration:step*1.6,level:.025*s.melody,pan:j?.55:-.55});}

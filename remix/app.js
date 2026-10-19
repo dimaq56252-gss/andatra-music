@@ -1,10 +1,11 @@
-import {soundSet} from './production.js?v=composition-37';
+import {getConcept} from './concepts.js?v=variety-38';
+import {soundSet} from './production.js?v=variety-38';
 import {SYNTHS} from './synth-engine.js?v=composition-37';
 import {SAMPLE_INSTRUMENTS} from './sample-engine.js?v=composition-37';
 import {STYLE_TEMPOS,STYLE_SOUNDS,pickAutoTempo} from './styles.js?v=composition-37';
 import {attachSampleCredits} from './sample-engine.js?v=composition-37';
 import {analyzeVocal,alignVocalBeat,estimateVocalTempo,chooseRemixTempo} from './adaptation.js?v=timing-16';
-import {estimateTempo,estimateKey,NOTE_NAMES,generateInstrumental,mixRemix,validateSettings,melodySelection,cropAudio,remixChoices,describeStructure} from './music.js?v=composition-37';
+import {estimateTempo,estimateKey,NOTE_NAMES,generateInstrumental,mixRemix,validateSettings,melodySelection,cropAudio,remixChoices,describeStructure} from './music.js?v=variety-38';
 import {separateChannels} from './separation.js?v=remix-6';
 import {wavBytes,measure} from '../audio-processing.js';
 import {downloadBlob} from '../studio-project.js';
@@ -56,7 +57,7 @@ export function initRemixer(){
     if(data.type==='progress'){$('progress').value=.3+.45*data.step/data.total;status(`Отделяю твой голос: ${data.step} из ${data.total} фрагментов. Оставь вкладку открытой.`);}
   }
   async function run(newVariant=false){
-    if((!beatMode()&&!file)||busy)return;if(newVariant&&!cache&&!beatMode())return;if(previewAttempts>0||newVariant){variation=(variation+1)%10000;const fresh=newSeed();songSeed=fresh===songSeed?(songSeed+1)>>>0:fresh;}previewAttempts++;
+    if((!beatMode()&&!file)||busy)return;if(newVariant&&!cache&&!beatMode())return;if(previewAttempts>0||newVariant){const previousConcept=getConcept({style:$('style').value,seed:songSeed,variation})?.name;variation=(variation+1)%10000;let fresh=newSeed();if(fresh===songSeed)fresh=(fresh+1)>>>0;if(previousConcept&&getConcept({style:$('style').value,seed:fresh,variation})?.name===previousConcept)fresh=(fresh+1)>>>0;songSeed=fresh;}previewAttempts++;
     const token=++generation;abort=new AbortController();transferred=false;lock(true);clearResults();$('original').pause();$('progress').hidden=false;$('progress').removeAttribute('value');let context,stage='загрузка песни';
     try{
       if(!cache&&!beatMode()){
@@ -82,7 +83,7 @@ export function initRemixer(){
       const start=beatMode()?Math.min(240/s.bpm*4,Math.max(0,duration-30)):Math.min(Math.max(0,duration-30),Math.max(0,(cache.profile.phrases[0]?.start||0)-.25)),length=Math.min(30,duration-start),choices=[singleChoice(s)],prepared=[];
       const voice=beatMode()?null:cropAudio(new OfflineAudioContext(2,Math.ceil(length*44100),44100),cache.vocals,start,length);
       for(let i=0;i<choices.length;i++){status('Готовлю пробу нового минуса…');const instrumental=await generateInstrumental(duration,choices[i].settings,beatMode()?null:cache.profile,{start,length});if(token!==generation)return;const mix=beatMode()?instrumental:await mixRemix(voice,instrumental,choices[i].settings);if(token!==generation)return;prepared.push({...choices[i],duration});const url=URL.createObjectURL(audioBlob(mix,s.samples));urls.push(url);$('preview'+i).src=url;$('preview'+i).load();const beatURL=beatMode()?url:URL.createObjectURL(audioBlob(instrumental,s.samples));if(beatURL!==url)urls.push(beatURL);$('previewBeat').src=beatURL;$('previewBeat').load();}
-      variants=prepared;chosen=0;document.querySelectorAll('[name=choice]').forEach((radio,i)=>radio.checked=i===chosen);$('audition').hidden=false;$('previewRange').textContent=`Вариант №${variation+1} · ${choices[0].settings.instrument==='auto'?'инструменты по стилю':choices[0].settings.instrument} · фрагмент: ${start.toFixed(1)}–${(start+length).toFixed(1)} с. ${beatMode()?'«Обновить пробу» создаст новую аранжировку.':'«Обновить пробу» создаст новый минус с текущими BPM и сдвигом.'}`;
+      variants=prepared;chosen=0;document.querySelectorAll('[name=choice]').forEach((radio,i)=>radio.checked=i===chosen);$('audition').hidden=false;$('previewRange').textContent=`Вариант №${variation+1} · ${choices[0].settings.instrument==='auto'?'инструменты по стилю':choices[0].settings.instrument} · ${getConcept(s)?.name||s.style} · фрагмент: ${start.toFixed(1)}–${(start+length).toFixed(1)} с. ${beatMode()?'«Обновить пробу» создаст новую аранжировку.':'«Обновить пробу» создаст новый минус с текущими BPM и сдвигом.'}`;
       analysis();$('progress').value=1;$('run').textContent='Обновить пробу';status(beatMode()?'Проба готова. Послушай и нажми «Собрать минус».':'Проба готова. Послушай и нажми «Собрать ремикс» или обнови минус.');
     }catch(e){if(token===generation)status(e.name==='AbortError'?'Обработка остановлена.':('Ошибка: '+stage+'. '+e.message),true);}
     finally{await context?.close();if(token===generation){lock(false);$('progress').hidden=true;}}

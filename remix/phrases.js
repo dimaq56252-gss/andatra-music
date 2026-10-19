@@ -1,19 +1,20 @@
+import {getConcept} from './concepts.js?v=variety-38';
 import {PHRASE_ONSETS} from './vocabulary.js?v=composition-37';
 // Seeded musical phrases: new note paths and durations, rather than rotated preset loops.
-import {randomSource,songSeed} from './production.js?v=composition-37';
+import {randomSource,songSeed} from './production.js?v=variety-38';
 const pick=(rng,items)=>items[Math.floor(rng()*items.length)];
 const bounds=(x,lo,hi)=>Math.max(lo,Math.min(hi,x));
 export const RAP_STYLES=new Set(['rap','boom','trap','drill','lofi','bounce','phonk','rnb']);
 function rapPhrase(s,development,phraseBars){
- const rng=randomSource(songSeed(s,700)),bars=phraseBars||4,anchor=pick(rng,[0,2,4]),cells=[[0,6,12,19,24],[0,3,10,18,26],[2,8,14,20,27],[0,7,12,22,28],[0,4,11,18,25],[2,6,14,19,26],[0,6,10,20,28],[0,3,12,22,27],[0,6,12,18,24,28],[0,4,12,20,26,29],...PHRASE_ONSETS],cell=cells[(s.variation+Math.floor(rng()*cells.length))%cells.length];
- const contours=[[0,2,1,0],[0,4,2,0],[0,-1,-2,0],[0,2,4,2,0],[0,0,2,-1,0],[0,-2,0,2,0]],contour=pick(rng,contours);
+ const concept=getConcept(s),rng=randomSource(songSeed(s,700)),bars=phraseBars||4,anchor=pick(rng,[0,2,4]),cells=[[0,6,12,19,24],[0,3,10,18,26],[2,8,14,20,27],[0,7,12,22,28],[0,4,11,18,25],[2,6,14,19,26],[0,6,10,20,28],[0,3,12,22,27],[0,6,12,18,24,28],[0,4,12,20,26,29],...PHRASE_ONSETS],eligible=concept?[...concept.cells,...PHRASE_ONSETS.filter(c=>c.length>=concept.density[0]&&c.length<=concept.density[1])]:cells,cell=eligible[(s.variation+Math.floor(rng()*eligible.length))%eligible.length];
+ const contours=[[0,2,1,0],[0,4,2,0],[0,-1,-2,0],[0,2,4,2,0],[0,0,2,-1,0],[0,-2,0,2,0]],contour=pick(rng,concept?.contours||contours);
  const tones=cell.map((_,i)=>anchor+contour[Math.round(i*(contour.length-1)/Math.max(1,cell.length-1))]);
  const steps=[],degrees=[],lengths=[],cadences=[];
  for(let offset=0;offset<bars*16;offset+=32)for(let i=0;i<cell.length;i++){
   const t=offset+cell[i];if(t>=bars*16-2)continue;
   const cadence=i===cell.length-1;steps.push(t);cadences.push(cadence);
   degrees.push(cadence?anchor+(offset===0?2:0):tones[i]+(development%2&&i===cell.length-2?1:0));
-  lengths.push(cadence?2.4:pick(rng,[1.2,1.6,2.2,2.8]));
+  lengths.push((cadence?2.4:pick(rng,[1.2,1.6,2.2,2.8]))*(concept?.noteLength||1));
  }
  // The same cell returns; only its final answer changes as the song develops.
  return {bars,steps,degrees,lengths,cadences,family:s.variation%8,anchor};
