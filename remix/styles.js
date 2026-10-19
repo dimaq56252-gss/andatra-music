@@ -1,5 +1,7 @@
 // Original rhythm and melody presets, authored for ANDATRA.
 export const EXTRA_STYLES={
+ // Drum grid measured from /assets/audio/klassika-instrumental.mp3; melodic presets are newly generated.
+ klassika:{name:'Классика · рэп',kit:'trap',kick:[0,12],snare:[8,14],clap:[],hat:[0,2,4,6,8,10,12,14],open:[15],bass:[0,12],swing:0,instruments:['guitar','pad','strings'],motif:[0,2,4,2,0,2,1,0],rhythm:[0,6,12,18,24,26,28,30],progression:[0,0,5,3]},
  boom:{name:'Boom bap · жёсткие барабаны',kit:'classic',kick:[0,6,8,11],snare:[4,12],clap:[],hat:[0,2,4,6,8,10,12,14],open:[15],bass:[0,6,8,11],swing:.16,instruments:['epiano','guitar','piano'],motif:[0,2,4,1,0,3,2,0],rhythm:[0,3,6,8,11,12,14,15],progression:[0,5,3,4]},
  bounce:{name:'West Coast / G-funk',kit:'classic',kick:[0,3,8,10,14],snare:[4,12],clap:[12],hat:[0,2,4,6,8,10,12,14],open:[7],bass:[0,3,6,8,10,14],swing:.12,instruments:['organ','guitar','epiano'],motif:[0,4,3,2,0,2,1,-1],rhythm:[0,2,5,7,8,10,13,15],progression:[0,3,4,0]},
  phonk:{name:'Phonk · тяжёлый бас',kit:'trap',kick:[0,3,7,8,11,14],snare:[4,12],clap:[4,12],hat:[0,2,4,6,8,10,12,14,15],open:[10],bass:[0,3,7,8,11,14],swing:.02,instruments:['epiano','organ','strings'],motif:[0,-1,0,2,1,0,-2,-1],rhythm:[0,2,4,7,8,10,12,15],progression:[0,0,5,4]},
@@ -9,7 +11,7 @@ export const EXTRA_STYLES={
  afro:{name:'Afrobeats · перкуссия',kit:'classic',kick:[0,7,10],snare:[4,12],clap:[6,14],hat:[0,3,6,8,11,14],open:[15],bass:[0,3,7,10,14],swing:.08,instruments:['guitar','epiano','piano'],motif:[0,2,1,4,2,5,3,1],rhythm:[0,3,5,6,8,11,13,14],progression:[0,3,1,4]},
  rnb:{name:'R&B · мягкий грув',kit:'classic',kick:[0,7,10],snare:[4,12],clap:[],hat:[0,2,5,6,8,10,13,14],open:[],bass:[0,7,8,10],swing:.2,instruments:['epiano','guitar','strings'],motif:[0,2,4,6,5,3,2,0],rhythm:[0,3,6,7,8,11,13,15],progression:[0,5,1,4]}
 };
-export const STYLE_SOUNDS={rap:['pluck','guitar','strings','lead'],boom:['guitar','strings','organ'],trap:['pad','strings','pluck','lead'],drill:['strings','pad','guitar'],lofi:['guitar','pad','epiano'],house:['pluck','organ','lead'],synth:['lead','pad','organ'],bounce:['lead','guitar','organ'],phonk:['bell','lead','organ'],dnb:['pad','lead','strings'],techno:['lead','pad','organ'],reggaeton:['guitar','pluck','pad'],afro:['guitar','pluck','strings'],rnb:['guitar','pad','epiano']};
+export const STYLE_SOUNDS={klassika:['mutedguitar','choir','analog','nylon','bellfm','shimmer'],rap:['pluck','guitar','strings','lead'],boom:['guitar','strings','organ'],trap:['pad','strings','pluck','lead'],drill:['strings','pad','guitar'],lofi:['guitar','pad','epiano'],house:['pluck','organ','lead'],synth:['lead','pad','organ'],bounce:['lead','guitar','organ'],phonk:['bell','lead','organ'],dnb:['pad','lead','strings'],techno:['lead','pad','organ'],reggaeton:['guitar','pluck','pad'],afro:['guitar','pluck','strings'],rnb:['guitar','pad','epiano']};
 // Style-specific expanded voices; old choices remain available and manual selection is preserved.
 const additions={rap:['nylon','mutedguitar','analog','choir'],boom:['jazzguitar','rhodes','vibes','flute'],trap:['bellfm','glass','choir','musicbox','wavetable'],drill:['cello','pizzicato','choir','bellfm'],lofi:['rhodes','nylon','vibes','fm','karplus'],house:['supersaw','softpluck','drawbar','fmkeys'],synth:['supersaw','analog','wavetable','shimmer'],bounce:['analog','cleanguitar','sax','sublead'],phonk:['bellfm','acid','brass'],dnb:['wavetable','supersaw','shimmer','synthstrings'],techno:['acid','analog','hollow','wavetable'],reggaeton:['nylon','marimba','brass','softpluck'],afro:['marimba','koto','steel','flute'],rnb:['rhodes','fm','voices','harp']};
 for(const [style,voices]of Object.entries(additions))STYLE_SOUNDS[style].push(...voices);
@@ -21,4 +23,4 @@ export const extraMelodies=Object.entries(EXTRA_STYLES).flatMap(([style,p])=>Arr
 })));
 
 
-export const STYLE_TEMPOS={rap:94,boom:90,bounce:96,trap:140,drill:142,lofi:78,house:124,synth:105,phonk:140,dnb:172,techno:132,reggaeton:96,afro:106,rnb:84};
+export const STYLE_TEMPOS={klassika:138,rap:94,boom:90,bounce:96,trap:140,drill:142,lofi:78,house:124,synth:105,phonk:140,dnb:172,techno:132,reggaeton:96,afro:106,rnb:84};

@@ -1,13 +1,13 @@
-import {SYNTHS} from './synth-engine.js?v=rap-31';
-import {SAMPLE_INSTRUMENTS} from './sample-engine.js?v=rap-31';
-import {STYLE_TEMPOS,STYLE_SOUNDS} from './styles.js?v=rap-31';
-import {attachSampleCredits} from './sample-engine.js?v=rap-31';
+import {SYNTHS} from './synth-engine.js?v=klassika-33';
+import {SAMPLE_INSTRUMENTS} from './sample-engine.js?v=klassika-33';
+import {STYLE_TEMPOS,STYLE_SOUNDS} from './styles.js?v=klassika-33';
+import {attachSampleCredits} from './sample-engine.js?v=klassika-33';
 import {analyzeVocal,alignVocalBeat,estimateVocalTempo,chooseRemixTempo} from './adaptation.js?v=timing-16';
-import {estimateTempo,estimateKey,NOTE_NAMES,generateInstrumental,mixRemix,validateSettings,melodySelection,cropAudio,remixChoices,describeStructure} from './music.js?v=rap-31';
+import {estimateTempo,estimateKey,NOTE_NAMES,generateInstrumental,mixRemix,validateSettings,melodySelection,cropAudio,remixChoices,describeStructure} from './music.js?v=klassika-33';
 import {separateChannels} from './separation.js?v=remix-6';
 import {wavBytes,measure} from '../audio-processing.js';
 import {downloadBlob} from '../studio-project.js';
-import {encodeMp3} from './export.js?v=mp3-32';
+import {encodeMp3} from './export.js?v=klassika-33';
 export function initRemixer(){
   const $=id=>document.getElementById(id),status=(text,error=false)=>{$('status').textContent=text;$('status').classList.toggle('error',error);};
   const newSeed=()=>crypto.getRandomValues(new Uint32Array(1))[0];
