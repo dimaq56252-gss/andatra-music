@@ -1,5 +1,5 @@
 import {processAudio,renderProject,measure,db,wavBytes,MAX_DURATION,MAX_PCM_BYTES} from './audio-processing.js';
-import {loadProject,downloadBlob} from './studio-project.js';
+import {loadProject,downloadBlob} from './studio-project.js?v=project-512-1';
 export function initMastering(api){
   const $=id=>document.getElementById(id),status=(s,error=false)=>{$('masteringStatus').textContent=s;$('masteringStatus').classList.toggle('error',error);};
   let source=null,result=null,busy=false,urls=[],selected='after';

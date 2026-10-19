@@ -1,5 +1,5 @@
-import {initMastering} from './mastering.js';
-import {saveProject,loadProject,downloadBlob} from './studio-project.js';
+import {initMastering} from './mastering.js?v=project-512-1';
+import {saveProject,loadProject,downloadBlob} from './studio-project.js?v=project-512-1';
 const MAX_SECONDS = 600;
 export function recordingLatency(context, settings = {}) {
   const seconds = value => Number.isFinite(value) && value >= 0 ? value : 0;
