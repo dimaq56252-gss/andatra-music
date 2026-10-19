@@ -1,4 +1,4 @@
-import {structurePlan,sectionAt} from './structure.js?v=shared-34';
+import {structurePlan,sectionAt} from './structure.js?v=karaoke-35';
 // Original sustained timbres and a damped stereo reverb; no additional sound downloads.
 export function atmosphereEvents(duration,s,composition){
  if(!s.harmony||s.atmosphere<=0)return [];

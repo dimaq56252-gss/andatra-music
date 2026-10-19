@@ -1,6 +1,7 @@
+import {GROOVE_VOCABULARY,TEXTURE_SHAPES} from './vocabulary.js?v=karaoke-35';
 // Original arrangement and synthesis; no remote generation or borrowed song loops.
 import {barActivity,activityAt,vocalAccentSteps} from './adaptation.js?v=remix-6';
-import {structurePlan,sectionAt} from './structure.js?v=shared-34';
+import {structurePlan,sectionAt} from './structure.js?v=karaoke-35';
 export function randomSource(seed){let state=seed>>>0;return ()=>{state=(state+0x6D2B79F5)>>>0;let t=state;t=Math.imul(t^(t>>>15),t|1);t^=t+Math.imul(t^(t>>>7),t|61);return ((t^(t>>>14))>>>0)/4294967296;};}
 export function songSeed(s,salt=0){return (Math.imul((s.seed||1)^(s.variation+1),2654435761)^Math.imul(salt+1,2246822519)^Array.from(s.style).reduce((a,c)=>Math.imul(a,31)+c.charCodeAt(0),0))>>>0;}
 const choose=(rng,items)=>items[Math.floor(rng()*items.length)];
@@ -37,7 +38,8 @@ export function soundSet(s){
   {chord:'organ',answer:'pad',brightness:.8,bassBody:.28}
  ];
  const base=sets[(s.seed+s.variation)%sets.length],extra=['lofi','rnb','boom'].includes(s.style)?['rhodes','jazzguitar','vibes','nylon']:['trap','drill','phonk'].includes(s.style)?['choir','synthstrings','cello','shimmer']:['cleanguitar','drawbar','fm','softpluck'];
- const index=(s.seed+s.variation)%6;return index<2?base:{...base,chord:extra[(index-2)%extra.length]};
+ const index=(s.seed+s.variation)%6,shape=TEXTURE_SHAPES[((s.seed>>>0)+s.variation)%TEXTURE_SHAPES.length],texture=index<2?base:{...base,chord:extra[(index-2)%extra.length]};
+ return {...texture,brightness:rapStyles.has(s.style)?(texture.brightness+shape.brightness)/2:texture.brightness,bassBody:rapStyles.has(s.style)?shape.bassBody:texture.bassBody};
 }
 export function bassGroove(kicks,family,style){
  if(fourFloor.has(style)||['reggaeton','afro'].includes(style))return [...family];
@@ -63,10 +65,13 @@ const bassPatterns={
 };
 // Two-bar syncopation joins the regular rap groove pool; tempo controls the backbeat spacing.
 export function sharedRapGroove(s,bar,base){
- const family=((s.seed>>>0)+s.variation)%4,odd=((bar%2)+2)%2===1;
- const kicks=family===1?(odd?[6,12]:[0,12]):family===2?(odd?[0,6,12]:[0,7,12]):base.kick;
- const snare=s.bpm>=120&&family===1?(odd?[2,8]:[8,14]):base.snare;
- return {...base,kick:kicks,snare};
+ const family=((s.seed>>>0)+s.variation)%(GROOVE_VOCABULARY.length+2),odd=((bar%2)+2)%2===1;
+ if(family===0)return base;
+ if(family===1)return {...base,kick:odd?[6,12]:[0,12],snare:s.bpm>=120?(odd?[2,8]:[8,14]):base.snare};
+ // Match beat spacing to the selected tempo; sample each component independently of song identity.
+ const candidates=GROOVE_VOCABULARY.filter(g=>(g.bpm>=115)===(s.bpm>=115)),pool=candidates.length?candidates:GROOVE_VOCABULARY,g=pool[(family-2)%pool.length],offset=odd?16:0;
+ const kick=g.kick.filter(i=>i>=offset&&i<offset+16).map(i=>i-offset),snare=g.snare.filter(i=>i>=offset&&i<offset+16).map(i=>i-offset);
+ return {...base,kick:kick.length?kick:base.kick,snare:snare.length?snare:base.snare};
 }
 export function composeBacking(duration,s,profile,composition,style){
  const step=60/s.bpm/4,bar=step*16,scale=composition.scale,plan=structurePlan(duration,s,profile),palette=PALETTES[s.style]||PALETTES.rap,events=[],rng=randomSource(songSeed(s)),texture=soundSet(s),compInstrument=texture.chord,bassPool=bassPatterns[s.style]||bassPatterns.rap;

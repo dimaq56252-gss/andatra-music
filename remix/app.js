@@ -1,13 +1,13 @@
-import {SYNTHS} from './synth-engine.js?v=shared-34';
-import {SAMPLE_INSTRUMENTS} from './sample-engine.js?v=shared-34';
-import {STYLE_TEMPOS,STYLE_SOUNDS,pickAutoTempo} from './styles.js?v=shared-34';
-import {attachSampleCredits} from './sample-engine.js?v=shared-34';
+import {SYNTHS} from './synth-engine.js?v=karaoke-35';
+import {SAMPLE_INSTRUMENTS} from './sample-engine.js?v=karaoke-35';
+import {STYLE_TEMPOS,STYLE_SOUNDS,pickAutoTempo} from './styles.js?v=karaoke-35';
+import {attachSampleCredits} from './sample-engine.js?v=karaoke-35';
 import {analyzeVocal,alignVocalBeat,estimateVocalTempo,chooseRemixTempo} from './adaptation.js?v=timing-16';
-import {estimateTempo,estimateKey,NOTE_NAMES,generateInstrumental,mixRemix,validateSettings,melodySelection,cropAudio,remixChoices,describeStructure} from './music.js?v=shared-34';
+import {estimateTempo,estimateKey,NOTE_NAMES,generateInstrumental,mixRemix,validateSettings,melodySelection,cropAudio,remixChoices,describeStructure} from './music.js?v=karaoke-35';
 import {separateChannels} from './separation.js?v=remix-6';
 import {wavBytes,measure} from '../audio-processing.js';
 import {downloadBlob} from '../studio-project.js';
-import {encodeMp3} from './export.js?v=shared-34';
+import {encodeMp3} from './export.js?v=karaoke-35';
 export function initRemixer(){
   const $=id=>document.getElementById(id),status=(text,error=false)=>{$('status').textContent=text;$('status').classList.toggle('error',error);};
   const newSeed=()=>crypto.getRandomValues(new Uint32Array(1))[0];

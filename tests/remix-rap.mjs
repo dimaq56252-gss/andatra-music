@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
-import {createArrangement,validateSettings} from '../remix/music.js?v=shared-34';
-import {inventPhrase,RAP_STYLES} from '../remix/phrases.js?v=shared-34';
+import {createArrangement,validateSettings} from '../remix/music.js?v=karaoke-35';
+import {inventPhrase,RAP_STYLES} from '../remix/phrases.js?v=karaoke-35';
 for(const style of RAP_STYLES)for(const seed of [1,51,734829]){
  const s=validateSettings({style,seed,bpm:100,variation:2,structure:false,adaptive:false}),phrase=inventPhrase(s),bar=240/s.bpm,step=bar/16;
  const first=phrase.steps.filter(t=>t<32),second=phrase.steps.filter(t=>t>=32).map(t=>t-32);assert.deepEqual(first,second,style+' repeated rhythm cell');
