@@ -1,8 +1,8 @@
-import {composeBacking,createProductionBus,renderBass,renderNoiseFx} from './production.js?v=production-20';
+import {composeBacking,createProductionBus,renderBass,renderNoiseFx} from './production.js?v=breaks-21';
 import {EXTRA_STYLES} from './styles.js?v=production-20';
 import {loadSamples,sampleNote,sampleDrum} from './sample-engine.js?v=production-20';
-import {structurePlan,arrangeDynamics,applyPartEdits} from './structure.js?v=production-20';
-import {composeMelody,renderLead} from './composer.js?v=production-20';
+import {structurePlan,arrangeDynamics,applyPartEdits,breakdownPlan,applyBreakdowns} from './structure.js?v=breaks-21';
+import {composeMelody,renderLead} from './composer.js?v=breaks-21';
 import {duckInstrumental} from './adaptation.js?v=remix-6';
 import {trigger} from '../drumpad/audio.js?v=3';
 import {limitPeaks,measure} from '../audio-processing.js';
@@ -57,7 +57,7 @@ export function createArrangement(duration,settings,profile=null){
  const s=validateSettings(settings),v=s.adaptive&&s.fit?profile:null,composition=composeMelody(v,s,duration);
  const events=composeBacking(duration,s,v,composition,STYLES[s.style]);
  if(s.melody>0)events.push(...composition.events);
- return applyPartEdits(arrangeDynamics(events,structurePlan(duration,s,v),s),s).sort((a,b)=>a.when-b.when);
+ return applyPartEdits(applyBreakdowns(arrangeDynamics(events,structurePlan(duration,s,v),s),breakdownPlan(duration,s,v),s),s).sort((a,b)=>a.when-b.when);
 }
 export async function generateInstrumental(duration,settings,profile=null,segment=null){
   if(!Number.isFinite(duration)||duration<=0||duration>300.01)throw Error('Поддерживаются песни до 5 минут.');
