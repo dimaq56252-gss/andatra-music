@@ -1,13 +1,14 @@
-import {SYNTHS} from './synth-engine.js?v=catalog-36';
-import {SAMPLE_INSTRUMENTS} from './sample-engine.js?v=catalog-36';
-import {STYLE_TEMPOS,STYLE_SOUNDS,pickAutoTempo} from './styles.js?v=catalog-36';
-import {attachSampleCredits} from './sample-engine.js?v=catalog-36';
+import {soundSet} from './production.js?v=composition-37';
+import {SYNTHS} from './synth-engine.js?v=composition-37';
+import {SAMPLE_INSTRUMENTS} from './sample-engine.js?v=composition-37';
+import {STYLE_TEMPOS,STYLE_SOUNDS,pickAutoTempo} from './styles.js?v=composition-37';
+import {attachSampleCredits} from './sample-engine.js?v=composition-37';
 import {analyzeVocal,alignVocalBeat,estimateVocalTempo,chooseRemixTempo} from './adaptation.js?v=timing-16';
-import {estimateTempo,estimateKey,NOTE_NAMES,generateInstrumental,mixRemix,validateSettings,melodySelection,cropAudio,remixChoices,describeStructure} from './music.js?v=catalog-36';
+import {estimateTempo,estimateKey,NOTE_NAMES,generateInstrumental,mixRemix,validateSettings,melodySelection,cropAudio,remixChoices,describeStructure} from './music.js?v=composition-37';
 import {separateChannels} from './separation.js?v=remix-6';
 import {wavBytes,measure} from '../audio-processing.js';
 import {downloadBlob} from '../studio-project.js';
-import {encodeMp3} from './export.js?v=catalog-36';
+import {encodeMp3} from './export.js?v=composition-37';
 export function initRemixer(){
   const $=id=>document.getElementById(id),status=(text,error=false)=>{$('status').textContent=text;$('status').classList.toggle('error',error);};
   const newSeed=()=>crypto.getRandomValues(new Uint32Array(1))[0];
@@ -47,7 +48,7 @@ export function initRemixer(){
   function singleChoice(s){
     const choices=remixChoices(s),choice=beatMode()?{settings:s}:choices[[1,2,0][s.variation%3]];
     const palette=STYLE_SOUNDS[s.style]||STYLE_SOUNDS.rap;
-    return {...choice,name:'Вариант '+(s.variation+1),settings:{...choice.settings,variation:s.variation,instrument:s.instrument==='auto'?palette[s.variation%palette.length]:s.instrument,swing:s.swing}};
+    return {...choice,name:'Вариант '+(s.variation+1),settings:{...choice.settings,variation:s.variation,instrument:s.instrument==='auto'?(soundSet(s).lead||palette[s.variation%palette.length]):s.instrument,swing:s.swing}};
   }
   function progress(data){
     if(data.type==='status'){status(data.text);$('progress').removeAttribute('value');}

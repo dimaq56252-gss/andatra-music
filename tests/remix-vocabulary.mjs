@@ -1,8 +1,8 @@
 import assert from 'node:assert/strict';
 import {readFileSync} from 'node:fs';
-import {GROOVE_VOCABULARY,PHRASE_ONSETS,TEMPO_VOCABULARY,TEXTURE_SHAPES} from '../remix/vocabulary.js?v=catalog-36';
-import {STYLES,createArrangement} from '../remix/music.js?v=catalog-36';
-import {sharedRapGroove} from '../remix/production.js?v=catalog-36';
+import {GROOVE_VOCABULARY,PHRASE_ONSETS,TEMPO_VOCABULARY,TEXTURE_SHAPES} from '../remix/vocabulary.js?v=composition-37';
+import {STYLES,createArrangement} from '../remix/music.js?v=composition-37';
+import {sharedRapGroove} from '../remix/production.js?v=composition-37';
 const analysis=JSON.parse(readFileSync(new URL('../scripts/karaoke-reference-analysis.json',import.meta.url)));
 const inventory=JSON.parse(readFileSync(new URL('../scripts/karaoke-source-inventory.json',import.meta.url))),audit=JSON.parse(readFileSync(new URL('../scripts/karaoke-reference-audit.json',import.meta.url))),baseline=JSON.parse(readFileSync(new URL('../scripts/approved-reference-vocabulary.json',import.meta.url)));
 assert.equal(analysis.length,inventory.length);assert.equal(new Set(analysis.map(x=>x.source)).size,inventory.length);assert.equal(audit.errors.length,0);assert.ok(analysis.every(x=>Number.isFinite(x.gridConfidence)&&x.duration>=6));assert.ok(audit.acceptedCount>=100);

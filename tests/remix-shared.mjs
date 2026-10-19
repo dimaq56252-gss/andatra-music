@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
-import {STYLES,createArrangement,validateSettings} from '../remix/music.js?v=catalog-36';
-import {STYLE_SOUNDS,RAP_TEMPOS,pickAutoTempo} from '../remix/styles.js?v=catalog-36';
-import {sharedRapGroove} from '../remix/production.js?v=catalog-36';
+import {STYLES,createArrangement,validateSettings} from '../remix/music.js?v=composition-37';
+import {STYLE_SOUNDS,RAP_TEMPOS,pickAutoTempo} from '../remix/styles.js?v=composition-37';
+import {sharedRapGroove} from '../remix/production.js?v=composition-37';
 assert.ok(!('klassika' in STYLES));assert.equal(Object.keys(STYLES).length,14);
 for(const style of ['rap','boom','trap','drill','bounce','phonk']){
  assert.ok(RAP_TEMPOS[style].includes(138));assert.ok(STYLE_SOUNDS[style].includes('mutedguitar'));

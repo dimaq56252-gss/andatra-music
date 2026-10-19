@@ -1,9 +1,10 @@
-import {inventPhrase,RAP_STYLES} from './phrases.js?v=catalog-36';
-import {extraMelodies,STYLE_SOUNDS} from './styles.js?v=catalog-36';
+import {fitThemeNote} from './harmony.js?v=composition-37';
+import {inventPhrase,RAP_STYLES} from './phrases.js?v=composition-37';
+import {extraMelodies,STYLE_SOUNDS} from './styles.js?v=composition-37';
 import {catalog,note} from '../drumpad/melodies.js?v=3';
 import {activityAt} from './adaptation.js?v=remix-6';
-import {editAt,structurePlan} from './structure.js?v=catalog-36';
-import {randomSource,songSeed} from './production.js?v=catalog-36';
+import {editAt,structurePlan} from './structure.js?v=composition-37';
+import {randomSource,songSeed,soundSet} from './production.js?v=composition-37';
 const styleMap={rap:['boom','funk'],trap:['trap'],house:['house'],drill:['drill'],lofi:['lofi','ambient'],synth:['synth']};
 const pc=(n)=>((n%12)+12)%12;
 const midi=(degree,root,scale,octave)=>12*(octave+1)+root+scale[((degree%7)+7)%7]+12*Math.floor(degree/7);
@@ -26,7 +27,7 @@ export function composeMelody(profile,s,duration){
  const progressions=[[0,5,3,4],[0,3,5,4],[0,6,5,3],[0,0,3,4],[0,2,5,4],[0,4,5,3],[0,5,2,4],[0,3,1,4],[0,2,3,6]],progression=progressions[Math.floor(rng()*progressions.length)];
  const {plan,scale,bar}=harmonicPlan(profile,s,duration,progression),step=bar/16,events=[],sections=structurePlan(duration,s,profile);
  const theme=inventPhrase(s),palette=STYLE_SOUNDS[s.style]||STYLE_SOUNDS.rap;
- const mids=profile?.pitches.map(p=>p.midi).filter(Number.isFinite).sort((a,b)=>a-b)||[],voiceMedian=mids[Math.floor(mids.length/2)]||60,octave=voiceMedian>66?3:4;
+ const mids=profile?.pitches.map(p=>p.midi).filter(Number.isFinite).sort((a,b)=>a-b)||[],voiceMedian=mids[Math.floor(mids.length/2)]||60,octave=RAP_STYLES.has(s.style)?3:voiceMedian>66?3:4;
  const hookSettings={...s,seed:(s.seed^0x9e3779b9)>>>0,variation:(s.variation+3)%10000},hook=RAP_STYLES.has(s.style)?{...theme,degrees:theme.degrees.map((d,i)=>i%5===3?d+2:d),lengths:theme.lengths.map(n=>n*1.2)}:inventPhrase(hookSettings,4,theme.bars);
  const segments=[];for(const part of sections){const last=segments.at(-1);if(last?.type===part.type)last.end=part.end;else segments.push({...part});}
  let verseNumber=0;
@@ -37,23 +38,26 @@ export function composeMelody(profile,s,duration){
   const first=Math.floor((segment.start-s.offset)/bar);
   for(let b=first;s.offset+b*bar<segment.end;b+=theme.bars){
    const development=Math.floor((b-first)/8),phrase=segment.type==='verse'&&development>0?inventPhrase(s,verseNumber*7+development,theme.bars):sectionTheme,response=((Math.floor((b-first)/theme.bars)%2)+2)%2===1,decision=randomSource(songSeed(s,b+900));
+   let previousDegree;
    for(let i=0;i<phrase.steps.length;i++){
     const r=phrase.steps[i],absoluteBar=b+Math.floor(r/16),when=s.offset+b*bar+r*step+(r%2?s.swing*step:0);if(when<segment.start||when>=segment.end||when<0||when>=duration)continue;
     const section=segment.type,activity=activityAt(profile,when),active=s.adaptive?s.fit*activity:0;
     if(s.structure&&(section==='intro'&&i>2||section==='outro'&&i%2))continue;
-    const important=i===0||i===phrase.steps.length-1||r%8===0;
+    const important=i===0||i===phrase.steps.length-1||r%8===0||phrase.cadences?.[i]===true;
     const spare=chorus?.3:.65;
     if(!important&&(s.character==='calm'&&decision()<.3||active>.5&&decision()<active*spare||section==='verse'&&!RAP_STYLES.has(s.style)&&i%4===2))continue;
     const singing=profile?.key&&vocalNoteAt(profile,when),version=editAt(s,when)?.versions.lead||0;
-    const degree=plan.get(absoluteBar)??0;let d=phrase.degrees[i]+degree;
-    if(version){const edited=inventPhrase({...s,variation:s.variation+version},verseNumber,theme.bars);d=edited.degrees[i%edited.degrees.length]+degree;}
-    if(response&&i>=phrase.steps.length-2)d=degree+(i===phrase.steps.length-1?0:2);
+    const degree=plan.get(absoluteBar)??0;let d=phrase.degrees[i]+(RAP_STYLES.has(s.style)?0:degree);
+    if(version){const edited=inventPhrase({...s,variation:s.variation+version},verseNumber,theme.bars);d=edited.degrees[i%edited.degrees.length]+(RAP_STYLES.has(s.style)?0:degree);}
+    if(!RAP_STYLES.has(s.style)&&response&&i>=phrase.steps.length-2)d=degree+(i===phrase.steps.length-1?0:2);
     if(singing&&active>.3){const candidate=[d,d-1,d+1].find(x=>[0,3,4,7,8,9].includes(pc(midi(x,s.root,scale,octave)-singing.note)));if(candidate!==undefined)d=candidate;}
+    const strong=important||r%4===0;
+    if(RAP_STYLES.has(s.style)){d=fitThemeNote(d,degree,previousDegree,strong);previousDegree=d;}
     const length=Math.min(phrase.lengths[i]*step,duration-when,segment.end-when,...(RAP_STYLES.has(s.style)&&active>.25?[step*2]:[]));if(length<.03)continue;
-    const baseInstrument=s.instrument==='auto'?palette[Math.floor(s.seed/17)%palette.length]:s.instrument;
-    const index=Math.max(0,palette.indexOf(baseInstrument)),instrument=s.autoInstrument&&chorus?palette[(index+1)%palette.length]:baseInstrument;
+    const baseInstrument=s.instrument==='auto'?(soundSet(s).lead||palette[Math.floor(s.seed/17)%palette.length]):s.instrument;
+    const index=Math.max(0,palette.indexOf(baseInstrument)),instrument=s.autoInstrument&&chorus?(RAP_STYLES.has(s.style)?soundSet(s).answer:palette[(index+1)%palette.length]):baseInstrument;
     let pitch=midi(d,s.root,scale,octave);if(chorus&&pitch<64)pitch+=12;while(pitch>79)pitch-=12;while(pitch<48)pitch+=12;
-    events.push({kind:'lead',note:pitch,when,duration:length,level:s.melody*.23*(1-.75*active)*(important?1:.8)*(chorus?1.08:1),instrument,theme:themeName});
+    events.push({kind:'lead',note:pitch,when,duration:length,level:s.melody*.23*(1-.75*active)*(important?1:.8)*(chorus?1.08:1),instrument,theme:themeName,...(RAP_STYLES.has(s.style)?{scaleDegree:d,chordDegree:degree,strong,cadence:phrase.cadences?.[i]===true}:{})});
    }
   }
  }

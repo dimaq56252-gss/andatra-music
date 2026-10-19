@@ -1,4 +1,4 @@
-import {TEMPO_VOCABULARY} from './vocabulary.js?v=catalog-36';
+import {TEMPO_VOCABULARY} from './vocabulary.js?v=composition-37';
 // Original rhythm and melody presets, authored for ANDATRA.
 export const EXTRA_STYLES={
  boom:{name:'Boom bap · жёсткие барабаны',kit:'classic',kick:[0,6,8,11],snare:[4,12],clap:[],hat:[0,2,4,6,8,10,12,14],open:[15],bass:[0,6,8,11],swing:.16,instruments:['epiano','guitar','piano'],motif:[0,2,4,1,0,3,2,0],rhythm:[0,3,6,8,11,12,14,15],progression:[0,5,3,4]},

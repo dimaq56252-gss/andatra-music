@@ -1,6 +1,7 @@
 import assert from 'node:assert/strict';
-import {createArrangement,validateSettings,STYLES,describeStructure} from '../remix/music.js?v=catalog-36';
-import {structurePlan} from '../remix/structure.js?v=catalog-36';
+import {createArrangement,validateSettings,STYLES,describeStructure} from '../remix/music.js?v=composition-37';
+import {soundSet} from '../remix/production.js?v=composition-37';
+import {structurePlan} from '../remix/structure.js?v=composition-37';
 const profile={accents:[],rate:20,duration:120,active:new Float32Array(2400).fill(.8),rms:new Float32Array(2400).fill(.1),pitches:[],phrases:[{start:0,end:120}],peak:.2};
 const base={seed:734829,bpm:100,root:9,instrument:'piano',autoInstrument:false,adaptive:true,fit:.85,structure:true};
 for(const style of Object.keys(STYLES)){
@@ -19,7 +20,7 @@ for(const style of Object.keys(STYLES)){
  assert.deepEqual(events,createArrangement(120,s,profile));
 }
 const automatic=createArrangement(120,{...base,style:'rap',autoInstrument:true,instrument:'guitar'},profile);
-assert.ok(automatic.some(e=>e.theme==='hook'&&e.instrument==='strings'));
+assert.ok(automatic.some(e=>e.theme==='hook'&&e.instrument===soundSet(validateSettings({...base,style:'rap'})).answer));
 console.log('PASS: distinct verse/hook notes, bass, drums and atmosphere; bounded chorus with constant-energy voice; manual timbre and structure-off controls; deterministic rebuild');
 
 const longForm=describeStructure(300,validateSettings({...base,adaptive:false,bpm:120}));
